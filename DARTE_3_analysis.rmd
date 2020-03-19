@@ -1,0 +1,1303 @@
+---
+title: "DARTE-QM 3.0 Analysis"
+author: <a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a>
+date: "`r Sys.Date()`"
+output:
+  html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+<br>
+
+## Data and Functions {.tabset .tabset-pills}
+### Packages and Functions
+```{r load_libraries, message=FALSE, warning=FALSE}
+library(Rcpp)
+library(ggplot2)
+library(plotly)
+library(data.table)
+library(ggpubr)
+library(vegan)
+library(phyloseq)
+# devtools::install_github("schuyler-smith/schuylR")
+library(schuylR)
+# devtools::install_github("schuyler-smith/ssBLAST")
+library(ssBLAST)
+setwd('~/google-drive/DARTE/')
+get_sample_names <- function(x){gsub('\\.','_',gsub('.blast.*','',colnames(x)))}
+```
+
+<br>
+
+### Data Files
+```{r load_data_files, message=FALSE, warning=FALSE, cache=TRUE}
+metadata <- fread('files/DARTE-QM-v3-metadata-fromKathyMou.csv')
+  metadata[[1]] <- gsub('\\.', '_', metadata[[1]])
+categories <- fread('files/category_all.tsv', header = FALSE)
+  colnames(categories) <- c('Source', 'ARG_Class', 'Primer')
+sample_metrics <- read.csv('darte-samples_R.csv')
+  sample_metrics <- sample_metrics[!(sample_metrics$Sample %in% c('Mock-0-025spike-C_S12', 'Mock-0spike-A_S1')),]
+```
+
+```{r data, echo=FALSE, message=FALSE, warning=FALSE}
+expected_mock <- unname(unlist(ssBLAST:::fasta_seq_names('files/mock.expected.fa')))
+expected_mock <- c(expected_mock, 'spike')
+primers <- unname(unlist(ssBLAST:::fasta_seq_names('files/DARTE-QM.v3.primer')))
+primers <- unique(gsub('.*:', '', primers))
+
+mock_samples <- c('Q3_Mock_0spike_B', 'Q3_Mock_0spike_C', 'Q3_Mock_0_0025spike_A', 'Q3_Mock_0_0025spike_B', 'Q3_Mock_0_0025spike_C',
+                  'Q3_Mock_0_009spike_A', 'Q3_Mock_0_009spike_B', 'Q3_Mock_0_009spike_C', 'Q3_Mock_0_025spike_A', 'Q3_Mock_0_025spike_B',
+                  'Q3_Mock_0_12spike_A', 'Q3_Mock_0_12spike_B', 'Q3_Mock_0_12spike_C', 'Q3_Mock_0_25spike_A', 'Q3_Mock_0_25spike_B', 'Q3_Mock_0_25spike_C')
+spike_samples <- c("Q3_Mock_0spike_B", "Q3_Mock_0spike_C", 
+                        "Q3_Mock_0_0025spike_A", "Q3_Mock_0_0025spike_B", "Q3_Mock_0_0025spike_C",
+                        "Q3_Mock_0_009spike_A", "Q3_Mock_0_009spike_B", "Q3_Mock_0_009spike_C",
+                        "Q3_Mock_0_025spike_A", "Q3_Mock_0_025spike_B",
+                "Q3_SCI_Manure_0_025spike_A", "Q3_SCI_Manure_0_025spike_B", "Q3_SCI_Manure_0_025spike_C",
+                        "Q3_Mock_0_12spike_A", "Q3_Mock_0_12spike_B", "Q3_Mock_0_12spike_C",
+                        "Q3_Mock_0_25spike_A", "Q3_Mock_0_25spike_B", "Q3_Mock_0_25spike_C"
+                        )
+
+# read_counts <- data.table(ssBLAST:::BLAST_db_match('BLAST/', 'files/merged_resfind_darte.fa'))
+# sample_names <- get_sample_names(read_counts)
+# colnames(read_counts) <- sample_names
+# read_counts <- merge(categories, read_counts, by.x = 'Primer', by.y = 'db')
+# saveRDS(read_counts, 'data/read_counts.rds')
+read_counts <- readRDS('data/read_counts.rds')
+aligned_reads <- fread('data/aligned_reads.csv')
+# read_counts_expected <- data.table(ssBLAST:::BLAST_db_match('BLAST/', 'files/DARTE-QM.v3.expected.fa'))
+# colnames(read_counts_expected) <- sample_names
+# saveRDS(read_counts_expected, 'data/read_counts_expected.rds')
+read_counts_expected <- readRDS('data/read_counts_expected.rds')
+# spike_counts <- data.table(ssBLAST:::BLAST_db_match('BLAST/', 'files/spike.fa'))
+# colnames(spike_counts) <- sample_names
+# saveRDS(spike_counts, 'data/spike_counts.rds')
+spike_counts <- readRDS('data/spike_counts.rds')
+
+read_counts_unexpected <- read_counts[!(read_counts[[1]] %in% read_counts_expected[[1]]), ]
+
+soil_column_I_ARGS <- readRDS('data/soil_column_I_ARGs.RDS')
+soil_column_I_16S <- readRDS('data/soil_column_I_ARGs.RDS')
+```
+
+<br>
+
+## Sequencing Results {.tabset .tabset-pills}
+
+<br>
+
+```{r BLAST_table, echo=FALSE, message=FALSE, warning=FALSE}
+BLAST_table <- readRDS('data/Sequence_percID_table.RDS')
+Raw_Reads <- fread('files/raw_read_counts.csv')[[2]]
+BLAST_table <- cbind(Raw_Reads, BLAST_table)
+BLAST_table[['Files']] <- gsub('_.*', '', BLAST_table[['Files']])
+BLAST_table[['Files']] <- gsub('-', '_', BLAST_table[['Files']])
+BLAST_table <- merge.data.table(metadata[,c(1,3)], BLAST_table, by.x = 'Sample_Name', by.y = 'Files')
+BLAST_table <- melt.data.table(BLAST_table, id.vars = c(1,2,3,4)) #,13:24
+BLAST_table[['variable']] <- factor(BLAST_table[['variable']], unique(BLAST_table[['variable']]))
+```
+
+### Percent Identity
+
+```{r percent_identity, echo=FALSE, message=FALSE, warning=FALSE}
+
+graph_data <- BLAST_table[, mean(value), by = c('matrix', 'variable')]
+
+classification <- 'matrix'
+color_count <- length(unique(graph_data[[classification]]))
+graph_colors <- schuylR::create_palette(color_count)
+percent_identity <-
+  ggplot(graph_data,
+         aes_string(x = 'variable', y = 'V1', group = 'matrix')) + 
+  geom_line(size = 1.5, aes_string(color = classification)) +
+  scale_colour_manual(values = graph_colors) +
+  guides(colour = guide_legend(
+    ncol = ceiling(length(unique(graph_data[[classification]])) / 25),
+    override.aes = list(size = 4)
+  )) + 
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(
+      angle = 30,
+      hjust = 1,
+      size = 10
+    ),
+    axis.text.y = element_text(hjust = 0.95, size = 10),
+    axis.title.x = element_text(size = 12, face = 'bold'),
+    axis.title.y = element_text(size = 12, face = 'bold'),
+    axis.ticks.x = element_blank(),
+    legend.title = element_text(size = 10, face = 'bold'),
+    legend.text = element_text(size = 12),
+    legend.spacing.x = unit(0.005, 'npc'),
+    legend.key.size = unit(4, "mm"),
+    legend.background = element_rect(fill = (alpha = 0)),
+    panel.background = element_rect(
+      color = 'black',
+      size = 1.5,
+      fill = 'white'
+    ),
+    panel.spacing = unit(.015, 'npc'),
+    strip.text.x = element_text(
+      size = 10,
+      face = 'bold',
+      color = 'black'
+    ),
+    strip.background = element_rect(
+      colour = 'black',
+      size = 1.4,
+      fill = 'white'
+    )
+  ) +
+  scale_y_continuous(expand = expand_scale(mult = c(0.008, 0.05), add = c(0))) +
+  scale_x_discrete(expand = expand_scale(mult = c(0.008), add = c(0))) + 
+  labs(x = "Percent Identity of Alignment", y = "Number of Reads")
+```
+
+This is created by averaging the number of reads from all samples from a single source, i.e. the average number of reads aligned from soil at each percent identity threshold.
+
+```{r percent_identity_graph, echo=FALSE, fig.width=12, fig.height=6, warning=FALSE}
+percent_identity
+```
+
+<br>
+
+### Relative Abundance
+
+This is the same information as the Percent Identity graph, but represented as the proportion of the total number of reads from the raw FASTQ files.
+
+```{r percent_identity_ra, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- BLAST_table
+graph_data[['value']] <- graph_data[['value']]/graph_data[['Raw_Reads']]
+graph_data <- graph_data[, mean(value), by = c('matrix', 'variable')]
+percent_identity_ra <-
+  ggplot(graph_data,
+         aes_string(x = 'variable', y = 'V1', group = 'matrix')) + 
+  geom_line(size = 1.5, aes_string(color = classification)) +
+  scale_colour_manual(values = graph_colors) +
+  guides(colour = guide_legend(
+    ncol = ceiling(length(unique(graph_data[[classification]])) / 25),
+    override.aes = list(size = 4)
+  )) + 
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(
+      angle = 30,
+      hjust = 1,
+      size = 10
+    ),
+    axis.text.y = element_text(hjust = 0.95, size = 10),
+    axis.title.x = element_text(size = 12, face = 'bold'),
+    axis.title.y = element_text(size = 12, face = 'bold'),
+    axis.ticks.x = element_blank(),
+    legend.title = element_text(size = 10, face = 'bold'),
+    legend.text = element_text(size = 12),
+    legend.spacing.x = unit(0.005, 'npc'),
+    legend.key.size = unit(4, "mm"),
+    legend.background = element_rect(fill = (alpha = 0)),
+    panel.background = element_rect(
+      color = 'black',
+      size = 1.5,
+      fill = 'white'
+    ),
+    panel.spacing = unit(.015, 'npc'),
+    strip.text.x = element_text(
+      size = 10,
+      face = 'bold',
+      color = 'black'
+    ),
+    strip.background = element_rect(
+      colour = 'black',
+      size = 1.4,
+      fill = 'white'
+    )
+  ) +
+  scale_y_continuous(expand = expand_scale(mult = c(0.008, 0.05), add = c(0))) +
+  scale_x_discrete(expand = expand_scale(mult = c(0.008), add = c(0))) + 
+  labs(x = "Percent Identity of Alignment", y = "Percent of Total Sequenced Reads")
+```
+
+```{r percent_identity_graph_ra, echo=FALSE, fig.width=12, fig.height=6, warning=FALSE}
+percent_identity_ra
+```
+
+<br>
+
+### Percent Aligned
+
+This is the same information as the Percent Identity graph, but represented as the proportion of the total number of aligned reads. I.E. at each increasing percent identity, the number of reads aligned is divided by the number of reads aligned at 60% (the total number of aligned reads).
+
+```{r percent_identity_pa, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- BLAST_table
+graph_data[['value']] <- graph_data[['value']]/graph_data[['Unique_Reads']]
+graph_data <- graph_data[, mean(value), by = c('matrix', 'variable')]
+percent_identity_pa <-
+  ggplot(graph_data,
+         aes_string(x = 'variable', y = 'V1', group = 'matrix')) + 
+  geom_line(size = 1.5, aes_string(color = classification)) +
+  scale_colour_manual(values = graph_colors) +
+  guides(colour = guide_legend(
+    ncol = ceiling(length(unique(graph_data[[classification]])) / 25),
+    override.aes = list(size = 4)
+  )) + 
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(
+      angle = 30,
+      hjust = 1,
+      size = 10
+    ),
+    axis.text.y = element_text(hjust = 0.95, size = 10),
+    axis.title.x = element_text(size = 12, face = 'bold'),
+    axis.title.y = element_text(size = 12, face = 'bold'),
+    axis.ticks.x = element_blank(),
+    legend.title = element_text(size = 10, face = 'bold'),
+    legend.text = element_text(size = 12),
+    legend.spacing.x = unit(0.005, 'npc'),
+    legend.key.size = unit(4, "mm"),
+    legend.background = element_rect(fill = (alpha = 0)),
+    panel.background = element_rect(
+      color = 'black',
+      size = 1.5,
+      fill = 'white'
+    ),
+    panel.spacing = unit(.015, 'npc'),
+    strip.text.x = element_text(
+      size = 10,
+      face = 'bold',
+      color = 'black'
+    ),
+    strip.background = element_rect(
+      colour = 'black',
+      size = 1.4,
+      fill = 'white'
+    )
+  ) +
+  scale_y_continuous(expand = expand_scale(mult = c(0.008, 0.05), add = c(0))) +
+  scale_x_discrete(expand = expand_scale(mult = c(0.008), add = c(0))) +  
+  labs(x = "Percent Identity of Alignment", y = "Percent of Total Aligned Reads")
+```
+
+```{r percent_identity_graph_pa, echo=FALSE, fig.width=12, fig.height=6, warning=FALSE}
+percent_identity_pa
+```
+
+
+<br>
+
+## 
+98% Identity match for reads of length >= 100 bp seems to be the ideal threshold for number of reads captured compared to confidence in alignment. For subsequent analyses, I used that threshold for determining identified ARGs.
+
+<br>
+
+## Primer Success {.tabset .tabset-pills}
+
+### Mock Samples
+
+The rate of success for the primers can be determined by how many successfully amplified their intended target.
+
+<br>
+
+```{r mock_primer_success, echo=FALSE, message=FALSE, warning=FALSE}
+primer_success <- sum(rowSums(read_counts[read_counts[[1]] %in% expected_mock, 
+                    grep('Mock', colnames(read_counts)), with = FALSE]) > 0)
+```
+
+```{r mock_number_successful}
+length(expected_mock)
+primer_success
+round(primer_success/length(expected_mock) * 100, 1)
+```
+
+Of the 98 genes expected to be found in the Mock communities, 73 were captured by the primers.
+
+<br>
+
+### Overall Success
+
+This metric for success, is not necessarily fair; the primers were not made with the certainty that every target was present within any of the samples. The Mock communities were designed with known members, and thereby a better idea of the expected targets that would be amplified.
+
+```{r primer_success, echo=FALSE, message=FALSE, warning=FALSE}
+primer_success <- sum(rowSums(read_counts[unlist(sapply(primers, FUN = function(x){grep(x, read_counts[[1]])})),-c(1:3)]) > 0)
+```
+
+```{r number_successful}
+length(primers)
+primer_success
+round(primer_success/length(primers) * 100, 1)
+```
+
+<br>
+<br>
+
+### Unexpected
+
+I addition to the 73 genes that were expected, there were an additional 61 genes detected that we did not predict.
+
+```{r unexpected_success, echo=FALSE, message=FALSE, warning=FALSE}
+unexpected  <- sum(rowSums(read_counts[!(read_counts[[1]] %in% expected_mock), 
+                    grep('Mock', colnames(read_counts)), with = FALSE]) > 1)
+```
+
+```{r unexpected_successful}
+unexpected
+```
+
+### Unexpected_graph
+
+I addition to the 73 genes that were expected, there were an additional 61 genes detected that we did not predict. The notable is the ?sulfanomides? that we did not expect to be there, as well as the aph-6 and the lnu_C. The other odditty is how much more abundant these are than the expected. Max value of 15000, compared to ~2500.
+
+```{r unexpected_graph_data, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- read_counts[!(read_counts[[1]] %in% expected_mock),c(1:3, grep('Mock', colnames(read_counts))), with = FALSE]
+graph_data <- graph_data[rowSums(graph_data[,-c(1:3)])>1,]
+graph_data <- melt(graph_data, id.vars = c('Primer', 'Source', 'ARG_Class'))
+graph_data <- graph_data[, sum(value), by = c('variable', 'ARG_Class', 'Source', 'Primer')]
+graph_data <- merge(aligned_reads, graph_data, by.x = 'Sample', by.y = 'variable')
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], 
+                                       levels = mock_samples))
+classification <- 'Primer'
+graph_data[[classification]] <- gsub('_R:.*','',graph_data[[classification]])
+graph_data[[classification]] <- gsub('_F','',graph_data[[classification]])
+graph_data[[classification]] <- factor(graph_data[[classification]], 
+                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+set(graph_data, which(graph_data[['V1']] < 1), j='V1', value=NA)
+
+unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill = "V1")) + 
+  geom_tile(color = "white", size = 0.25) +
+  guides(colour = guide_legend(ncol = ceiling(length(
+    unique(graph_data[[classification]])
+  ) / 25))) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, size = 10), axis.title.x = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10, face = "bold"), axis.ticks.x = element_blank(), legend.title = element_text(size = 8, face = "bold"), legend.text = element_text(size = 8), legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(6, "mm"), legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), panel.background = element_rect(color = "black", size = 1.4), strip.text.x = element_text(size = 10, face = "bold"), strip.background = element_rect(colour = "black", size = 1.4)) + scale_x_discrete(expand = expand_scale(mult = 0, add = 0.53)) + 
+  labs(x = "Sample") + 
+  ggraph::scale_fill_viridis(limits = c(0.0001, max(graph_data$V1, na.rm = T))) 
+
+```
+
+```{r unexpected_graph, fig.width=8, fig.height=12, echo=FALSE}
+unexpected_graph
+```
+
+Of the 97 genes expected to be found in the Mock communities, 72 were captured by the primers.
+
+<br>
+
+## Spike Detection {.tabset .tabset-pills}
+
+<br>
+
+### Bar Graphs
+
+```{r spike_counts, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- melt(spike_counts, id.vars = c('db'))
+graph_data <- graph_data[, floor(mean(value)), by = c('variable')]
+graph_data <- graph_data[grep('spike', graph_data[['variable']]),]
+graph_data[['variable']] <- factor(graph_data[['variable']], 
+                        levels = mock_samples)
+setnames(graph_data, colnames(graph_data), c("Sample", "Spike"))
+graph_data[, Spike_Level := c(sapply(c(0.0025, 0.009, 0.025, 0.12, 0.25, 0, 0.025), rep, 3))]
+setkey(graph_data, 'Spike_Level')
+graph_data[, Color := rep(schuylR::create_palette(length(graph_data[['Sample']])/3), each = 3)]
+graph_data <- graph_data[graph_data[['Sample']] %in% mock_samples,]
+spike_bars <-  ggplot(graph_data,
+             aes_string(x = 'Sample', y = 'Spike')) + 
+  geom_bar(stat = "identity", size = 0.45, alpha = 1, position = "dodge",
+           fill = graph_data$Color) + 
+  theme_light() +
+      theme(
+        axis.line.x = element_line(
+          colour = 'black',
+          size = 1,
+          linetype = 'solid'
+        ),
+        axis.line.y = element_line(
+          colour = 'black',
+          size = 1,
+          linetype = 'solid'
+        ),
+        axis.text.x = element_text(
+          size = 10,
+          vjust = 1,
+          hjust = 1,
+          angle = 30
+        ),
+        # axis.text.x = element_text(
+        #   size = 10,i
+        #   vjust = 0.6,
+        #   hjust = 0.6,
+        #   angle = 30,
+        # ),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.background = element_rect(fill = (alpha = 0)),
+        legend.key.size = unit(4, "mm"),
+        legend.spacing.x = unit(0.005, 'npc'),
+        strip.text.x = element_text(size = 10, face = 'bold', color = 'black'),
+        strip.background = element_rect(colour = 'black', size = 1.4, fill = 'white')
+      ) +
+      scale_y_continuous(expand = expand_scale(mult = c(0.0025, 0.01)))
+```
+
+```{r spike_counts_bars, fig.width=12, fig.height=8, echo=FALSE, warning=FALSE}
+spike_bars
+```
+
+<br>
+
+### Linear Relation
+
+```{r spike_counts_lines, echo=FALSE, message=FALSE, warning=FALSE}
+lm_eqn <- function(df, x_data, y_data){
+  m <- lm(get(y_data) ~ get(x_data), df);
+  eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+                   list(a = format(unname(coef(m)[1]), digits = 2),
+                        b = format(unname(coef(m)[2]), digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 2)))
+  as.character(as.expression(eq));
+}
+
+spike_points <-  ggplot(graph_data,
+                        aes_string(x = 'Spike_Level', y = 'Spike')) + 
+  geom_point(stat = "identity", size = 4, alpha = 1, position = "dodge",
+            color = graph_data$Color) + 
+    geom_smooth(method = "lm", se = FALSE, aes(x = Spike_Level, y = Spike) ) + 
+  geom_text(x = 0.075, y = 1000, label = lm_eqn(graph_data, 'Spike_Level', 'Spike'), parse = TRUE) + 
+    theme_bw() + theme(axis.text.x = element_text(
+        hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, 
+        size = 10), axis.title.x = element_text(size = 12, face = "bold"), 
+        axis.title.y = element_text(size = 12, face = "bold"), 
+        axis.ticks.x = element_blank(), legend.title = element_text(size = 10, 
+        face = "bold"), legend.text = element_text(size = 8), 
+        legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4, 
+        "mm"), legend.background = element_rect(fill = (alpha = 0)), 
+        panel.background = element_rect(color = "black", size = 1.5, 
+      fill = "white"), panel.spacing = unit(0.015, "npc"), 
+      strip.text.x = element_text(size = 10, face = "bold", 
+      color = "black"), strip.background = element_rect(colour = "black", 
+      size = 1.4, fill = "white")) + 
+  labs(x = "Spike Level", y = "Spike Sequences Detected at >= 98% Identity")
+```
+
+```{r spike_counts_line_reg, fig.width=12, fig.height=8, echo=FALSE, warning=FALSE}
+spike_points
+```
+
+<br>
+
+### Table
+
+```{r spike_counts_table, echo=FALSE}
+graph_data
+```
+
+<br>
+
+### Nomal. Bar Graphs
+
+```{r norm_spike_counts, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- melt(spike_counts, id.vars = c('db'))
+graph_data <- graph_data[, floor(mean(value)), by = c('variable')]
+graph_data <- graph_data[grep('spike', graph_data[['variable']]),]
+graph_data <- merge(graph_data, aligned_reads, by.x = 'variable', by.y = 'Sample')
+graph_data[, Count := round((V1/Aligned)*100,2)]
+graph_data[['variable']] <- factor(graph_data[['variable']], 
+                        levels = mock_samples)
+setnames(graph_data, c("variable", "V1"), c("Sample", "Spike"))
+graph_data[, Spike_Level := c(sapply(c(0.0025, 0.009, 0.025, 0.12, 0.25, 0, 0.025), rep, 3))]
+setkey(graph_data, 'Spike_Level')
+graph_data[, Color := rep(schuylR::create_palette(length(graph_data[['Sample']])/3), each = 3)]
+graph_data <- graph_data[graph_data[['Sample']] %in% mock_samples,]
+spike_bars <-  ggplot(graph_data,
+             aes_string(x = 'Sample', y = 'Count')) + 
+  geom_bar(stat = "identity", size = 0.45, alpha = 1, position = "dodge",
+           fill = graph_data$Color) + 
+  theme_light() +
+      theme(
+        axis.line.x = element_line(
+          colour = 'black',
+          size = 1,
+          linetype = 'solid'
+        ),
+        axis.line.y = element_line(
+          colour = 'black',
+          size = 1,
+          linetype = 'solid'
+        ),
+        axis.text.x = element_text(
+          size = 10,
+          vjust = 1,
+          hjust = 1,
+          angle = 30
+        ),
+        # axis.text.x = element_text(
+        #   size = 10,
+        #   vjust = 0.6,
+        #   hjust = 0.6,
+        #   angle = 30,
+        # ),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.background = element_rect(fill = (alpha = 0)),
+        legend.key.size = unit(4, "mm"),
+        legend.spacing.x = unit(0.005, 'npc'),
+        strip.text.x = element_text(size = 10, face = 'bold', color = 'black'),
+        strip.background = element_rect(colour = 'black', size = 1.4, fill = 'white')
+      ) +
+      scale_y_continuous(expand = expand_scale(mult = c(0.0025, 0.01)))
+```
+
+```{r norm_spike_counts_bars, fig.width=12, fig.height=8, echo=FALSE, warning=FALSE}
+spike_bars
+```
+
+<br>
+
+### Nomal. Linear Relation
+
+
+```{r norm_spike_counts_lines, echo=FALSE, message=FALSE, warning=FALSE}
+lm_eqn <- function(df, x_data, y_data){
+  m <- lm(get(y_data) ~ get(x_data), df);
+  eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+                   list(a = format(unname(coef(m)[1]), digits = 2),
+                        b = format(unname(coef(m)[2]), digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 2)))
+  as.character(as.expression(eq));
+}
+
+spike_points <-  ggplot(graph_data,
+                        aes_string(x = 'Spike_Level', y = 'Count')) + 
+  geom_point(stat = "identity", size = 4, alpha = 1, position = "dodge",
+            color = graph_data$Color) + 
+    geom_smooth(method = "lm", se = FALSE, aes(x = Spike_Level, y = Count) ) + 
+  geom_text(x = 0.075, y = 2.5, label = lm_eqn(graph_data, 'Spike_Level', 'Count'), parse = TRUE) + 
+    theme_bw() + theme(axis.text.x = element_text(
+        hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, 
+        size = 10), axis.title.x = element_text(size = 12, face = "bold"), 
+        axis.title.y = element_text(size = 12, face = "bold"), 
+        axis.ticks.x = element_blank(), legend.title = element_text(size = 10, 
+        face = "bold"), legend.text = element_text(size = 8), 
+        legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4, 
+        "mm"), legend.background = element_rect(fill = (alpha = 0)), 
+        panel.background = element_rect(color = "black", size = 1.5, 
+      fill = "white"), panel.spacing = unit(0.015, "npc"), 
+      strip.text.x = element_text(size = 10, face = "bold", 
+      color = "black"), strip.background = element_rect(colour = "black", 
+      size = 1.4, fill = "white")) + 
+  labs(x = "Spike Level", y = "Spike Sequences Detected at >= 98% Identity")
+```
+
+```{r norm_spike_counts_line_reg, fig.width=12, fig.height=8, echo=FALSE, warning=FALSE}
+spike_points
+```
+
+<br>
+
+### Table
+
+```{r norm_spike_counts_table, echo=FALSE}
+graph_data
+```
+
+<br>
+
+## Mock Samples - ARG Amplicon Detection {.tabset .tabset-pills}
+
+<br>
+
+Each primer/ARG genes presented is expected to be found based on the mock.expected.fa file. 
+75% of the primers expected to bind genes in the mock samples were successful, and detected in the sequencing.
+87% of the ARG genes expected to be found in the mock samples were found.
+
+<br>
+
+### ARGs in Mock
+
+BLAST against mock.expected.fa, compare to mock.expected.fa.
+Looking to see how many of the known ARGs are detected.
+Something is wrong with Q3_Mock_0_025spike_C.
+
+```{r read_counts, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- read_counts[read_counts[[1]] %in% expected_mock,]
+graph_data <- melt(graph_data, id.vars = c('Primer', 'Source', 'ARG_Class'))
+graph_data <- graph_data[variable %in% mock_samples]
+set(graph_data, j = 'variable', value = factor(graph_data[['variable']], 
+                                       levels = mock_samples))
+graph_data <- graph_data[, sum(value), by = c('variable', 'ARG_Class', 'Source')]
+# set(graph_data, which(graph_data[['V1']]==0), j='V1', value=NA)
+set(graph_data, which(graph_data[['V1']] < 5), j='V1', value=NA)
+classification <- 'ARG_Class'
+set(graph_data, j = classification, value = factor(graph_data[[classification]], 
+                                       levels = c('spike', unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+
+ARG_counts <- ggplot(graph_data, aes_string("variable", 'ARG_Class', fill = "V1")) + 
+  geom_tile(color = "white", size = 0.25) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 30, 
+              hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, 
+              size = 10), axis.title.x = element_text(size = 10, face = "bold"), 
+                          axis.title.y = element_text(size = 10, face = "bold"), 
+                          axis.ticks.x = element_blank(), legend.title = element_text(size = 8, 
+                                                                                      face = "bold"), legend.text = element_text(size = 8), 
+                          legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(6, "mm"), 
+              legend.background = element_rect(fill = (alpha = 0), 
+              color = "black", size = 0.25), panel.background = element_rect(color = "black", 
+              size = 1.4), strip.text.x = element_text(size = 10, face = "bold"), 
+                          strip.background = element_rect(colour = "black", size = 1.4)) + 
+  scale_x_discrete(expand = expand_scale(mult = 0, add = 0.53)) +  
+  ggraph::scale_fill_viridis(limits = c(min(graph_data$V1, na.rm = T), max(graph_data$V1, na.rm = T))) +
+  labs(x = "Sample")
+```
+
+```{r ARG_counts, fig.width=8, fig.height=12, echo=FALSE, warning=FALSE}
+ARG_counts
+```
+
+### By Primer
+
+Same data, but by individual primer pressence.
+
+```{r mock_primer_counts, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- read_counts[read_counts[[1]] %in% expected_mock,]
+graph_data <- melt(graph_data, id.vars = c('Primer', 'Source', 'ARG_Class'))
+graph_data <- graph_data[variable %in% mock_samples]
+graph_data <- graph_data[, sum(value), by = c('variable', 'ARG_Class', 'Source', 'Primer')]
+graph_data <- merge(aligned_reads, graph_data, by.x = 'Sample', by.y = 'variable')
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], 
+                                       levels = mock_samples))
+classification <- 'Primer'
+graph_data[[classification]] <- gsub('_R:.*','',graph_data[[classification]])
+graph_data[[classification]] <- gsub('_F','',graph_data[[classification]])
+graph_data[[classification]] <- factor(graph_data[[classification]], 
+                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+set(graph_data, which(graph_data[['V1']] < 2), j='V1', value=NA)
+mock_primer_counts_graph <- ggplot(graph_data, aes_string("Sample", 'Primer', fill = "V1")) + 
+  geom_tile(color = "white", size = 0.25) +
+  guides(colour = guide_legend(ncol = ceiling(length(
+    unique(graph_data[[classification]])
+  ) / 25))) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, size = 10), axis.title.x = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10, face = "bold"), axis.ticks.x = element_blank(), legend.title = element_text(size = 8, face = "bold"), legend.text = element_text(size = 8), legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(6, "mm"), legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), panel.background = element_rect(color = "black", size = 1.4), strip.text.x = element_text(size = 10, face = "bold"), strip.background = element_rect(colour = "black", size = 1.4)) + scale_x_discrete(expand = expand_scale(mult = 0, add = 0.53)) + 
+  labs(x = "Sample") + 
+  ggraph::scale_fill_viridis(limits = c(0.0001, max(graph_data$V1, na.rm = T))) 
+```
+
+```{r mock_primer_counts_graph, fig.width=8, fig.height=12, echo=FALSE}
+mock_primer_counts_graph
+```
+
+<br>
+
+
+## Sample Ordination {.tabset .tabset-pills}
+
+<br>
+
+### Non-Normalized PCA
+
+Distances were calculated from raw read counts to compare to how normalizing with relative abundance clusters replicates. Without housekeeping genes, we can't directly compare samples to each other in terms of abundance or expression of certain genes. With relative abundance though, we should be able to compare the ratios.
+
+```{r pca_calculation_non_normalized, echo=FALSE, message=FALSE, warning=FALSE}
+treatment = 'matrix'
+  x = 1
+  y = 2
+  method = 'bray'
+  circle = 0.95
+distance_matrix <- vegan::vegdist(t(read_counts[,-c(1:3)]), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+MDS <- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
+graph_data <- cbind(x = MDS$points[,x], y = MDS$points[,y])
+graph_data <- merge(graph_data, BLAST_table, by.x = 0, by.y = 'Sample_Name')
+
+pca <- ggplot(data = graph_data, aes_string('x', 'y', group = treatment))
+ellipse_df <- phylosmith:::CI_ellipse(ggplot_build(pca)$data[[1]],
+                             groups = 'group', level = 0.95)
+color_count <- length(unique(graph_data[[treatment]]))
+graph_colors <- schuylR::create_palette(color_count)
+    # pca <- pca + geom_polygon(data = ellipse_df, aes(x = x,
+    #           y = y, group = group), color = "black", fill = graph_colors[ellipse_df$group],
+    #           alpha = 0.3, size = 0.6, linetype = 1)
+  pca <- pca + geom_point(aes_string(fill = treatment), shape = 21,
+              color = "black", size = 5, alpha = 1) + scale_fill_manual(values = graph_colors)
+    pca <- pca + theme_classic() + theme(axis.line.x = element_line(colour = "black",
+              size = 1, linetype = "solid"), axis.line.y = element_line(colour = "black",
+              size = 1, linetype = "solid"), axis.text.x = element_text(size = 10),
+              axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+              face = "bold"), axis.title.y = element_text(size = 12,
+              face = "bold"), legend.title = element_text(size = 12,
+              face = "bold"), legend.text = element_text(size = 12),
+              legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4,
+              "mm"), legend.background = element_rect(fill = (alpha = 0))) +
+    labs(x = paste("PCo ", x, "  (", round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = ''),
+         y = paste("PCo ", y, "  (", round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = '')) +
+    guides(fill = guide_legend(override.aes = list(size = 4)))
+    pca <- pca +
+    guides(fill = guide_legend(ncol = ceiling(length(unique(graph_data[[treatment]]))/50)),
+           group = guide_legend(ncol = ceiling(length(unique(graph_data[[treatment]]))/50)))
+```
+
+```{r pca_non_normalized, echo=FALSE, fig.width=12, fig.height=9}
+pca
+```
+
+<br>
+
+### Normalized PCA
+
+Using relative abundance to normalize samples clusters the replicates tighter, indicating that it works well overall as a normalization method.
+
+```{r pca_calculation_normalized, echo=FALSE, message=FALSE, warning=FALSE}
+distance_matrix <- vegan::vegdist(t(apply(read_counts[,-c(1,2,3)], 2, FUN=function(y){y/sum(y)})), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+MDS <- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
+graph_data <- cbind(x = MDS$points[,x], y = MDS$points[,y])
+graph_data <- merge(graph_data, metadata, by.x = 0, by.y = 'Sample_Name')
+
+pca_normalized <- ggplot(data = graph_data, aes_string('x', 'y', group = treatment))
+ellipse_df <- phylosmith:::CI_ellipse(ggplot_build(pca_normalized)$data[[1]],
+                             groups = 'group', level = 0.95)
+color_count <- length(unique(graph_data[[treatment]]))
+graph_colors <- schuylR::create_palette(color_count)
+    # pca <- pca + geom_polygon(data = ellipse_df, aes(x = x,
+    #             y = y, group = group), color = "black", fill = graph_colors[ellipse_df$group],
+    #             alpha = 0.3, size = 0.6, linetype = 1)
+  pca_normalized <- pca_normalized + geom_point(aes_string(fill = treatment), shape = 21,
+                      color = "black", size = 5, alpha = 1) + scale_fill_manual(values = graph_colors)
+    pca_normalized <- pca_normalized + theme_classic() + theme(axis.line.x = element_line(colour = "black",
+                size = 1, linetype = "solid"), axis.line.y = element_line(colour = "black",
+                size = 1, linetype = "solid"), axis.text.x = element_text(size = 10),
+                axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                face = "bold"), axis.title.y = element_text(size = 12,
+                face = "bold"), legend.title = element_text(size = 10,
+                face = "bold"), legend.text = element_text(size = 12),
+                legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4,
+                "mm"), legend.background = element_rect(fill = (alpha = 0))) +
+    labs(x = paste("PCo ", x, "  (", round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = ''),
+         y = paste("PCo ", y, "  (", round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = '')) +
+    guides(fill = guide_legend(override.aes = list(size = 4)))
+    pca_normalized <- pca_normalized +
+    guides(fill = guide_legend(ncol = ceiling(length(unique(graph_data[[treatment]]))/50)),
+           group = guide_legend(ncol = ceiling(length(unique(graph_data[[treatment]]))/50)))
+```
+
+```{r pca_normalized, echo=FALSE, fig.width=12, fig.height=9}
+pca_normalized
+```
+
+<br>
+
+### NMDS
+
+```{r nmds, echo=FALSE, message=FALSE, warning=FALSE}
+  x = 'NMDS1'
+  y = 'NMDS2'
+  method = 'bray'
+  circle = 0.95
+MDS <- vegan::metaMDS(t(apply(read_counts[,-c(1:3)], 2, FUN=function(y){y/sum(y)})), autotransform = FALSE, distance = method, k = 3, trymax = 100, trace = FALSE)
+graph_data <- vegan::scores(MDS)
+graph_data <- merge(graph_data, metadata, by.x = 0, by.y = 'Sample_Name')
+
+nmds <- ggplot(data = graph_data, aes_string(x, y, group = treatment))
+ellipse_df <- phylosmith:::CI_ellipse(ggplot_build(nmds)$data[[1]],
+                             groups = 'group', level = 0.95)
+color_count <- length(unique(graph_data[[treatment]]))
+graph_colors <- schuylR::create_palette(color_count)
+  nmds <- nmds + geom_point(aes_string(fill = treatment), shape = 21,
+                      color = "black", size = 5, alpha = 1) + scale_fill_manual(values = graph_colors)
+    nmds <- nmds + theme_classic() + theme(axis.line.x = element_line(colour = "black",
+                size = 1, linetype = "solid"), axis.line.y = element_line(colour = "black",
+                size = 1, linetype = "solid"), axis.text.x = element_text(size = 10),
+                axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                face = "bold"), axis.title.y = element_text(size = 12,
+                face = "bold"), legend.title = element_text(size = 10,
+                face = "bold"), legend.text = element_text(size = 12),
+                legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4,
+                "mm"), legend.background = element_rect(fill = (alpha = 0))) + 
+    guides(fill = guide_legend(override.aes = list(size = 4)))
+    nmds <- nmds +
+    guides(fill = guide_legend(ncol = ceiling(length(unique(graph_data[[treatment]]))/50)),
+           group = guide_legend(ncol = ceiling(length(unique(graph_data[[treatment]]))/50)))
+```
+
+```{r nmds_graph, echo=FALSE, fig.width=12, fig.height=9}
+nmds
+```
+
+<br>
+
+## Hierarchical Clustering {.tabset .tabset-pills}
+
+<br>
+
+### Bray-Curtis
+
+```{r bray_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+method = 'bray'
+distance_matrix <- vegan::vegdist(t(apply(read_counts[,-c(1:3)], 2, FUN=function(y){y/sum(y)})), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
+graph_data <- ggdendro::dendro_data(dend)
+# graph_data <- cbind(ggdendro::segment(graph_data), merge(graph_data$labels, metadata[,c(1,3)], by.x = 'label', by.y = 'Sample_Name'))
+
+sample_colors <- schuylR::create_palette(length(unique(metadata$matrix)))[as.factor(metadata$matrix[match(as.character(graph_data$labels$label), metadata$Sample_Name)])]
+
+sample_dendrogram <- ggplot(data = ggdendro::segment(graph_data)) + geom_blank() + theme_minimal()
+sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
+                                                                 y = "y", 
+                                                                 xend = "xend", 
+                                                                 yend = "yend",
+                                                                 color = 'y'),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(graph_data$labels$label),
+                     labels = gsub('Q3_','',graph_data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))
+```
+
+```{r bray_dendro, echo=FALSE, fig.width=12, fig.height=6, warning=FALSE}
+sample_dendrogram
+```
+
+<br>
+
+### Jaccard
+
+```{r jaccard_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+method = 'jaccard'
+
+distance_matrix <- vegan::vegdist(t(apply(read_counts[,-c(1:3)], 2, FUN=function(y){y/sum(y)})), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
+data <- ggdendro::dendro_data(dend)
+sample_dendrogram <- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
+sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
+                                                                 y = "y", 
+                                                                 xend = "xend", 
+                                                                 yend = "yend",
+                                                                 color = 'y'),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(data$labels$label),
+                     labels = gsub('Q3_','',data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))
+```
+
+```{r jaccard_dendro, echo=FALSE, fig.width=12, fig.height=6, warning=FALSE}
+sample_dendrogram
+```
+
+<br>
+
+### Euclidean
+
+```{r euclidean_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+method = 'euclidean'
+distance_matrix <- vegan::vegdist(t(apply(read_counts[,-c(1:3)], 2, FUN=function(y){y/sum(y)})), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
+data <- ggdendro::dendro_data(dend)
+
+sample_dendrogram <- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
+sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
+                                                                 y = "y", 
+                                                                 xend = "xend", 
+                                                                 yend = "yend",
+                                                                 color = 'y'),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(data$labels$label),
+                     labels = gsub('Q3_','',data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))
+```
+
+```{r euclidean_dendro, echo=FALSE, warning=FALSE, fig.width=12, fig.height=6}
+sample_dendrogram
+```
+
+<br>
+
+### Gower
+
+```{r gower_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+method = 'gower'
+distance_matrix <- vegan::vegdist(t(apply(read_counts[,-c(1:3)], 2, FUN=function(y){y/sum(y)})), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
+data <- ggdendro::dendro_data(dend)
+
+sample_dendrogram <- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
+sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
+                                                                 y = "y", 
+                                                                 xend = "xend", 
+                                                                 yend = "yend",
+                                                                 color = 'y'),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(data$labels$label),
+                     labels = gsub('Q3_','',data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))
+```
+
+```{r gower_dendro, echo=FALSE, warning=FALSE, fig.width=12, fig.height=6}
+sample_dendrogram
+```
+
+```{r primers, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+primers <- unique(substring(primers,3))
+```
+
+<br>
+
+## K-Means Clustering {.tabset .tabset-pills}
+
+<br>
+
+### Optimize K
+
+```{r k-means_analysis, echo=FALSE, message=FALSE, warning=FALSE}
+method = 'bray'
+x = 1
+y = 2
+distance_matrix <- vegan::vegdist(t(apply(read_counts[,-c(1:3)], 2, FUN=function(y){y/sum(y)})), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] <- 0
+
+n_k = 15
+graph_data <- sapply(2:n_k, function(k){
+  kmeans(distance_matrix, k, nstart=20 ,iter.max = 15 )$tot.withinss
+  })
+graph_colors <- rep('ins', n_k-1)
+graph_size <- rep(2, n_k-1)
+for(i in seq(3)){
+  a <- data.frame(k = 2:n_k, ss = graph_data, diff = c(abs(diff(graph_data)),0))
+  a <- cbind(a, "percent_change" = c(0, round((a$diff/a$ss)*100)[-length(a$diff)]))
+  if(i!=1)a <- a[(max(which(graph_colors != 'ins'))+1):nrow(a),]
+  opt_k <- max(a[a$percent_change >= mean(a$percent_change) + sd(a$percent_change), 'k']) - 1
+  graph_colors[opt_k] <- 'sig'
+  graph_size[opt_k] <- 4
+}
+opt_k_means <- ggplot(data.frame(k = 2:n_k, graph_data), aes(k, graph_data)) + geom_line() + geom_point(size = graph_size, aes(color = graph_colors)) + theme_bw() + 
+  scale_x_continuous(breaks = c(seq(2,14, by = 2))) + 
+  scale_colour_manual(values=c("black", "#009E73"), 
+                      breaks = "sig", 
+                      labels = "values of k where the difference between \nwithin-cluster sum of squares is > one standard \ndeviation from the mean rate of change \n(removing values <= the prior denoted k value") + 
+  labs(x = "Number of Clusters K", y = "Total Within-Clusters Sum of Wquares", color = "") + 
+  theme(
+    legend.position = c(0.9, 0.82),
+    legend.justification = c("right", "top"),
+    legend.text = element_text(size = 12)
+  ) + 
+  guides(color = guide_legend(override.aes = list(size = 4)))
+```
+ 
+```{r opt_k_means, echo=FALSE, warning=FALSE, fig.width=8, fig.height=7}
+opt_k_means
+```
+
+<br>
+
+### K(4)
+
+<br>
+
+```{r K(4), echo=FALSE, message=FALSE, warning=FALSE}
+k = 4
+treatment = 'matrix'
+MDS <- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
+graph_data <- cbind(x = MDS$points[,x], y = MDS$points[,y])
+graph_data <- merge(graph_data, metadata, by.x = 0, by.y = 'Sample_Name')
+km <- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
+graph_data <- cbind(graph_data, cluster =  factor(km[match(names(km), graph_data$Row.names)])) 
+graph_colors <- schuylR::create_palette(length(unique(graph_data[[treatment]])))
+cluster_colors <- schuylR::create_palette(k, colors = 'Dark2')
+```
+ 
+```{r K(4)_graph, echo=FALSE, fig.width=12, fig.height=9}
+k4 <- ggplot(data = graph_data, aes_string('x', 'y', group = 'cluster'))
+k4 <- k4 +  
+  geom_point(aes_string(color = 'matrix', fill = 'matrix'),
+              size = 5, alpha = 1) + 
+              scale_color_manual(values = graph_colors) +
+              scale_fill_manual(values = graph_colors) + 
+  theme_classic() + theme(axis.line.x = element_line(colour = "black", size = 1, linetype = "solid"), axis.line.y = element_line(colour = "black",
+                    size = 1, linetype = "solid"), axis.text.x = element_text(size = 10),
+                    axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                    face = "bold"), axis.title.y = element_text(size = 12,
+                    face = "bold"), legend.title = element_text(size = 10,
+                    face = "bold"), legend.text = element_text(size = 12),
+                    legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4,
+                    "mm"), legend.background = element_rect(fill = (alpha = 0))) +
+  labs(x = paste("PCo ", x, "  (", round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = ''),
+       y = paste("PCo ", y, "  (", round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = '')) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) + 
+  geom_polygon(data = phylosmith:::CI_ellipse(ggplot_build(k4)$data[[1]], 'group'), 
+               aes(x = x, y = y, group = group), color = "black", 
+               alpha = 0.3, size = 0.6, linetype = 1, 
+               fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k4)$data[[1]], 'group')$group])
+k4
+```
+
+<br>
+
+### K(6)
+
+<br>
+
+```{r K(6), echo=FALSE, message=FALSE, warning=FALSE}
+k = 6
+cluster_colors <- schuylR::create_palette(k, colors = 'Dark2')
+km <- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
+graph_data$cluster <- factor(km[match(names(km), graph_data$Row.names)])
+```
+ 
+```{r K(7)_graph, echo=FALSE, warning=FALSE, fig.width=12, fig.height=9}
+k6 <- ggplot(data = graph_data, aes_string('x', 'y', group = 'cluster'))
+k6 <- k6 + 
+  geom_point(aes_string(color = 'matrix', fill = 'matrix'),
+              size = 5, alpha = 1) + 
+              scale_color_manual(values = graph_colors) +
+              scale_fill_manual(values = graph_colors) + 
+  theme_classic() + theme(axis.line.x = element_line(colour = "black", size = 1, linetype = "solid"), axis.line.y = element_line(colour = "black",
+                    size = 1, linetype = "solid"), axis.text.x = element_text(size = 10),
+                    axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                    face = "bold"), axis.title.y = element_text(size = 12,
+                    face = "bold"), legend.title = element_text(size = 10,
+                    face = "bold"), legend.text = element_text(size = 12),
+                    legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4,
+                    "mm"), legend.background = element_rect(fill = (alpha = 0))) +
+  labs(x = paste("PCo ", x, "  (", round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = ''),
+       y = paste("PCo ", y, "  (", round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = '')) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) + 
+  geom_polygon(data = phylosmith:::CI_ellipse(ggplot_build(k6)$data[[1]], 'group'), 
+               aes(x = x, y = y, group = group), color = "black", 
+               alpha = 0.3, size = 0.6, linetype = 1, 
+               fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k6)$data[[1]], 'group')$group])
+k6
+```
+
+<br>
+
+### K(15)
+
+<br>
+
+```{r K(15), echo=FALSE, message=FALSE, warning=FALSE}
+k = 15
+cluster_colors <- schuylR::create_palette(k, colors = 'Dark2')
+km <- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
+graph_data$cluster <- factor(km[match(names(km), graph_data$Row.names)])
+```
+ 
+```{r K(13)_graph, echo=FALSE, warning=FALSE, fig.width=12, fig.height=9}
+k15 <- ggplot(data = graph_data, aes_string('x', 'y', group = 'cluster'))
+k15 <- k15 + 
+  geom_point(aes_string(color = 'matrix', fill = 'matrix'),
+              size = 5, alpha = 1) + 
+              scale_color_manual(values = graph_colors) +
+              scale_fill_manual(values = graph_colors) + 
+  theme_classic() + theme(axis.line.x = element_line(colour = "black", size = 1, linetype = "solid"), axis.line.y = element_line(colour = "black",
+                    size = 1, linetype = "solid"), axis.text.x = element_text(size = 10),
+                    axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                    face = "bold"), axis.title.y = element_text(size = 12,
+                    face = "bold"), legend.title = element_text(size = 10,
+                    face = "bold"), legend.text = element_text(size = 12),
+                    legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4,
+                    "mm"), legend.background = element_rect(fill = (alpha = 0))) +
+  labs(x = paste("PCo ", x, "  (", round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = ''),
+       y = paste("PCo ", y, "  (", round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig > 0]),3)*100, "%)", sep = '')) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) + 
+  geom_polygon(data = phylosmith:::CI_ellipse(ggplot_build(k15)$data[[1]], 'group'), 
+               aes(x = x, y = y, group = group), color = "black", 
+               alpha = 0.3, size = 0.6, linetype = 1, 
+               fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k15)$data[[1]], 'group')$group])
+k15
+```
+
+<br>
+
+## Sample Compositon {.tabset .tabset-pills}
+
+<br>
+
+### ARG Profile
+
+<br>
+
+```{r arg_classes, echo=FALSE, message=FALSE, warning=FALSE}
+graph_data <- melt(read_counts, id.vars = c('Primer', 'Source', 'ARG_Class'), variable.name = 'Sample_Name')
+graph_data <- merge(metadata[,c(1,3,4)], graph_data, by = 'Sample_Name')
+graph_data <- graph_data[, sum(value), by = c('Sample_Name', 'Source', 'matrix', 'ARG_Class')]
+set(graph_data, j ='Sample_Name', value = gsub('Q3_', '', graph_data[['Sample_Name']]))
+graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample_Name')]
+set(graph_data, which(graph_data[['V1']]==0), j='V1', value=NA)
+set(graph_data, which(graph_data[['relative_abundance']]==0), j='relative_abundance', value=NA)
+classification <- 'Source'
+set(graph_data, j = classification, value = factor(graph_data[[classification]], levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')])))))
+setkey(graph_data, "Source", "Sample_Name")
+
+graph_colors <- schuylR::create_palette(length(levels(graph_data[[classification]])))
+# sample_colors <- schuylR::create_palette(length(unique(groups[,2])))[as.numeric(groups[,2])]
+treatment_name <- 'matrix'
+profile <- ggplot(graph_data, aes_string(x = "Sample_Name", 
+                                   y = "relative_abundance", 
+                                   fill = classification)) + 
+  guides(fill = guide_legend(ncol = ceiling(length(unique(graph_data[[classification]]))/50))) + 
+  scale_fill_manual(values = graph_colors, aesthetics = c("color", "fill")) + 
+  facet_grid(reformulate(treatment_name), scales = "free", space = "free") + 
+    geom_bar(aes_string(fill = classification, 
+                    color = classification), stat = "identity", position = "stack", 
+                    size = 0.2, width = 0.95) + 
+    ylab("Relative Abundance") + 
+    theme_bw() + theme(axis.text.x = element_blank(), 
+                            axis.text.y = element_text(size = 10), 
+                            axis.title.x = element_blank(), 
+                            axis.title.y = element_text(size = 10, face = "bold"), 
+                            axis.ticks.x = element_blank(), legend.title = element_text(size = 10, 
+                            face = "bold"), legend.text = element_text(size = 8), 
+                            legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4, 
+                            "mm"), panel.background = element_rect(color = "black", 
+                            size = 1.5), panel.spacing = unit(0.01, "npc"), 
+                            strip.text.x = element_text(size = 10, face = "bold"), 
+                            strip.background = element_rect(colour = "black", size = 1.4, 
+                            fill = "white"), panel.grid.major.x = element_blank()) + 
+  scale_y_continuous(expand = expand_scale(mult = c(0.0037, 
+  0.003), add = c(0, 0))) + scale_x_discrete(expand = expand_scale(mult = 0, 
+  add = 0.51))
+```
+ 
+```{r profile, echo=FALSE, warning=FALSE, fig.width=12, fig.height=6}
+profile
+```
+
+<br>
+
+### NGS vs PCR
+
+<br>
+
+```{r shotgun, echo=FALSE, message=FALSE, warning=FALSE}
+source('src/facet_nested.R')
+SC_I <- phylosmith::melt_phyloseq(soil_column_I_ARGS)
+SC_I <- SC_I[, sum(Abundance), by = c('Sample', 'Gene', 'Treatment', 'Matrix', 'Day')]
+SC_I[, relative_abundance := V1/sum(V1), by = c('Sample')]
+set(SC_I, which(SC_I[['V1']]==0), j='V1', value=NA)
+set(SC_I, which(SC_I[['relative_abundance']]==0), j='relative_abundance', value=NA)
+set(SC_I, j = 'Gene', value = tolower(substr(SC_I[['Gene']],1,3)))
+set(SC_I, j = 'Matrix', value = tolower(SC_I[['Matrix']]))
+setnames(SC_I, 'Gene', 'Source')
+
+graph_data <- melt(read_counts, id.vars = c('Primer', 'Source', 'ARG_Class'), variable.name = 'Sample_Name')
+graph_data <- merge(metadata[,c(1,3,4)], graph_data, by = 'Sample_Name')
+graph_data <- graph_data[, sum(value), by = c('Sample_Name', 'Source', 'matrix', 'day', 'ARG_Class')]
+set(graph_data, j ='Sample_Name', value = gsub('Q3_', '', graph_data[['Sample_Name']]))
+graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample_Name')]
+set(graph_data, which(graph_data[['V1']]==0), j='V1', value=NA)
+set(graph_data, which(graph_data[['relative_abundance']]==0), j='relative_abundance', value=NA)
+set(graph_data, j = classification, value = factor(graph_data[[classification]], levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')])))))
+setkey(graph_data, "Source", "Sample_Name")
+
+set(graph_data, which(is.na(graph_data[['day']])), j='day', value=0)
+set(graph_data, j = 'Source', value = tolower(graph_data$Source))
+setnames(graph_data, c('Sample_Name', 'day', 'matrix'), c('Sample', 'Day', 'Matrix'))
+graph_data <- graph_data[grep('SCI_', Sample), ]
+SC_I <- SC_I[Matrix %in% c('manure', 'soil')]
+
+graph_data <- rbind(
+  cbind(graph_data[,c('Sample', 'Source', 'Matrix', 'Day', 'relative_abundance')], Tech = 'DARTE-QM'), 
+  cbind(SC_I[,c('Sample', 'Source', 'Matrix', 'Day', 'relative_abundance')], Tech = 'Metagenome'))
+graph_data <- graph_data[!(is.na(graph_data$relative_abundance))]
+graph_colors <- schuylR::create_palette(length(unique(graph_data[[classification]])))
+graph_data[['Matrix']] <- as.character(graph_data[['Matrix']])
+setkey(graph_data, 'Day', 'Sample')
+profile_compare <- ggplot(graph_data, aes_string(x = "Sample", 
+                                         y = "relative_abundance", 
+                                         fill = classification)) + 
+  guides(fill = guide_legend(ncol = 3), color = guide_legend(ncol = 3)) + 
+  scale_fill_manual(values = graph_colors, aesthetics = c("color", "fill")) + 
+  facet_nested(.~ Tech + Matrix, scales = "free", space = "free") + 
+  geom_bar(aes_string(fill = classification, 
+           color = classification), stat = "identity", position = "stack", 
+           size = 0.2, width = 0.95) + 
+  ylab("Relative Abundance") + 
+  theme_bw() + theme(axis.text.x = element_blank(), 
+                     axis.text.y = element_text(size = 10), 
+                     axis.title.x = element_blank(), 
+                     axis.title.y = element_text(size = 10, face = "bold"), 
+                     axis.ticks.x = element_blank(), legend.title = element_text(size = 10, 
+                    face = "bold"), legend.text = element_text(size = 8), 
+                     legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4, 
+                    "mm"), panel.background = element_rect(color = "black", 
+                    size = 1.5), panel.spacing = unit(0.01, "npc"), 
+                     strip.text.x = element_text(size = 10, face = "bold"), 
+                     strip.background = element_rect(colour = "black", size = 1.4, 
+                    fill = "white"), panel.grid.major.x = element_blank()) + 
+  scale_y_continuous(expand = expand_scale(mult = c(0.0037, 
+                    0.003), add = c(0, 0))) + scale_x_discrete(expand = expand_scale(mult = 0, 
+                    add = 0.51))
+```
+
+```{r shotgun_profile, echo=FALSE, fig.width=12, fig.height=6}
+profile_compare
+```
+
+<br>
+
+<!-- ```{r 1, echo=FALSE, message=FALSE, warning=FALSE} --> 
+<!-- code -->
+<!-- ``` -->
+
+<!-- ```{r 2, echo=FALSE, fig.width=12, fig.height=6} -->
+<!-- graph -->
+<!-- ``` -->
+
+
+<br>
+<br>
+<br>
