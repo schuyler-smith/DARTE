@@ -1,0 +1,97 @@
+---
+title: "Diversity of Antibiotic Resistance genes and Transfer Elements-Quantitative Monitoring (DARTE-QM)"
+author: <a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a>
+output:
+  html_document:
+    df_print: paged
+    toc_depth: 1
+---
+<br>
+
+# Abstract
+Monitoring the spread of antibiotic resistance genes in environmental ecosystems faces significant obstacles, predominantly due to the cost and efficiency of methods available for the task. We developed Diversity of Antibiotic Resistance genes and Transfer Elements-Quantitative Monitoring (DARTE-QM), a method implementing high-throughput sequencing to simultaneously target thousands of antibiotic resistant genes representing a full-spectrum of antibiotic resistance classes seen in environmental systems. In this study, we demonstrate DARTE-QM screening 673 antibiotic resistant genes in environmental samples originating from manure, soil, and animal feces, in addition to a mock-community used as a control to test performance. DARTE-QM offers a supplemental approach to studying antibiotic resistance in environments, showing advantages in efficiency, ergo ability to scale for many samples, that may alleviate obstacles for researchers in this area.
+
+<br>
+<br>
+
+
+# Sequencing
+#### [Mock-Community](sequencing.html#Mock-Community)
+#### [Soil Column I](sequencing.html#Soil_Column_I)
+#### [Soil Column II](sequencing.html#Soil_Column_II)
+#### [Swine Fecal](sequencing.html#Swine_Fecal)
+<br>
+
+
+# Primer Analysis
+#### [Primer Success Tables](primer_analysis.html#Primer_Success_Tables)
+#### [Success Metrics](primer_analysis.html#Success_Metrics)
+#### [Primer Performance Graphs](primer_analysis.html#Primer_Performance_Graphs)
+#### [PCR-Artifacts](primer_analysis.html#Artifact_Reads)
+<br>
+
+
+# Mock Evalutaion
+#### [Mock](mock_analysis.html)
+<br>
+
+
+# Sample analysis
+#### [ARG Profile](sample_analysis.html#ARG_Profile)
+#### [Ordination](sample_analysis.html#Ordination)
+#### [PERMANOVA](sample_analysis.html#PERMANOVA)
+#### [Hierarchical Clustering](sample_analysis.html#Hierarchical_Clustering)
+#### [K-Means Clustering](sample_analysis.html#K-Means_Clustering)
+<br>
+
+
+# Quantification
+#### [Synthetic Oligonucleotide ‘Spike’](quantification.html#Synthetic_Oligonucleotide_‘Spike’)
+<br>
+
+
+# Metagenome Comparison
+#### [All ARGs Found](metagenome_comparison.html#All_ARGs_Found)
+#### [DARTE-QM Target ARGs](metagenome_comparison.html#DARTE-QM_Target_ARGs)
+<br>
+
+
+# Data
+### [Antibioti Resistance Genes](data.html#Antibiotic_Resistance_Genes)
+File | Description | Download
+:------------- |:-------------------------------------- |:------------
+[ARG Database](data.html#Antibiotic_Resistance_Genes) | fasta format file of the targeted ARG database | <a href="../data/ARG_database.fa" download>Download</a>
+[Forward Primers](data.html#Antibiotic_Resistance_Genes) | fasta format file of the forward primers | <a href="../data/forward_primers" download>Download</a>
+[Reverse Primers](data.html#Antibiotic_Resistance_Genes) | fasta format file of the reverse primers | <a href="../data/forward_primers" download>Download</a>
+[Target ARGs](data.html#Antibiotic_Resistance_Genes) | table of target ARG classifications | <a href="../data/target_ARG_classifications.tsv" download>Download</a>
+
+### [Mock Community](data.html#Mock_Community)
+File | Description | Download
+:------------- |:-------------------------------------- |:------------
+[Mock Strain Info](data.html#Mock_Community) | file containing information about each community member of the mock | <a href="../data/mock_strain_infor.csv" download>Download</a>
+[Mock Genomes](data.html#Mock_Community) | fasta format file of the genomes of mock community members | <a href="../data/mock_genomes.fa" download>Download</a>
+
+### [Samples](data.html#Sample_Info)
+File | Description | Download
+:------------- |:------------------------------------- |:------------
+[Sequencing Data](data.html#Sample_Info) | where to find the raw sequence files | 
+[Sample ARG Counts](data.html#Sample_Info) | count tables for ARGs by sample | <a href="../data/read_counts_from_primers.RDS" download>Download</a>
+[Sample Metadata](data.html#Sample_Info) | file containing metadata for each of the samples analyzed | <a href="../data/sample_metadata.csv" download>Download</a>
+<br>
+
+
+# Packages and Functions
+### [R-Packages](packages_and_functions.html#R-Packages)
+Package | Description
+:-------------------- | :------------------------------------------------------------
+[Cran Packages](packages_and_functions.html#R-Packages) | R-packages used for analysis installed from CRAN
+[Github Packages](packages_and_functions.html#R-Packages) | R-packages used for analysis installed from Github
+
+### [R-Functions](packages_and_functions.html#R-Functions)
+Function | Description
+:-------------------- | :------------------------------------------------------------
+[Rarefy](packages_and_functions.html#R-Functions) | Randomly sample features without replacement from each column until a given count 
+[Rarefaction](packages_and_functions.html#R-Functions) | Assess diversity richness by rarefying to increasing sample abundance
+[Rarefaction Curve](packages_and_functions.html#R-Functions) | Create a graphical dipiction of the rarefaction
+<br>
+

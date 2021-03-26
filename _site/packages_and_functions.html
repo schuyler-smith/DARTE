@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Schuyler D. Smith" />
+
+<meta name="date" content="2021-03-26" />
+
+<title>Packages and Functions</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-sm-12 col-md-4 col-lg-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-sm-12 col-md-8 col-lg-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">DARTE-QM</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fas fa-home"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="sequencing.html">
+    <span class="fas fa-dna"></span>
+     
+    Sequencing
+  </a>
+</li>
+<li>
+  <a href="primer_analysis.html">
+    <span class="fas fa-barcode"></span>
+     
+    Primers
+  </a>
+</li>
+<li>
+  <a href="mock_analysis.html">
+    <span class="fas fa-vial"></span>
+     
+    Mock
+  </a>
+</li>
+<li>
+  <a href="sample_analysis.html">
+    <span class="fas fa-chart-pie"></span>
+     
+    Sample
+  </a>
+</li>
+<li>
+  <a href="quantification.html">
+    <span class="fas fa-calculator"></span>
+     
+    Quantification
+  </a>
+</li>
+<li>
+  <a href="metagenome_comparison.html">
+    <span class="fas fa-greater-than-equal"></span>
+     
+    Metagenome
+  </a>
+</li>
+<li>
+  <a href="data.html">
+    <span class="fas fa-database"></span>
+     
+    Data
+  </a>
+</li>
+<li>
+  <a href="packages_and_functions.html">
+    <span class="fas fa-box-open"></span>
+     
+    Packages
+  </a>
+</li>
+<li>
+  <a href="https://github.com/schuyler-smith/DARTE-QM/">
+    <span class="fas fa-code"></span>
+     
+    Source Code
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="http://github.com/schuyler-smith">
+    <span class="fab fa-github"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://germslab.org/">
+    <span class="fas fa-flask"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://www.bcb.iastate.edu/people/schuyler-smith">
+    <span class="fas fa-university"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="mailto:sdsmith@iastate.edu">
+    <span class="fas fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Packages and Functions</h1>
+<h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
+<h4 class="date">2021-03-26</h4>
+
+</div>
+
+
+<p><br> <br></p>
+<div id="r-packages" class="section level2 tabset tabset-pills">
+<h2>R-Packages</h2>
+<div id="cran" class="section level3">
+<h3>CRAN</h3>
+<pre class="r"><code>library(ggplot2)
+library(plotly)
+library(ggpubr)
+library(Rcpp)
+library(vegan)
+library(data.table)</code></pre>
+<p><br> <br></p>
+</div>
+<div id="github-packages" class="section level3">
+<h3>Github Packages</h3>
+<pre class="r"><code>devtools::install_github(&quot;teunbrand/ggh4x&quot;)
+library(ggh4x)
+devtools::install_github(&quot;joey711/phyloseq&quot;)
+library(phyloseq)
+devtools::install_github(&quot;schuyler-smith/schuylR&quot;)
+library(schuylR)
+devtools::install_github(&quot;schuyler-smith/ssBLAST&quot;)
+library(ssBLAST)
+devtools::install_github(&quot;schuyler-smith/phylosmith&quot;)
+library(phylosmith)</code></pre>
+<p><br> <br></p>
+</div>
+</div>
+<div id="r-functions" class="section level2 tabset tabset-pills">
+<h2>R-Functions</h2>
+<div id="rarefy" class="section level3">
+<h3>Rarefy</h3>
+<pre class="r"><code>rarefy &lt;- function(data, n){
+  col_names &lt;- colnames(data)
+  rarefied_table &lt;- data.table(categories=data[[1]])
+  for(sample in seq(ncol(data)-1)+1){
+    rarvec &lt;- vector()
+    for(i in seq(length(data[[sample]]))){
+      rarvec &lt;- c(rarvec, rep(i, data[[sample]][i]))
+    }
+    subsample &lt;- sample(rarvec, n, replace=FALSE)
+    subsample &lt;- table(subsample)
+    subsample &lt;- merge(data.frame(index = seq(length(data[[sample]]))), 
+                       data.table(subsample), by = 1, all = TRUE)[,2]
+    subsample[is.na(subsample)] &lt;- 0
+    rarefied_table &lt;- cbind(rarefied_table, subsample)
+  }
+  colnames(rarefied_table) &lt;- c(col_names)
+  return(rarefied_table)
+}</code></pre>
+<p><br> <br></p>
+</div>
+<div id="rarefaction" class="section level3">
+<h3>Rarefaction</h3>
+<pre class="r"><code>rarefaction &lt;- function(data, max_n=NA, intervals=10){
+  if(is.na(max_n)){max_n &lt;- min(colSums(data[,-1]))}
+  n_categories &lt;- vector()
+  n &lt;- vector()
+  for(i in seq(intervals, max_n, intervals)){
+    n &lt;- c(n, i)
+    n_categories &lt;- c(n_categories, sum(rowSums(rarefy(data, i)[,-1]) &gt; 0))
+  }
+  return(data.frame(n=n, counts=n_categories))
+}</code></pre>
+<p><br> <br></p>
+</div>
+<div id="rarefaction-curve" class="section level3">
+<h3>Rarefaction Curve</h3>
+<pre class="r"><code>rarefaction_curve &lt;- function(data, max_n=NA, intervals=10, iter = 100){
+  rarefied_counts &lt;- data.frame()
+  for(i in seq(iter)){
+    rarefied_counts &lt;- rbind(rarefied_counts, 
+                             rarefaction(data, max_n, intervals))}
+  g &lt;- ggplot(rarefied_counts, aes_string(x=&quot;n&quot;, y=&quot;counts&quot;)) + 
+    geom_smooth(formula=y ~ x, method=&quot;loess&quot;, se=TRUE, fullrange=TRUE, level=0.95, color=&#39;black&#39;) + 
+    theme_bw()
+  return(g)
+}</code></pre>
+<p><br> <br></p>
+<p><br> <br></p>
+</div>
+<div id="sequence-quality" class="section level3">
+<h3>Sequence Quality</h3>
+<pre class="r"><code>sequence_quality &lt;- function(file, n = 5e+05){
+  if(length(file) == 1 &amp;&amp; dir.exists(file)){ 
+    file &lt;- gsub(&#39;/$&#39;,&#39;&#39;,file)
+    files &lt;- vector()
+    for(extension in c(&quot;.fastq.gz$&quot;, &quot;.fastq.bz2$&quot;, &quot;.fastq$&quot;)){
+      files &lt;- append(files, dir(path, extension, full.names = TRUE))
+    }
+  } else {files &lt;- file}
+  files &lt;- normalizePath(files)
+  graph_data &lt;- data.table()
+  stat_data &lt;- data.table()
+  annotations &lt;- data.table()
+  for(file in files){
+    srqa &lt;- qa(file, n = n)
+    df &lt;- srqa[[&quot;perCycle&quot;]]$quality
+    graph_data &lt;- rbind(graph_data, cbind(df, file = basename(file)))
+    rc &lt;- sum(srqa[[&quot;readCounts&quot;]]$read)
+    
+    means &lt;- rowsum(df$Score * df$Count, df$Cycle)/rowsum(df$Count, df$Cycle)
+    
+    quantile_calc &lt;- function(score, count, q)score[which(cumsum(count)/sum(count) &gt;= q)][[1]]
+    stat_data &lt;- rbind(stat_data, 
+                    data.table(Cycle = as.integer(rownames(means)), 
+                               Mean = as.vector(means), 
+                               Q25 = as.vector(by(df, df$Cycle, function(foo) quantile_calc(foo$Score, foo$Count, 0.25), simplify = TRUE)), 
+                               Q50 = as.vector(by(df, df$Cycle, function(foo) quantile_calc(foo$Score, foo$Count, 0.5), simplify = TRUE)),
+                               Q75 = as.vector(by(df, df$Cycle, function(foo) quantile_calc(foo$Score, foo$Count, 0.75), simplify = TRUE)), 
+                               ct = 10 * as.vector(by(df, df$Cycle, function(foo) sum(foo$Count), simplify = TRUE))/min(rc,n), 
+                               file = basename(file)))
+    if (rc &gt;= n) {rclabel &lt;- paste(&quot;Read Count &gt;= &quot;, n)} else rclabel &lt;- paste(&quot;Read Count: &quot;, rc)
+    annotations &lt;- rbind(annotations, data.table(minScore = min(df$Score), 
+                                     label = basename(file), 
+                                     rclabel = rclabel, 
+                                     rc = rc,
+                                     file = basename(file)))
+  }
+  seq_qual &lt;- list(graph_data = graph_data, stat_data = stat_data, annotations = annotations)
+  attributes(seq_qual) &lt;- list(type = &quot;ssSQ&quot;)
+  return(seq_qual)
+}</code></pre>
+</div>
+<div id="plot-sequence-quality" class="section level3">
+<h3>Plot Sequence Quality</h3>
+<pre class="r"><code>plot_sequence_quality &lt;- function(file, aggregate = FALSE){
+  graph_data &lt;- file[[1]]
+  stat_data &lt;- file[[2]]
+  annotations &lt;- file[[3]]
+  g &lt;- ggplot(data = graph_data, aes(x = Cycle, y = Score)) + 
+    geom_tile(aes(fill = Count)) + 
+    scale_fill_gradient(low = &quot;#F5F5F5&quot;, high = &quot;black&quot;) + 
+    geom_line(data = stat_data, aes(y = Mean), color = &quot;#66C2A5&quot;, size = 2) + 
+    geom_line(data = stat_data, aes(y = Q25), color = &quot;#FC8D62&quot;, size = 0.25, linetype = &quot;dashed&quot;) + 
+    geom_line(data = stat_data, aes(y = Q50), color = &quot;#FC8D62&quot;, size = 0.25) + 
+    geom_line(data = stat_data, aes(y = Q75), color = &quot;#FC8D62&quot;, size = 0.25, linetype = &quot;dashed&quot;) + 
+    geom_text(data = annotations, aes(x = 0, label = rclabel, y = 0), color = &quot;red&quot;, hjust = 0, size = 5) + 
+    guides(fill = FALSE) + 
+    facet_wrap(~file) +   
+    theme_bw() + 
+    theme(
+      axis.line.x = element_line(colour = &#39;black&#39;, size = 1, linetype = &#39;solid&#39;),
+      axis.line.y = element_line(colour = &#39;black&#39;,size = 1, linetype = &#39;solid&#39;),
+      axis.text.x = element_text(size = 10, vjust = 1, hjust = 1),
+      axis.title.x = element_text(size = 12, face = &quot;bold&quot;),
+      axis.title.y = element_text(size = 12, face = &quot;bold&quot;),
+      legend.text = element_text(size = 10),
+      legend.title = element_text(size = 12, face = &quot;bold&quot;),
+      legend.background = element_rect(fill = (alpha = 0)),
+      legend.key.size = unit(4, &quot;mm&quot;),
+      legend.spacing.x = unit(0.005, &#39;npc&#39;),
+      strip.text.x = element_text(size = 12, face = &#39;bold&#39;, color = &#39;black&#39;),
+      strip.background = element_rect(colour = &#39;black&#39;, size = 1.4, fill = &#39;white&#39;),
+      panel.grid = element_blank()
+    ) + 
+    ylab(&quot;Quality Score&quot;) + 
+    xlab(&quot;Cycle&quot;) + 
+    scale_x_continuous(breaks = seq(0,max(graph_data$Cycle),25),
+                       expand = expansion(mult = 0.01, 
+                                          add = c(0)))
+  return(g)
+}</code></pre>
+</div>
+</div>
+
+<p><br>
+<br>
+<strong><a href="https://schuyler-smith.github.io/" target="_blank">Schuyler Smith</a></strong>
+<br>
+Ph.D. Student - Bioinformatics and Computational Biology<br>
+Iowa State University.  Ames, IA.</p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+Sample Name,Matrix,Day,Concentration (ng/ul) in 20ul volume,Spike,replication,who prepare,Original plate location,Original well location,Actual concentration (DNA concentration (ng/ul) * total volume (ul)),Location on 96-well plate for TruSeq sample prep,Analyzed
+Mock-0spike-A,Mock,NA,5,0,A,USDA,Tubes,NA,86.4,A1,FALSE
+Mock-0spike-B,Mock,NA,5,0,B,USDA,Tubes,NA,86.4,A2,TRUE
+Mock-0spike-C,Mock,NA,5,0,C,USDA,Tubes,NA,86.4,A3,TRUE
+Mock-0-0025spike-A,Mock,NA,5,0.0025,A,USDA,Tubes,NA,86.4,A4,TRUE
+Mock-0-0025spike-B,Mock,NA,5,0.0025,B,USDA,Tubes,NA,86.4,A5,TRUE
+Mock-0-0025spike-C,Mock,NA,5,0.0025,C,USDA,Tubes,NA,86.4,A6,TRUE
+Mock-0-009spike-A,Mock,NA,5,0.009,A,USDA,Tubes,NA,86.4,A7,TRUE
+Mock-0-009spike-B,Mock,NA,5,0.009,B,USDA,Tubes,NA,86.4,A8,TRUE
+Mock-0-009spike-C,Mock,NA,5,0.009,C,USDA,Tubes,NA,86.4,A9,TRUE
+Mock-0-025spike-A,Mock,NA,5,0.025,A,USDA,Tubes,NA,86.4,A10,TRUE
+Mock-0-025spike-B,Mock,NA,5,0.025,B,USDA,Tubes,NA,86.4,A11,TRUE
+Mock-0-025spike-C,Mock,NA,5,0.025,C,USDA,Tubes,NA,86.4,A12,FALSE
+Mock-0-12spike-A,Mock,NA,5,0.12,A,USDA,Tubes,NA,86.4,B1,TRUE
+Mock-0-12spike-B,Mock,NA,5,0.12,B,USDA,Tubes,NA,86.4,B2,TRUE
+Mock-0-12spike-C,Mock,NA,5,0.12,C,USDA,Tubes,NA,86.4,B3,TRUE
+Mock-0-25spike-A,Mock,NA,5,0.25,A,USDA,Tubes,NA,86.4,B4,TRUE
+Mock-0-25spike-B,Mock,NA,5,0.25,B,USDA,Tubes,NA,86.4,B5,TRUE
+Mock-0-25spike-C,Mock,NA,5,0.25,C,USDA,Tubes,NA,86.4,B6,TRUE
+SCI-Soil-D0-A,Soil A,0,86,no,A,Jin,Tubes,NA,1720,B7,FALSE
+SCI-Soil-D0-B,Soil A,0,70,no,B,Jin,Tubes,NA,1400,B8,FALSE
+SCI-Soil-D24-A,Manure-Soil A,24,100,no,A,Jin,Tubes,NA,2000,B9,TRUE
+SCI-Soil-D24-B,Manure-Soil A,24,58,no,B,Jin,Tubes,NA,1160,B10,FALSE
+SCI-Soil-D24-C,Manure-Soil A,24,103,no,C,Jin,Tubes,NA,2060,B11,TRUE
+SCI-Soil-D59-A,Manure-Soil A,59,131,no,A,Jin,Tubes,NA,2620,B12,FALSE
+SCI-Soil-D59-B,Manure-Soil A,59,75.2,no,B,Jin,Tubes,NA,1504,C1,TRUE
+SCI-Soil-D59-C,Manure-Soil A,59,48.4,no,C,Jin,Tubes,NA,968,C2,FALSE
+SCI-Soil-D108-A,Manure-Soil A,108,47.6,no,A,Jin,Tubes,NA,952,C3,FALSE
+SCI-Soil-D108-B,Manure-Soil A,108,44.8,no,B,Jin,Tubes,NA,896,C4,FALSE
+SCI-Soil-D108-C,Manure-Soil A,108,43.2,no,C,Jin,Tubes,NA,864,C5,FALSE
+SCI-Manure-A,Swine Manure,NA,22.21222911,no,A,Jin,Tubes,NA,444.2445822,C6,TRUE
+SCI-Manure-B,Swine Manure,NA,22.45011739,no,B,Jin,Tubes,NA,449.0023478,C7,TRUE
+SCI-Manure-C,Swine Manure,NA,22.51553667,no,C,Jin,Tubes,NA,450.3107333,C8,TRUE
+SCII-SoilPig-D0-A,Soil A,0,18.03134264,no,A,Jin,Tubes,NA,360.6268528,C9,TRUE
+SCII-SoilPig-D0-B,Soil A,0,15.70003752,no,B,Jin,Tubes,NA,314.0007504,C10,TRUE
+SCII-SoilPig-D0-C,Soil A,0,16.60996018,no,C,Jin,Tubes,NA,332.1992036,C11,FALSE
+SCII-SoilBeef-D0-A,Soil B,0,30.49668837,no,A,Jin,Tubes,NA,609.9337674,C12,TRUE
+SCII-SoilBeef-D0-B,Soil B,0,29.08720033,no,B,Jin,Tubes,NA,581.7440065,D1,TRUE
+SCII-SoilBeef-D0-C,Soil B,0,29.39050788,no,C,Jin,Tubes,NA,587.8101576,D2,TRUE
+SCII-SwineManure-A,Swine Manure,NA,29.62244895,no,A,Jin,Tubes,NA,592.448979,D3,TRUE
+SCII-SwineManure-B,Swine Manure,NA,26.48232369,no,B,Jin,Tubes,NA,529.6464738,D4,TRUE
+SCII-SwineManure-C,Swine Manure,NA,26.50016531,no,C,Jin,Tubes,NA,530.0033062,D5,TRUE
+SCII-BeefManure-A,Bovine Manure,NA,27.93344218,no,A,Jin,Tubes,NA,558.6688436,D6,FALSE
+SCII-BeefManure-B,Bovine Manure,NA,31.9775429,no,B,Jin,Tubes,NA,639.5508579,D7,FALSE
+SCII-BeefManure-C,Bovine Manure,NA,27.83828687,no,C,Jin,Tubes,NA,556.7657374,D8,FALSE
+SCII-Water-D11-A,Effluent,11,10,no,A,Jin,Tubes,NA,200,D9,FALSE
+SCII-Water-D11-B,Effluent,11,10,no,B,Jin,Tubes,NA,200,D10,FALSE
+SCII-Water-D11-C,Effluent,11,10,no,C,Jin,Tubes,NA,200,D11,FALSE
+X1P5N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A01,200,E1,FALSE
+X1P22N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B01,200,E2,FALSE
+X1P23N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C01,200,E3,FALSE
+X1P24N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D01,200,E4,FALSE
+X1P25N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,E01,200,E5,FALSE
+X1P26N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,F01,200,E6,FALSE
+X1P27N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,G01,200,E7,FALSE
+X1P28N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H01,200,E8,FALSE
+X1P36N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H02,200,E9,FALSE
+X1P37N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A03,200,E10,FALSE
+X1P38N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B03,200,E11,FALSE
+X1P39N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C03,200,E12,TRUE
+X1P40N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D03,200,F1,FALSE
+X1P41N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,E03,200,F2,FALSE
+X1P42N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,F03,200,F3,FALSE
+X1P43N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,G03,200,F4,FALSE
+X1P44N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H03,200,F5,FALSE
+X1P45N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A04,200,F6,TRUE
+X1P46N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B04,200,F7,TRUE
+X1P47N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C04,200,F8,FALSE
+X1P48N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D04,200,F9,FALSE
+X1P49N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,E04,200,F10,FALSE
+X1P59N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,F05,200,F11,FALSE
+X1P60N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,G05,200,F12,FALSE
+X1P61N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H05,200,G1,TRUE
+X1P63N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A06,200,G2,TRUE
+X1P64N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B06,200,G3,TRUE
+X1P65N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C06,200,G4,FALSE
+X1P66N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D06,200,G5,FALSE
+SCI-Manure-0-025spike-A,Swine Manure,NA,22.21222911,0.025,A,"Jin, USDA",Tubes,NA,444.2445822,G6,TRUE
+SCI-Manure-0-025spike-B,Swine Manure,NA,22.21222911,0.025,B,"Jin, USDA",Tubes,NA,444.2445822,G7,TRUE
+SCI-Manure-0-025spike-C,Swine Manure,NA,22.21222911,0.025,C,"Jin, USDA",Tubes,NA,444.2445822,G8,TRUE
+NTC,Water,NA,NA,NA,no,USDA,NA,NA,0,H11,FALSE
