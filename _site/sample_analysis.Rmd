@@ -95,7 +95,7 @@ profile <- ggplot(graph_data[Tech == 'DARTE-QM'], aes_string(x="Sample", y="rela
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, color="black") + 
   ylab("Relative Abundance") + 
-  theme_bw() + theme(axis.text.x = element_text(size=12, angle = 30, hjust = -0.05), 
+  theme_bw() + theme(axis.text.x = element_text(size=12, angle = 330, hjust = -0.05), 
                      axis.text.y=element_blank(), 
                      axis.title.x=element_blank(), 
                      axis.title.y=element_text(size=12, face="bold"), 
@@ -261,7 +261,7 @@ sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
   scale_x_continuous(breaks = seq_along(graph_data$labels$label),
                      labels = gsub('Q3_','',graph_data$labels$label)) + 
   scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 30, vjust = 0.5,
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5,
                                    margin = margin(t = -10),
                                    color = sample_colors), 
         axis.text.y = element_text(angle = 90, hjust = -1,
@@ -303,7 +303,7 @@ sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
   scale_x_continuous(breaks = seq_along(data$labels$label),
                      labels = gsub('Q3_','',data$labels$label)) + 
   scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 0.5,
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
                                    margin = margin(t = -10),
                                    color = sample_colors), 
         axis.text.y = element_text(angle = 90, hjust = -1,
@@ -345,7 +345,7 @@ sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
   scale_x_continuous(breaks = seq_along(data$labels$label),
                      labels = gsub('Q3_','',data$labels$label)) + 
   scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 0.5,
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
                                    margin = margin(t = -10),
                                    color = sample_colors), 
         axis.text.y = element_text(angle = 90, hjust = -1,
@@ -387,7 +387,7 @@ sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
   scale_x_continuous(breaks = seq_along(data$labels$label),
                      labels = gsub('Q3_','',data$labels$label)) + 
   scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 0.5,
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
                                    margin = margin(t = -10),
                                    color = sample_colors), 
         axis.text.y = element_text(angle = 90, hjust = -1,

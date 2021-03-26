@@ -13,9 +13,9 @@
 
 <meta name="date" content="2021-03-26" />
 
-<title>Comaprison of DARTE-QM to Metagenome</title>
+<title>Mock-Community Analysis</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -36,6 +36,16 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.17/datatables.js"></script>
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -424,7 +434,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Comaprison of DARTE-QM to Metagenome</h1>
+<h1 class="title toc-ignore">Mock-Community Analysis</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
 <h4 class="date">2021-03-26</h4>
 
@@ -432,44 +442,21 @@ div.tocify {
 
 
 <p><br> <br></p>
-<div id="all-args-found" class="section level2 tabset tabset-pills">
-<h2>All ARGs Found</h2>
-<div id="profiles" class="section level3">
-<h3>Profiles</h3>
-<p><img src="metagenome_comparison_files/figure-html/shotgun_profile-1.png" width="1152" /></p>
+<div id="synthetic-oligonucleotide-spike" class="section level2 tabset tabset-pills">
+<h2>Synthetic Oligonucleotide ‘Spike’</h2>
+<div id="linear-regression" class="section level3">
+<h3>Linear Regression</h3>
+<p><img src="mock_analysis_files/figure-html/spike_counts_line_reg-1.png" width="576" /> <br> <br></p>
 </div>
-<div id="diversity" class="section level3">
-<h3>Diversity</h3>
-<p><img src="metagenome_comparison_files/figure-html/apha-div-1.png" width="480" /></p>
-<p><br></p>
-<pre><code>## [1] 72</code></pre>
-<pre><code>##  [1] tetT         tetA(P)      tet(36)      tetM         tet(32)     
-##  [6] tetW         tetY         tetZ         tet(40)      tet(33)     
-## [11] tetB(P)      tet(31)      tetG         tetS         tetQ        
-## [16] tetX         tetC         tet(39)      APH(3&#39;)-Ia   APH(2&#39;&#39;)-Ib 
-## [21] ANT(6)-Ib    APH(3&#39;&#39;)-Ib  APH(3&#39;)-VI   APH(4)-Ia    APH(3&#39;)-IIa 
-## [26] APH(3&#39;)-IIIa sul1         sul2         lnuA         lnuF        
-## [31] lnuC         lnuD         ErmG         ErmB         ErmT        
-## [36] ErmC         ErmF         ErmQ         ErmA         ErmX        
-## [41] Erm(47)      Erm(35)      ErmY         Erm(42)      Erm(36)     
-## [46] ANT(6)-Ia    aadA7        aadA5        aadA24       mdtA        
-## [51] mdtN         ACI-1        acrB         mdtO         mefA        
-## [56] mphB         AAC(6&#39;)-Ib11 AAC(6&#39;)-Iid  AAC(6&#39;)-IIa  str         
-## [61] cfr(C)       mdtB         mdtF         TolC         tetA        
-## [66] aadA15       mefB         mdsB         OXA-347      mdtC        
-## [71] AAC(3)-IVa   tetL        
-## 422 Levels: spike vgaE vgaC vatE TolC tetZ tetY tetX tetW tet(W/32/O) ... cml</code></pre>
+<div id="bar-chart" class="section level3">
+<h3>Bar Chart</h3>
+<p><img src="mock_analysis_files/figure-html/spike_counts_bars-1.png" width="576" /> <br> <br></p>
 </div>
-</div>
-<div id="darte-qm-target-args" class="section level2 tabset tabset-pills">
-<h2>DARTE-QM Target ARGs</h2>
-<div id="profiles-1" class="section level3">
-<h3>Profiles</h3>
-<p><img src="metagenome_comparison_files/figure-html/target_profile-1.png" width="1152" /></p>
-</div>
-<div id="diversity-1" class="section level3">
-<h3>Diversity</h3>
-<p><img src="metagenome_comparison_files/figure-html/apha-div_DARTE_Only-1.png" width="480" /></p>
+<div id="table" class="section level3">
+<h3>Table</h3>
+<div id="htmlwidget-26cc8a53da84c6802d46" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-26cc8a53da84c6802d46">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],["Mock-0spike-B","Mock-0spike-C","Mock-0-0025spike-A","Mock-0-0025spike-B","Mock-0-0025spike-C","Mock-0-009spike-A","Mock-0-009spike-B","Mock-0-009spike-C","Mock-0-025spike-A","Mock-0-025spike-B","Mock-0-12spike-A","Mock-0-12spike-B","Mock-0-12spike-C","Mock-0-25spike-A","Mock-0-25spike-B","Mock-0-25spike-C"],[2,1,24,12,13,38,73,88,222,150,632,567,942,2022,1681,1051],[0,0,0.0025,0.0025,0.0025,0.009,0.009,0.009,0.025,0.025,0.12,0.12,0.12,0.25,0.25,0.25]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Sample<\/th>\n      <th>Spike<\/th>\n      <th>Spike_Level<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p><br> <br></p>
 </div>
 </div>
 

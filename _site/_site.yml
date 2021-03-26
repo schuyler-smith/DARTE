@@ -35,10 +35,6 @@ navbar:
     - text: Sample
       icon: fa-chart-pie
       href: sample_analysis.html  
-
-    - text: Quantification
-      icon: fa-calculator
-      href: quantification.html      
       
     - text: Metagenome
       icon: fa-greater-than-equal

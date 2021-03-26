@@ -1,3 +1,0 @@
-"0","mock_genomes <- data.table::fread('../data/mock_genomes.fa', header = FALSE, col.names = ""Mock Community Members"")"
-"0","mock_genome_names <- unname(unlist(ssBLAST:::fasta_seq_names(""../data/mock_genomes.fa"")))"
-"0","mock_genomes"

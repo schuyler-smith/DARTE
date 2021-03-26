@@ -45,11 +45,6 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 <br>
 
 
-# Quantification
-#### [Synthetic Oligonucleotide ‘Spike’](quantification.html#Synthetic_Oligonucleotide_‘Spike’)
-<br>
-
-
 # Metagenome Comparison
 #### [All ARGs Found](metagenome_comparison.html#All_ARGs_Found)
 #### [DARTE-QM Target ARGs](metagenome_comparison.html#DARTE-QM_Target_ARGs)
