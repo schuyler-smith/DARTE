@@ -329,7 +329,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 ## Artifact Reads
 
 ### Examples of Artifact Reads
-```{r example_artifacts, warning=FALSE}
+```{r example_artifacts, warning=FALSE, echo=FALSE}
 fread('../data/example_artifacts.fa', header = FALSE, col.names = "SCI-Soil-D59-A R1 Reads")
 ```
 
@@ -337,7 +337,7 @@ fread('../data/example_artifacts.fa', header = FALSE, col.names = "SCI-Soil-D59-
 <br>
 
 ### Artifacts by Primer Count
-```{r by_reads, warning=FALSE}
+```{r by_reads, warning=FALSE, echo=FALSE}
 by_true_pos <- data.frame(sensitivity = 0, number_reads = seq(0, 1000,10), type = "True-Positive Reads")
 for(i in seq_along(by_true_pos$number_reads)){
   by_true_pos[i,1] <- mean(primer_success[true_pos > by_true_pos$number_reads[i]]$sens)
