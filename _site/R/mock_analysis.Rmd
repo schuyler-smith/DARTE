@@ -5,6 +5,8 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 <br>
 <br>
@@ -25,12 +27,12 @@ rrna <- c('HM798937.1.1383','LC124582.1.1424','GQ927630.1.918','FJ680748.1.1374'
           'KY898052.1','KY898059.1','FPLP01012084.16.1433','FJ478940.1.1496',
           'b0463','SL1344_RS02425')
 
-mock_blast <- data.table::fread('../../data/mock/mock_targets.blast')
+mock_blast <- data.table::fread('../../data/mock/reverse_primers.blast')
 
 mock_blast <- mock_blast[!(V1 %in% rrna)]
 
-mock_blast <- mock_blast[V4 > 200]
-mock_blast <- mock_blast[V3 > 93]
+mock_blast <- mock_blast[V4 > 20]
+mock_blast <- mock_blast[V3 > 95]
 setorder(mock_blast, 'V2', 'V9')
 
 strains[, Abundance := Genome_copies_per_microgram * micrograms]

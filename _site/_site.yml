@@ -1,5 +1,5 @@
 name: "DARTE-QM"
-output_dir: ../_site
+output_dir: ../docs
 output:
   html_document:
     lib_dir: site_libs
