@@ -1,5 +1,4 @@
 base
-DT
 ggplot2
 plotly
 ggpubr
@@ -8,3 +7,9 @@ permute
 lattice
 vegan
 data.table
+ggh4x
+phyloseq
+schuylR
+ssBLAST
+phylosmith
+DT

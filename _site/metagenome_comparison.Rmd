@@ -134,7 +134,6 @@ profile_compare <- ggplot(compare_data,
 profile_compare
 ```
 <br>
-<br>
 
 
 ### Diversity
@@ -186,10 +185,9 @@ ggplot(alpha_data, aes(Matrix, Alpha)) +
   scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))
 ```
 <br>
-<br>
 
 
-```{r missing, echo=FALSE, message=FALSE, warning=FALSE}
+```{r missing, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
 missing <- unique(compare_data[Tech != "DARTE-QM"]$ARG)[
   unique(compare_data[Tech != "DARTE-QM"]$ARG) %in% unique(compare_data[Tech == "DARTE-QM"]$ARG)
 ]
