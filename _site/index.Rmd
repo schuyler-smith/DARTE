@@ -32,7 +32,7 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 
 
 # Mock Evalutaion
-#### [Mock](mock_analysis.html)
+#### [Synthetic Oligonucleotide 'Spike'](mock_analysis.html#Synthetic_Oligonucleotide_‘Spike’)
 <br>
 
 

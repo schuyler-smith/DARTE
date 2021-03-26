@@ -262,7 +262,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ) + 
   scale_y_discrete(expand=expansion(mult=0, add=1), limits = seq(0,100,10)) + 
   ylab("Percentage of Reads") + 
-  scale_fill_manual(values = colors[c(2,4,5,3)], name = "Read Classification")
+  scale_fill_manual(values = colors[c(2,5,4,3)], name = "Read Classification")
 ```
 
 ### Artifact
