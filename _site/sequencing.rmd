@@ -5,14 +5,19 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
+    code_folding: hide
+    toc_depth: 1
+    highlight: pygments
 ---
 <br>
+<br>
+
+# Sequencing Results {.tabset .tabset-pills}
 <br>
 
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 sample_seq_results <- fread('../data/sample_seq_results.csv')
 ```
-
 
 ## Mock-Community {.tabset .tabset-pills}
 ```{r mock, message=FALSE, warning=FALSE, echo=FALSE}
@@ -31,10 +36,9 @@ for (i in grep("_R1_", annotations$file)){
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
-  cat('\n', '<br>', '\n\n')
+  cat('\n', '<br><br><br>', '\n\n')
   n=n+1
 }
-
 ```
 <br>
 <br>
@@ -64,10 +68,9 @@ for (i in grep("_R1_", annotations$file)){
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
-  cat('\n', '<br>', '\n\n')
+  cat('\n', '<br><br><br>', '\n\n')
   n=n+1
 }
-
 ```
 <br>
 <br>
@@ -97,10 +100,9 @@ for (i in grep("_R1_", annotations$file)){
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
-  cat('\n', '<br>', '\n\n')
+  cat('\n', '<br><br><br>', '\n\n')
   n=n+1
 }
-
 ```
 <br>
 <br>
@@ -130,11 +132,11 @@ for (i in grep("_R1_", annotations$file)){
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
-  cat('\n', '<br>', '\n\n')
+  cat('\n', '<br><br>', '\n\n')
   n=n+1
 }
-
 ```
+<br>
 <br>
 <br>
 
@@ -142,6 +144,9 @@ for (i in grep("_R1_", annotations$file)){
 ```{r fecal_res, message=FALSE, warning=FALSE, echo=FALSE}
 datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('X1P', sample_seq_results$Sample)]])
 ```
+<br>
+<br>
+<br>
 
 
 ```{r, setup_seq_quals, echo=FALSE, eval=FALSE}
@@ -164,3 +169,130 @@ datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('X1P', s
  fecal_qual <- sequence_quality(fecal_files)
  saveRDS(fecal_qual, "../data/seq_qual/fecal_qual.RDS")
 ```
+<br>
+<br>
+<br>
+
+# Read Processing Pipeline
+<br>
+
+### Software Used for Read Processing
+
+[Cutadapt](https://cutadapt.readthedocs.io/en/stable/) - demultiplexing and primer-trimming
+<br>
+[Cutadapt removes adapter sequences from high-throughput sequencing reads](http://journal.embnet.org/index.php/embnetjournal/article/view/200)
+<br>
+
+[PEAR](https://cme.h-its.org/exelixis/web/software/pear/doc.html) - paired-end read assembler
+<br>
+[PEAR: a fast and accurate Illumina Paired-End reAd mergeR](https://academic.oup.com/bioinformatics/article/30/5/614/247231?login=true)
+<br>
+
+[BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) - basic local alignment search tool
+<br>
+[Basic local alignment search tool](https://www.sciencedirect.com/science/article/pii/S0022283605803602)
+<br>
+
+## Primer Trimming and Demultiplexing
+
+```{r cutadapt, engine = 'bash', eval = FALSE}
+wd="../data/read_processing"
+raw_files="${wd}/raw"
+
+for raw_file in $(ls ${raw_files}/putvariablehere*_R1_*)
+do \
+sample="$(basename -- $raw_file)"
+sample=$(echo "$sample" | cut -f 1 -d '.')
+sample=$(echo "$sample" | cut -f 1 -d '_')
+
+mkdir -p ${wd}/split/${sample}
+
+cutadapt \
+	--pair-filter=both \
+	-e 0.10 \
+	-q 15 \
+	-g file:${wd}/../data/DARTE_forward_primers \
+	-G file:${wd}/../data/DARTE_reverse_primers \
+	-o ${wd}/split/${sample}/{name}.R1.1.fastq \
+	-p ${wd}/split/${sample}/{name}.R2.1.fastq \
+	$(ls ${wd}/raw/${sample}*_R2_*) \
+	$(ls ${wd}/raw/${sample}*_R1_*)
+cutadapt \
+	--pair-filter=both \
+	-e 0.10 \
+	-q 15 \
+	-g file:${wd}/../data/DARTE_forward_primers \
+	-G file:${wd}/../data/DARTE_reverse_primers \
+	-o ${wd}/split/${sample}/{name}.R1.2.fastq \
+	-p ${wd}/split/${sample}/{name}.R2.2.fastq \
+	${wd}/split/${sample}/unknown.R2.1.fastq \
+	${wd}/split/${sample}/unknown.R1.1.fastq
+done
+```
+
+## Pair-end Read Merging
+
+```{r pear, engine = 'bash', eval = FALSE}
+for primer in $(grep ">" ${wd}/../data/DARTE_forward_primers  | cut -c2-)
+do \
+mkdir -p ${wd}/merge/${sample}
+mkdir -p ${wd}/combined/${sample}
+
+cat ${wd}/split/${sample}/${primer}*R1* > ${wd}/split/${sample}/${primer}.R1.fastq
+cat ${wd}/split/${sample}/${primer}*R2* > ${wd}/split/${sample}/${primer}.R2.fastq
+
+for file in $(ls ${wd}/split/${sample}/*.R1.fastq)
+do \
+file_name="$(basename -- $file)"
+file_name=${file_name%.fastq}
+file_name=$(echo $file_name| tr : _)
+file_name=$(echo "$file_name" | cut -f 1 -d '.')
+
+pear/bin/pear \
+-j 8 \
+-p 0.05 \
+-v 10 \
+-m 350 \
+-f ${file} \
+-r ${wd}/split/${sample}/${file_name}.R2.fastq \
+-o ${wd}/merge/${sample}/${file_name}_merged
+
+cat ${wd}/merge/${sample}/${file_name}_merged.assembled.fastq \
+	${wd}/merge/${sample}/${file_name}_merged.unassembled.forward.fastq \
+	${wd}/merge/${sample}/${file_name}_merged.unassembled.reverse.fastq \
+	> ${wd}/combined/${sample}/${file_name}_combined.fastq;
+
+sed -n '1~4s/^@/>/p;2~4p' ${wd}/combined/${sample}/${file_name}_combined.fastq \
+	> ${wd}/combined/${sample}/${file_name}.fasta
+done
+done
+```
+## BLAST
+
+```{r blast, engine = 'bash', eval = FALSE}
+makeblastdb -in ../data/ARG_database.fa -dbtype nucl -out ../data/DARTE-QM_ARGs
+
+for primer in $(grep ">" ${wd}/../data/DARTE_forward_primers  | cut -c2-)
+do
+cat ${wd}/split/${sample}/${primer}*R1* > ${wd}/split/${sample}/${primer}.R1.fastq
+cat ${wd}/split/${sample}/${primer}*R2* > ${wd}/split/${sample}/${primer}.R2.fastq
+
+for file in $(ls ${wd}/split/${sample}/*.R1.fastq)
+do \
+file_name="$(basename -- $file)"
+file_name=${file_name%.fastq}
+file_name=$(echo $file_name| tr : _)
+file_name=$(echo "$file_name" | cut -f 1 -d '.')
+
+/mnt/home/smithsch/software/ncbi-blast-2.9.0+/bin/blastn \
+	-db ../data/DARTE-QM_ARGs \
+	-query ${wd}/combined/${sample}/${file_name}.fasta \
+	-out ${wd}/blast/${sample}/${file_name}.blast \
+	-perc_identity 90 \
+	-outfmt 6 \
+	-num_threads 8;
+
+done
+done
+```
+

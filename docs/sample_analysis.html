@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-03-26" />
+<meta name="date" content="2021-03-29" />
 
 <title>Sample Analysis</title>
 
@@ -34,6 +34,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
@@ -224,6 +225,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -424,11 +428,19 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Sample Analysis</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-03-26</h4>
+<h4 class="date">2021-03-29</h4>
 
 </div>
 
@@ -437,6 +449,101 @@ div.tocify {
 <div id="arg-profile" class="section level2">
 <h2>ARG Profile</h2>
 <p><br></p>
+<pre class="r"><code>classification &lt;- &#39;ARG_Family&#39;
+treatment_name &lt;- &#39;Matrix&#39;
+SC_I &lt;- phylosmith::melt_phyloseq(soil_column_I_ARGS)
+SC_I &lt;- SC_I[Sample %in% SC_I[,sum(Abundance), by = c(&#39;Sample&#39;)]$Sample[SC_I[,sum(Abundance), by = c(&#39;Sample&#39;)]$V1 &gt; 1000]]
+# SC_I &lt;- SC_I[Matrix %in% c(&#39;Manure&#39;, &#39;Soil&#39;) &amp; Treatment == &#39;Control&#39;]
+SC_I &lt;- SC_I[, sum(Abundance), by = c(&#39;Sample&#39;, &#39;Gene&#39;, &#39;Treatment&#39;, &#39;Matrix&#39;, &#39;Day&#39;)]
+set(SC_I, j = &#39;Gene&#39;, value = tolower((SC_I[[&#39;Gene&#39;]])))
+SC_I[, ARG_Family := tolower(substr(SC_I[[&#39;Gene&#39;]],1,3))]
+set(SC_I, j = &#39;Matrix&#39;, value = tolower(SC_I[[&#39;Matrix&#39;]]))
+set(SC_I, which(SC_I[[&#39;Matrix&#39;]]==&#39;soil&#39; &amp; SC_I[[&#39;Day&#39;]]==0), j=&#39;Matrix&#39;, value=&#39;Soil A&#39;)
+set(SC_I, which(SC_I[[&#39;Matrix&#39;]]==&#39;soil&#39; &amp; SC_I[[&#39;Day&#39;]]!=0), j=&#39;Matrix&#39;, value=&#39;Manure-Soil A&#39;)
+SC_I$Sample &lt;- factor(SC_I$Sample, levels = unique(SC_I$Sample[order(as.numeric(SC_I$Day))]))
+setnames(SC_I, &#39;Gene&#39;, &#39;ARG&#39;)
+
+graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
+graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
+graph_data &lt;- merge(metadata[,c(1:3)], graph_data, by.x = &#39;Sample Name&#39;, by.y = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample Name&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;Day&#39;, &#39;ARG&#39;)]
+
+set(graph_data, j = classification, value = factor(graph_data[[classification]], levels = c(&#39;spike&#39;, rev(unique(graph_data[[classification]][!(graph_data[[classification]]==&#39;spike&#39;)])))))
+setkey(graph_data, &quot;ARG&quot;, &quot;Sample Name&quot;)
+
+set(graph_data, which(is.na(graph_data[[&#39;Day&#39;]])), j=&#39;Day&#39;, value=0)
+setnames(graph_data, c(&#39;Sample Name&#39;, &#39;Day&#39;, &#39;Matrix&#39;), c(&#39;Sample&#39;, &#39;Day&#39;, &#39;Matrix&#39;))
+
+graph_data &lt;- rbindlist(list(
+  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;Day&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
+  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;Day&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
+graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
+set(graph_data, j = &#39;Matrix&#39;, value = as.character(graph_data$Matrix))
+
+setkey(graph_data, &#39;Sample&#39;, &#39;Day&#39;)
+graph_data &lt;- graph_data[!(is.na(relative_abundance))]
+graph_data &lt;- graph_data[graph_data$Matrix != &#39;effluent&#39;,]
+graph_data &lt;- graph_data[graph_data$Matrix != &#39;Effluent&#39;,]
+graph_data &lt;- graph_data[V1 != 0]
+graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
+
+classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), by=ARG_Family, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
+classification_order &lt;- classification_order[round(classification_order[[2]]*100 / length(unique(graph_data[Tech == &quot;DARTE-QM&quot;]$Sample)),1) &gt;= 0.5,]
+graph_data &lt;- graph_data[ARG_Family %in% classification_order$ARG_Family]
+set(graph_data, j = &#39;ARG_Family&#39;, value = factor(graph_data$ARG_Family, levels = classification_order[[1]]))
+set(graph_data, which(graph_data$Matrix == &quot;Soil Ammended&quot;), &#39;Matrix&#39;, &#39;Manure-Soil&#39;)
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(metadata$Matrix)[c(1,2,5,4,6,3,8,9)]))
+graph_colors &lt;- schuylR::create_palette(length(levels(graph_data[[classification]])))
+graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG_Family&quot;, &quot;Day&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
+                         .SDcols=c(&quot;V1&quot;, &quot;relative_abundance&quot;) ] 
+graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
+
+samples &lt;- c(
+  &quot;Mock + spike 0.0025 - rep 1&quot;,&quot;Mock + spike 0.0025 - rep 2&quot;,&quot;Mock + spike 0.0025 - rep 3&quot;,
+  &quot;Mock + spike 0.009 - rep 1&quot;,&quot;Mock + spike 0.009 - rep 2&quot;,&quot;Mock + spike 0.009 - rep 3&quot;,
+  &quot;Mock + spike 0.025 - rep 1&quot;,&quot;Mock + spike 0.025 - rep 2&quot;,
+  &quot;Mock + spike 0.12 - rep 1&quot;,&quot;Mock + spike 0.12 - rep 2&quot;,&quot;Mock + spike 0.12 - rep 3&quot;,
+  &quot;Mock + spike 0.25 - rep 1&quot;,&quot;Mock + spike 0.25 - rep 2&quot;,&quot;Mock + spike 0.25 - rep 3&quot;,
+  &quot;Mock + spike 0.0 - rep 1&quot;,&quot;Mock + spike 0.0 - rep 2&quot;,
+  &quot;Swine Manure rep 1&quot;, &quot;Swine Manure rep 2&quot;, &quot;Swine Manure rep 3&quot;, 
+  &quot;Swine Manure rep 4&quot;, &quot;Swine Manure rep 5&quot;, &quot;Swine Manure rep 6&quot;, 
+  &quot;Soil A + Manure Day-24 rep 1&quot;, &quot;Soil A + Manure Day-24 rep 2&quot;,
+  &quot;Soil A + Manure Day-59&quot;, 
+  &quot;Soil A rep 1&quot;, &quot;Soil A rep 2&quot;, &quot;Soil A rep 3&quot;, 
+  &quot;Soil A rep 1&quot;, &quot;Soil A rep 2&quot;, 
+  &quot;Swine Fecal rep 1&quot;, &quot;Swine Fecal rep 2&quot;, &quot;Swine Fecal rep 3&quot;, 
+  &quot;Swine Fecal rep 4&quot;, &quot;Swine Fecal rep 5&quot;, &quot;Swine Fecal rep 6&quot;)
+for(i in seq_along(samples)){
+  set(graph_data, which(graph_data$Sample == as.character(unique(graph_data$Sample)[i])), &#39;Sample&#39;, samples[i])
+}
+
+profile &lt;- ggplot(graph_data[Tech == &#39;DARTE-QM&#39;], aes_string(x=&quot;Sample&quot;, y=&quot;relative_abundance&quot;, 
+                                                             fill=classification)) + 
+  guides(fill=guide_legend(ncol=ceiling(length(unique(graph_data[[classification]]))/50))) + 
+  scale_fill_manual(values=graph_colors, aesthetics=c(&quot;color&quot;, 
+                                                      &quot;fill&quot;)) + 
+  geom_bar(stat=&quot;identity&quot;, position=&quot;stack&quot;, 
+           size=0.12, width=0.95, color=&quot;black&quot;) + 
+  ylab(&quot;Relative Abundance&quot;) + 
+  theme_bw() + theme(axis.text.x = element_text(size=12, angle = 330, hjust = -0.05), 
+                     axis.text.y=element_blank(), 
+                     axis.title.x=element_blank(), 
+                     axis.title.y=element_text(size=12, face=&quot;bold&quot;), 
+                     axis.ticks.x=element_blank(), 
+                     legend.title=element_text(size=12, 
+                                               face=&quot;bold&quot;), 
+                     legend.text=element_text(size=12), 
+                     legend.spacing.x=unit(0.005, &quot;npc&quot;), legend.key.size=unit(6,&quot;mm&quot;),
+                     panel.background=element_rect(color=&quot;black&quot;, 
+                                                   size=1.5), panel.spacing=unit(0.01, &quot;npc&quot;), 
+                     strip.text.x=element_text(size=12, face=&quot;bold&quot;), 
+                     strip.background=element_rect(colour=&quot;black&quot;, size=1.4,
+                                                   fill=&quot;white&quot;), panel.grid.major.x=element_blank()) + 
+  scale_y_continuous(expand=expansion(mult=c(0.0037, 
+                                             0.003), add=c(0, 0))) + 
+  ggh4x::facet_nested(.~ Matrix, scales = &quot;free&quot;, space = &quot;free&quot;) + 
+  scale_x_discrete(expand=expansion(mult=0, add=0.51))</code></pre>
 <p><img src="sample_analysis_files/figure-html/profile-1.png" width="1152" /> <br> <br></p>
 </div>
 <div id="ordination" class="section level2 tabset tabset-pills">
@@ -444,15 +551,89 @@ div.tocify {
 <p><br></p>
 <div id="pca" class="section level3">
 <h3>PCA</h3>
+<pre class="r"><code>treatment = &#39;Matrix&#39;
+x = 1
+y = 2
+method = &#39;bray&#39;
+circle = 0.95
+graph_data &lt;- read_counts[,-c(2,3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+MDS &lt;- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
+graph_data &lt;- cbind(x = MDS$points[,x], y = MDS$points[,y])
+graph_data &lt;- merge(graph_data, metadata[,c(&#39;Sample Name&#39;, &#39;Matrix&#39;)], by.x = 0, by.y = &#39;Sample Name&#39;)
+
+color_count &lt;- length(unique(graph_data[[treatment]]))
+graph_colors &lt;- schuylR::create_palette(color_count)
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(graph_data$Matrix)))
+
+pca &lt;- ggplot(data = graph_data, aes_string(&#39;x&#39;, &#39;y&#39;, group = treatment)) + 
+  geom_point(aes_string(fill = treatment), shape = 21,
+             color = &quot;black&quot;, size = 4, alpha = 1) + scale_fill_manual(values = graph_colors) + 
+  theme_bw() + theme(
+    axis.line.x = element_line(colour = &quot;black&quot;,size = 1, linetype = &quot;solid&quot;), 
+    axis.line.y = element_line(colour = &quot;black&quot;,size = 1, linetype = &quot;solid&quot;), 
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10), 
+    axis.title.x = element_text(size = 12,face = &quot;bold&quot;), 
+    axis.title.y = element_text(size = 12,face = &quot;bold&quot;), 
+    legend.title = element_text(size = 12,face = &quot;bold&quot;), 
+    legend.text = element_text(size = 12),
+    legend.spacing.x = unit(0.005, &quot;npc&quot;), 
+    legend.key.size = unit(4,&quot;mm&quot;)) +
+  labs(x = paste(&quot;PCo &quot;, x, &quot;  (&quot;, round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig &gt; 0]),3)*100, &quot;%)&quot;, sep = &#39;&#39;),
+       y = paste(&quot;PCo &quot;, y, &quot;  (&quot;, round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig &gt; 0]),3)*100, &quot;%)&quot;, sep = &#39;&#39;)) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) +
+  guides(fill = guide_legend(ncol = 1),
+         group = guide_legend(ncol = 1))</code></pre>
 <p><img src="sample_analysis_files/figure-html/pca_normalized-1.png" width="672" /> <br> <br></p>
 </div>
 <div id="nmds" class="section level3">
 <h3>NMDS</h3>
+<pre class="r"><code>graph_data &lt;- read_counts[,-c(2,3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+
+MDS &lt;- metaMDS(t(distance_matrix), autotransform = FALSE, distance = method, 
+  k = 3, trymax = 100, trace = FALSE)
+graph_data &lt;- merge(scores(MDS)[,c(1,2)], 
+                    metadata[,c(&#39;Sample Name&#39;, &#39;Matrix&#39;)], by.x = 0, by.y = &#39;Sample Name&#39;)
+
+color_count &lt;- length(unique(graph_data[[treatment]]))
+graph_colors &lt;- schuylR::create_palette(color_count)
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(graph_data$Matrix)))
+
+nmds &lt;- ggplot(data = graph_data, aes_string(&#39;NMDS1&#39;, &#39;NMDS2&#39;, group = treatment)) + 
+  geom_point(aes_string(fill = treatment), shape = 21,
+             color = &quot;black&quot;, size = 4, alpha = 1) + scale_fill_manual(values = graph_colors) + 
+  theme_bw() + theme(
+    axis.line.x = element_line(colour = &quot;black&quot;,size = 1, linetype = &quot;solid&quot;), 
+    axis.line.y = element_line(colour = &quot;black&quot;,size = 1, linetype = &quot;solid&quot;), 
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10), 
+    axis.title.x = element_text(size = 12,face = &quot;bold&quot;), 
+    axis.title.y = element_text(size = 12,face = &quot;bold&quot;), 
+    legend.title = element_text(size = 12,face = &quot;bold&quot;), 
+    legend.text = element_text(size = 12),
+    legend.spacing.x = unit(0.005, &quot;npc&quot;), 
+    legend.key.size = unit(4,&quot;mm&quot;)) +
+  labs(x = paste(&quot;NMDS-1&quot;),
+       y = paste(&quot;NMDS-2&quot;)) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) +
+  guides(fill = guide_legend(ncol = 1),
+         group = guide_legend(ncol = 1))</code></pre>
 <p><img src="sample_analysis_files/figure-html/nmds_graph-1.png" width="672" /> <br> <br></p>
 </div>
 </div>
 <div id="permanova" class="section level2">
 <h2>PERMANOVA</h2>
+<pre class="r"><code>graph_data &lt;- read_counts[,-c(2,3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+graph_data &lt;- graph_data[rowSums(graph_data) &gt;=5, ]
+
+permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`Sample Name` %in% colnames(graph_data)])</code></pre>
 <pre><code>## 
 ## Call:
 ## vegan::adonis(formula = t(graph_data) ~ Matrix, data = metadata[`Sample Name` %in%      colnames(graph_data)]) 
@@ -463,9 +644,9 @@ div.tocify {
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(&gt;F)    
-## Matrix     6    5.0772 0.84620  11.168 0.69075  0.001 ***
-## Residuals 30    2.2730 0.07577         0.30925           
-## Total     36    7.3502                 1.00000           
+## Matrix     6    5.0861 0.84768  11.226 0.69185  0.001 ***
+## Residuals 30    2.2653 0.07551         0.30815           
+## Total     36    7.3514                 1.00000           
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p><br> <br></p>
@@ -475,21 +656,146 @@ div.tocify {
 <p><br></p>
 <div id="bray-curtis" class="section level3">
 <h3>Bray-Curtis</h3>
+<pre class="r"><code>method = &#39;bray&#39;
+graph_data &lt;- read_counts[,-c(2:3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+dend &lt;- as.dendrogram(hclust(as.dist(distance_matrix), method = &#39;complete&#39;))
+graph_data &lt;- ggdendro::dendro_data(dend)
+
+sample_colors &lt;- schuylR::create_palette(length(unique(metadata$Matrix)))[as.factor(metadata$Matrix[match(as.character(graph_data$labels$label), metadata$`Sample Name`)])]
+
+sample_dendrogram &lt;- ggplot(data = ggdendro::segment(graph_data)) + geom_blank() + theme_minimal()
+sample_dendrogram &lt;- sample_dendrogram + geom_segment(aes_string(x = &quot;x&quot;,
+                                                                 y = &quot;y&quot;, 
+                                                                 xend = &quot;xend&quot;, 
+                                                                 yend = &quot;yend&quot;,
+                                                                 color = &#39;y&#39;),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(graph_data$labels$label),
+                     labels = gsub(&#39;Q3_&#39;,&#39;&#39;,graph_data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),&quot;points&quot;)) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))</code></pre>
 <p><img src="sample_analysis_files/figure-html/bray_dendro-1.png" width="1152" /></p>
 <p><br></p>
 </div>
 <div id="jaccard" class="section level3">
 <h3>Jaccard</h3>
+<pre class="r"><code>method = &#39;jaccard&#39;
+graph_data &lt;- read_counts[,-c(2:3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+dend &lt;- as.dendrogram(hclust(as.dist(distance_matrix), method = &#39;complete&#39;))
+data &lt;- ggdendro::dendro_data(dend)
+sample_dendrogram &lt;- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
+sample_dendrogram &lt;- sample_dendrogram + geom_segment(aes_string(x = &quot;x&quot;,
+                                                                 y = &quot;y&quot;, 
+                                                                 xend = &quot;xend&quot;, 
+                                                                 yend = &quot;yend&quot;,
+                                                                 color = &#39;y&#39;),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(data$labels$label),
+                     labels = gsub(&#39;Q3_&#39;,&#39;&#39;,data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),&quot;points&quot;)) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))</code></pre>
 <p><img src="sample_analysis_files/figure-html/jaccard_dendro-1.png" width="1152" /></p>
 <p><br></p>
 </div>
 <div id="euclidean" class="section level3">
 <h3>Euclidean</h3>
+<pre class="r"><code>method = &#39;euclidean&#39;
+graph_data &lt;- read_counts[,-c(2:3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+dend &lt;- as.dendrogram(hclust(as.dist(distance_matrix), method = &#39;complete&#39;))
+data &lt;- ggdendro::dendro_data(dend)
+
+sample_dendrogram &lt;- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
+sample_dendrogram &lt;- sample_dendrogram + geom_segment(aes_string(x = &quot;x&quot;,
+                                                                 y = &quot;y&quot;, 
+                                                                 xend = &quot;xend&quot;, 
+                                                                 yend = &quot;yend&quot;,
+                                                                 color = &#39;y&#39;),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(data$labels$label),
+                     labels = gsub(&#39;Q3_&#39;,&#39;&#39;,data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),&quot;points&quot;)) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))</code></pre>
 <p><img src="sample_analysis_files/figure-html/euclidean_dendro-1.png" width="1152" /></p>
 <p><br></p>
 </div>
 <div id="gower" class="section level3">
 <h3>Gower</h3>
+<pre class="r"><code>method = &#39;gower&#39;
+graph_data &lt;- read_counts[,-c(2:3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+dend &lt;- as.dendrogram(hclust(as.dist(distance_matrix), method = &#39;complete&#39;))
+data &lt;- ggdendro::dendro_data(dend)
+
+sample_dendrogram &lt;- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
+sample_dendrogram &lt;- sample_dendrogram + geom_segment(aes_string(x = &quot;x&quot;,
+                                                                 y = &quot;y&quot;, 
+                                                                 xend = &quot;xend&quot;, 
+                                                                 yend = &quot;yend&quot;,
+                                                                 color = &#39;y&#39;),
+                                                      show.legend = FALSE,
+                                                      size = 1.3) + 
+  scale_x_continuous(breaks = seq_along(data$labels$label),
+                     labels = gsub(&#39;Q3_&#39;,&#39;&#39;,data$labels$label)) + 
+  scale_y_continuous() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                   margin = margin(t = -10),
+                                   color = sample_colors), 
+        axis.text.y = element_text(angle = 90, hjust = -1,
+                                   margin = margin(r = -30),),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),&quot;points&quot;)) + #t,r,b,l
+  guides(color = guide_legend(override.aes = list(alpha=1))) +
+  scale_color_gradientn(colors =  viridis::viridis(10))</code></pre>
 <p><img src="sample_analysis_files/figure-html/gower_dendro-1.png" width="1152" /> <br> <br></p>
 </div>
 </div>
@@ -498,18 +804,106 @@ div.tocify {
 <p><br></p>
 <div id="optimize-k" class="section level3">
 <h3>Optimize K</h3>
+<pre class="r"><code>method = &#39;bray&#39;
+x = 1
+y = 2
+graph_data &lt;- read_counts[,-c(2:3)]
+graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
+distance_matrix[is.na(distance_matrix)] &lt;- 0
+
+n_k = 15
+graph_data &lt;- sapply(2:n_k, function(k){
+  kmeans(distance_matrix, k, nstart=20 ,iter.max = 15 )$tot.withinss
+  })
+graph_colors &lt;- rep(&#39;ins&#39;, n_k-1)
+graph_size &lt;- rep(2, n_k-1)
+for(i in seq(3)){
+  k_value &lt;- data.frame(k = 2:n_k, ss = graph_data, diff = c(abs(diff(graph_data)),0))
+  k_value &lt;- cbind(k_value, &quot;percent_change&quot; = c(0, round((k_value$diff/k_value$ss)*100)[-length(k_value$diff)]))
+  if(i!=1)k_value &lt;- k_value[(max(which(graph_colors != &#39;ins&#39;))+1):nrow(k_value),]
+  opt_k &lt;- max(k_value[k_value$percent_change &gt;= mean(k_value$percent_change) + sd(k_value$percent_change), &#39;k&#39;]) - 1
+  graph_colors[opt_k] &lt;- &#39;sig&#39;
+  graph_size[opt_k] &lt;- 4
+}
+opt_k_means &lt;- ggplot(data.frame(k = 2:n_k, graph_data), aes(k, graph_data)) + 
+  geom_line() + 
+  geom_point(size = 3, color = &quot;black&quot;) + theme_bw() + 
+  scale_x_continuous(breaks = c(seq(2,14, by = 2))) + 
+  theme(
+    legend.position = c(0.9, 0.82),
+    legend.justification = c(&quot;right&quot;, &quot;top&quot;),
+    legend.text = element_text(size = 12)
+  ) + 
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  labs(x = &quot;Number of Clusters K&quot;, y = &quot;Total Within-Clusters Sum of Wquares&quot;, color = &quot;&quot;)</code></pre>
 <p><img src="sample_analysis_files/figure-html/opt_k_means-1.png" width="576" /></p>
 <p><br></p>
 </div>
 <div id="k3" class="section level3">
 <h3>K(3)</h3>
 <p><br></p>
+<pre class="r"><code>k = 3
+treatment = &#39;Matrix&#39;
+MDS &lt;- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
+graph_data &lt;- cbind(x = MDS$points[,x], y = MDS$points[,y])
+graph_data &lt;- merge(graph_data, metadata, by.x = 0, by.y = &#39;Sample Name&#39;)
+km &lt;- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
+graph_data &lt;- cbind(graph_data, cluster =  factor(km[match(names(km), graph_data$Row.names)])) 
+graph_colors &lt;- schuylR::create_palette(length(unique(graph_data[[treatment]])))
+cluster_colors &lt;- schuylR::create_palette(k, colors = &#39;Dark2&#39;)
+k3 &lt;- ggplot(data = graph_data, aes_string(&#39;x&#39;, &#39;y&#39;, group = &#39;cluster&#39;))
+k3 &lt;- k3 +  
+  geom_point(aes_string(color = &#39;Matrix&#39;, fill = &#39;Matrix&#39;),
+              size = 5, alpha = 1) + 
+              scale_color_manual(values = graph_colors) +
+              scale_fill_manual(values = graph_colors) + 
+  theme_classic() + theme(axis.line.x = element_line(colour = &quot;black&quot;, size = 1, linetype = &quot;solid&quot;), axis.line.y = element_line(colour = &quot;black&quot;,
+                    size = 1, linetype = &quot;solid&quot;), axis.text.x = element_text(size = 10),
+                    axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                    face = &quot;bold&quot;), axis.title.y = element_text(size = 12,
+                    face = &quot;bold&quot;), legend.title = element_text(size = 10,
+                    face = &quot;bold&quot;), legend.text = element_text(size = 12),
+                    legend.spacing.x = unit(0.005, &quot;npc&quot;), legend.key.size = unit(4,
+                    &quot;mm&quot;), legend.background = element_rect(fill = (alpha = 0))) +
+  labs(x = paste(&quot;PCo &quot;, x, &quot;  (&quot;, round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig &gt; 0]),3)*100, &quot;%)&quot;, sep = &#39;&#39;),
+       y = paste(&quot;PCo &quot;, y, &quot;  (&quot;, round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig &gt; 0]),3)*100, &quot;%)&quot;, sep = &#39;&#39;)) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) + 
+  geom_polygon(data = phylosmith:::CI_ellipse(ggplot_build(k3)$data[[1]], &#39;group&#39;), 
+               aes(x = x, y = y, group = group), color = &quot;black&quot;, 
+               alpha = 0.3, size = 0.6, linetype = 1, 
+               fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k3)$data[[1]], &#39;group&#39;, level = 0.01)$group])</code></pre>
 <p><img src="sample_analysis_files/figure-html/K(3)_graph-1.png" width="672" /></p>
 <p><br></p>
 </div>
 <div id="k6" class="section level3">
 <h3>K(6)</h3>
 <p><br></p>
+<pre class="r"><code>k = 6
+cluster_colors &lt;- schuylR::create_palette(k, colors = &#39;Dark2&#39;)
+km &lt;- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
+graph_data$cluster &lt;- factor(km[match(names(km), graph_data$Row.names)])
+k6 &lt;- ggplot(data = graph_data, aes_string(&#39;x&#39;, &#39;y&#39;, group = &#39;cluster&#39;))
+k6 &lt;- k6 + 
+  geom_point(aes_string(color = &#39;Matrix&#39;, fill = &#39;Matrix&#39;),
+              size = 5, alpha = 1) + 
+              scale_color_manual(values = graph_colors) +
+              scale_fill_manual(values = graph_colors) + 
+  theme_classic() + theme(axis.line.x = element_line(colour = &quot;black&quot;, size = 1, linetype = &quot;solid&quot;), axis.line.y = element_line(colour = &quot;black&quot;,
+                    size = 1, linetype = &quot;solid&quot;), axis.text.x = element_text(size = 10),
+                    axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 12,
+                    face = &quot;bold&quot;), axis.title.y = element_text(size = 12,
+                    face = &quot;bold&quot;), legend.title = element_text(size = 10,
+                    face = &quot;bold&quot;), legend.text = element_text(size = 12),
+                    legend.spacing.x = unit(0.005, &quot;npc&quot;), legend.key.size = unit(4,
+                    &quot;mm&quot;), legend.background = element_rect(fill = (alpha = 0))) +
+  labs(x = paste(&quot;PCo &quot;, x, &quot;  (&quot;, round(sum(MDS$eig[x])/sum(MDS$eig[MDS$eig &gt; 0]),3)*100, &quot;%)&quot;, sep = &#39;&#39;),
+       y = paste(&quot;PCo &quot;, y, &quot;  (&quot;, round(sum(MDS$eig[y])/sum(MDS$eig[MDS$eig &gt; 0]),3)*100, &quot;%)&quot;, sep = &#39;&#39;)) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) + 
+  geom_polygon(data = phylosmith:::CI_ellipse(ggplot_build(k6)$data[[1]], &#39;group&#39;), 
+               aes(x = x, y = y, group = group), color = &quot;black&quot;, 
+               alpha = 0.3, size = 0.6, linetype = 1, 
+               fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k6)$data[[1]], &#39;group&#39;)$group])</code></pre>
 <p><img src="sample_analysis_files/figure-html/K(6)_graph-1.png" width="672" /></p>
 <p><br></p>
 </div>
@@ -556,6 +950,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

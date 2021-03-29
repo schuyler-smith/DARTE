@@ -3,7 +3,8 @@ title: "Comaprison of DARTE-QM to Metagenome"
 author: <a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a>
 date: "`r Sys.Date()`"
 output:
-  html_document
+  html_document:
+    code_folding: hide
 ---
 <br>
 <br>
@@ -11,7 +12,7 @@ output:
 
 ## All ARGs Found {.tabset .tabset-pills}
 ### Profiles
-```{r shotgun, echo=FALSE, message=FALSE, warning=FALSE}
+```{r shotgun, message=FALSE, warning=FALSE}
 classification <- 'ARG'
 treatment_name <- 'Matrix'
 
@@ -91,9 +92,7 @@ graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c('Sample', "ARG", "
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample')]
 
 graph_colors <- schuylR::create_palette(length(unique(graph_data[['ARG_Family']])))
-```
 
-```{r profilecomp, echo=FALSE, message=FALSE, warning=FALSE}
 gene_classes <- sort(unique(graph_data[['ARG_Family']]))
 compare_data <- graph_data[c(grep('Swine Manure', graph_data$Sample), grep('Soil A', graph_data$Sample), grep('_L0', graph_data$Sample)), ]
 compare_data <- compare_data[Matrix %in% c('Manure-Soil A', 'Swine Manure')]
@@ -102,7 +101,7 @@ profile_compare <- ggplot(compare_data,
        aes_string(x = "Sample", 
                   y = "relative_abundance",
                   fill = "ARG_Family")) + 
-  guides(fill = guide_legend(ncol = 1)) + 
+  guides(fill = guide_legend(ncol = 2)) + 
   scale_fill_manual(
     values = graph_colors[gene_classes[gene_classes %in% unique(compare_data[['ARG_Family']])]],
     aesthetics = c("color", "fill")
@@ -134,10 +133,10 @@ profile_compare <- ggplot(compare_data,
 profile_compare
 ```
 <br>
-
+<br>
 
 ### Diversity
-```{r apha-div, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+```{r apha-div, message=FALSE, warning=FALSE}
 index = "shannon"
 colors = "default"
 alpha <- compare_data
@@ -167,7 +166,7 @@ alpha_data <- data.table(Sample = samples$Sample,
 color_count <- length(unique(paste(alpha_data$Tech, alpha_data$Matrix)))
 alpha_graph_colors <- schuylR::create_palette(color_count, colors)
   
-ggplot(alpha_data, aes(Matrix, Alpha)) + 
+div_graph<- ggplot(alpha_data, aes(Matrix, Alpha)) + 
     geom_boxplot(show.legend = FALSE, fill = alpha_graph_colors) + 
     theme_bw() +   
   theme(
@@ -184,21 +183,54 @@ ggplot(alpha_data, aes(Matrix, Alpha)) +
     facet_nested(.~ Tech, scales = "free", space = "free")  +
   scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))
 ```
+
+```{r div_graph, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+div_graph
+```
+<br>
 <br>
 
+### Resitome Differences
+#### Swine Manure
+DARTE-QM had `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))` ARGs in Swine Manure samples, with an alpha-diversity measured at `r round(mean(alpha_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"]$Alpha, na.rm = T), 2)`.
+<br>
 
-```{r missing, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
-missing <- unique(compare_data[Tech != "DARTE-QM"]$ARG)[
-  unique(compare_data[Tech != "DARTE-QM"]$ARG) %in% unique(compare_data[Tech == "DARTE-QM"]$ARG)
-]
-length(missing)
-missing[(missing %in% classifications$ARG)]
+compared to metagenomes which had `r length(unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))` ARGs in Swine Manure samples, with an alpha-diversity measured at `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"]$Alpha, na.rm = T), 2)`.
+<br>
+
+The metagenome found `r sum(unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG) %in% unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))` ARGs that were not detected with DARTE-QM.
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show Table </button>  
+<div id="BlockName" class="collapse"> 
+```{r arg_list2, echo=FALSE}
+datatable(data.frame(ARG = unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG)[unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG) %in% 
+    unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG)]))
 ```
+</div>
+<br>
 
-  
+#### Manure-Soil
+DARTE-QM had `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))` ARGs in Manure-Soil samples, with an alpha-diversity measured at `r round(mean(alpha_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"]$Alpha, na.rm = T), 2)`.
+<br>
+
+compared to metagenomes which had `r length(unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))` ARGs in Swine Manure samples, with an alpha-diversity measured at `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"]$Alpha, na.rm = T), 2)`.
+<br>
+
+The metagenome found `r sum(unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG) %in% unique(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))` ARGs that were not detected with DARTE-QM.
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName2"> Show Table </button>  
+<div id="BlockName2" class="collapse"> 
+```{r arg_list, echo=FALSE}
+datatable(data.frame(ARG = sort(as.character(unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)[unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG) %in% unique(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)]))))
+```
+</div>
+
+<br>
+<br>
+
 ## DARTE-QM Target ARGs {.tabset .tabset-pills}
 ### Profiles
-```{r compare_targets, echo=FALSE, message=FALSE, warning=FALSE}
+```{r compare_targets, message=FALSE, warning=FALSE}
 compare_data <- compare_data[ARG %in% classifications$ARG]
 compare_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample')]
 
@@ -206,7 +238,7 @@ profile_compare <- ggplot(compare_data,
        aes_string(x = "Sample", 
                   y = "relative_abundance",
                   fill = "ARG_Family")) + 
-  guides(fill = guide_legend(ncol = 1)) + 
+  guides(fill = guide_legend(ncol = 2)) + 
   scale_fill_manual(
     values = graph_colors[gene_classes[gene_classes %in% unique(compare_data[['ARG_Family']])]],
     aesthetics = c("color", "fill")
@@ -237,9 +269,11 @@ profile_compare <- ggplot(compare_data,
 ```{r target_profile, echo=FALSE, fig.width=12, fig.height=6}
 profile_compare
 ```
+<br>
+<br>
 
 ### Diversity
-```{r apha-div_DARTE_Only, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+```{r apha-div_DARTE_Only, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
 index = "shannon"
 colors = "default"
 alpha <- compare_data
@@ -269,7 +303,7 @@ alpha_data <- data.table(Sample = samples$Sample,
   color_count <- length(unique(paste(alpha_data$Tech, alpha_data$Matrix)))
   graph_colors <- create_palette(color_count, colors)
   
-ggplot(alpha_data, aes(Matrix, Alpha)) + 
+div_graph <- ggplot(alpha_data, aes(Matrix, Alpha)) + 
     geom_boxplot(show.legend = FALSE, fill = graph_colors) + 
     theme_bw() + 
   theme(
@@ -285,5 +319,22 @@ ggplot(alpha_data, aes(Matrix, Alpha)) +
       " Index)", sep = "")) + 
     facet_nested(.~ Tech, scales = "free", space = "free")  +
   scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))
-    
 ```
+
+```{r div_graph2, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+div_graph
+```
+<br>
+<br>
+
+### Resitome Differences
+
+#### Swine Manure
+With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found `r length(unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))` of the `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))`, with and alpha diversity of `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"]$Alpha, na.rm = T), 2)`.
+<br>
+
+#### Manunre-Soil
+With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found `r length(unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))` of the `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))`, with and alpha diversity of `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"]$Alpha, na.rm = T), 2)`.
+
+
+

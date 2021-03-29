@@ -5,18 +5,18 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
 <br>
 <br>
 
-
 ## ARG Profile
 
 <br>
   
-```{r ARG_Families, echo=FALSE, message=FALSE, warning=FALSE}
+```{r ARG_Families, message=FALSE, warning=FALSE}
 classification <- 'ARG_Family'
 treatment_name <- 'Matrix'
 SC_I <- phylosmith::melt_phyloseq(soil_column_I_ARGS)
@@ -86,7 +86,6 @@ for(i in seq_along(samples)){
   set(graph_data, which(graph_data$Sample == as.character(unique(graph_data$Sample)[i])), 'Sample', samples[i])
 }
 
-
 profile <- ggplot(graph_data[Tech == 'DARTE-QM'], aes_string(x="Sample", y="relative_abundance", 
                                                              fill=classification)) + 
   guides(fill=guide_legend(ncol=ceiling(length(unique(graph_data[[classification]]))/50))) + 
@@ -128,7 +127,7 @@ profile
   
 ### PCA
   
-```{r pca_calculation_non_normalized, echo=FALSE, message=FALSE, warning=FALSE}
+```{r pca_calculation_non_normalized, message=FALSE, warning=FALSE}
 treatment = 'Matrix'
 x = 1
 y = 2
@@ -174,7 +173,7 @@ pca
 <br>
 
 ### NMDS
-```{r nmds, echo=FALSE, message=FALSE, warning=FALSE}
+```{r nmds, message=FALSE, warning=FALSE}
 graph_data <- read_counts[,-c(2,3)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
@@ -218,13 +217,14 @@ nmds
 
 
 ## PERMANOVA
-```{r permanova_code, echo=FALSE, message=FALSE, warning=FALSE}
+```{r permanova_code, message=FALSE, warning=FALSE}
 graph_data <- read_counts[,-c(2,3)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 graph_data <- graph_data[rowSums(graph_data) >=5, ]
 
 permanova <- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`Sample Name` %in% colnames(graph_data)])
 ```
+
 ```{r permanova, echo=FALSE, message=FALSE, warning=FALSE}
 permanova
 ```
@@ -238,7 +238,7 @@ permanova
 
 ### Bray-Curtis
 
-```{r bray_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+```{r bray_clustering, message=FALSE, warning=FALSE}
 method = 'bray'
 graph_data <- read_counts[,-c(2:3)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
@@ -246,7 +246,6 @@ distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] <- 0
 dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
 graph_data <- ggdendro::dendro_data(dend)
-# graph_data <- cbind(ggdendro::segment(graph_data), merge(graph_data$labels, metadata[,c(1,3)], by.x = 'label', by.y = 'Sample_Name'))
 
 sample_colors <- schuylR::create_palette(length(unique(metadata$Matrix)))[as.factor(metadata$Matrix[match(as.character(graph_data$labels$label), metadata$`Sample Name`)])]
 
@@ -283,9 +282,8 @@ sample_dendrogram
 
 ### Jaccard
 
-```{r jaccard_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+```{r jaccard_clustering, message=FALSE, warning=FALSE}
 method = 'jaccard'
-
 graph_data <- read_counts[,-c(2:3)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
@@ -325,7 +323,7 @@ sample_dendrogram
 
 ### Euclidean
 
-```{r euclidean_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+```{r euclidean_clustering, message=FALSE, warning=FALSE}
 method = 'euclidean'
 graph_data <- read_counts[,-c(2:3)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
@@ -367,7 +365,7 @@ sample_dendrogram
 
 ### Gower
 
-```{r gower_clustering, echo=FALSE, message=FALSE, warning=FALSE}
+```{r gower_clustering, message=FALSE, warning=FALSE}
 method = 'gower'
 graph_data <- read_counts[,-c(2:3)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
@@ -413,7 +411,7 @@ sample_dendrogram
 
 ### Optimize K
 
-```{r k-means_analysis, echo=FALSE, message=FALSE, warning=FALSE}
+```{r k-means_analysis, message=FALSE, warning=FALSE}
 method = 'bray'
 x = 1
 y = 2
@@ -459,7 +457,7 @@ opt_k_means
 
 <br>
 
-```{r K(3), echo=FALSE, message=FALSE, warning=FALSE}
+```{r K(3), message=FALSE, warning=FALSE}
 k = 3
 treatment = 'Matrix'
 MDS <- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
@@ -469,9 +467,6 @@ km <- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
 graph_data <- cbind(graph_data, cluster =  factor(km[match(names(km), graph_data$Row.names)])) 
 graph_colors <- schuylR::create_palette(length(unique(graph_data[[treatment]])))
 cluster_colors <- schuylR::create_palette(k, colors = 'Dark2')
-```
- 
-```{r K(3)_graph, echo=FALSE, fig.width=7, fig.height=5}
 k3 <- ggplot(data = graph_data, aes_string('x', 'y', group = 'cluster'))
 k3 <- k3 +  
   geom_point(aes_string(color = 'Matrix', fill = 'Matrix'),
@@ -493,6 +488,9 @@ k3 <- k3 +
                aes(x = x, y = y, group = group), color = "black", 
                alpha = 0.3, size = 0.6, linetype = 1, 
                fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k3)$data[[1]], 'group', level = 0.01)$group])
+```
+ 
+```{r K(3)_graph, echo=FALSE, fig.width=7, fig.height=5}
 k3
 ```
 
@@ -502,14 +500,11 @@ k3
 
 <br>
 
-```{r K(6), echo=FALSE, message=FALSE, warning=FALSE}
+```{r K(6), message=FALSE, warning=FALSE}
 k = 6
 cluster_colors <- schuylR::create_palette(k, colors = 'Dark2')
 km <- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
 graph_data$cluster <- factor(km[match(names(km), graph_data$Row.names)])
-```
- 
-```{r K(6)_graph, echo=FALSE, warning=FALSE, fig.width=7, fig.height=5}
 k6 <- ggplot(data = graph_data, aes_string('x', 'y', group = 'cluster'))
 k6 <- k6 + 
   geom_point(aes_string(color = 'Matrix', fill = 'Matrix'),
@@ -531,6 +526,9 @@ k6 <- k6 +
                aes(x = x, y = y, group = group), color = "black", 
                alpha = 0.3, size = 0.6, linetype = 1, 
                fill = cluster_colors[phylosmith:::CI_ellipse(ggplot_build(k6)$data[[1]], 'group')$group])
+```
+ 
+```{r K(6)_graph, echo=FALSE, warning=FALSE, fig.width=7, fig.height=5}
 k6
 ```
 

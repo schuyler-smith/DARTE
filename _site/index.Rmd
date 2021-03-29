@@ -16,10 +16,8 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 
 
 # Sequencing
-#### [Mock-Community](sequencing.html#Mock-Community)
-#### [Soil Column I](sequencing.html#Soil_Column_I)
-#### [Soil Column II](sequencing.html#Soil_Column_II)
-#### [Swine Fecal](sequencing.html#Swine_Fecal)
+#### [Sequencing Results](sequencing.html#Sequencing_Results)
+#### [Read Processing Pipeline](sequencing.html#Read_Processing_Pipeline)
 <br>
 
 
