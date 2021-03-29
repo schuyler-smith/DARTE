@@ -20,7 +20,7 @@ library(DT)
 args <- data.table::fread('../data/ARG_database.fa', header = FALSE, col.names = "Target ARGs")
 datatable(args)
 ```
-<a id="raw-url" href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/ARG_database.fa" download target="_blank">
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/ARG_database.fa" download target="_blank">
   Download
 </a>
 <br>
