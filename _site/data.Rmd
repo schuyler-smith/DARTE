@@ -20,7 +20,7 @@ library(DT)
 args <- data.table::fread('../data/ARG_database.fa', header = FALSE, col.names = "Target ARGs")
 datatable(args)
 ```
-<a href="../data/ARG_database.fa" download>
+<a id="raw-url" href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/ARG_database.fa" download target="_blank">
   Download
 </a>
 <br>
@@ -31,7 +31,7 @@ datatable(args)
 fprimers <- data.table::fread('../data/forward_primers', header = FALSE, col.names = "Forward Primers")
 datatable(fprimers)
 ```
-<a href="../data/forward_primers" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/forward_primers" download target="_blank">
   Download
 </a>
 <br>
@@ -42,7 +42,7 @@ datatable(fprimers)
 rprimers <- data.table::fread('../data/reverse_primers', header = FALSE, col.names = "Reverse Primers")
 datatable(rprimers)
 ```
-<a href="../data/reverse_primers" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/reverse_primers" download target="_blank">
   Download
 </a>
 <br>
@@ -53,7 +53,7 @@ datatable(rprimers)
 classifications <- unique(data.table::fread('../data/target_ARG_classifications.tsv', header = TRUE))
 datatable(classifications)
 ```
-<a href="../data/target_ARG_classifications.tsv" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/target_ARG_classifications.tsv" download target="_blank">
   Download
 </a>
 <br>
@@ -79,7 +79,7 @@ datatable(strains, options = list(
           )
 )
 ```
-<a href="../data/mock_strain_infor.csv" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/mock_strain_infor.csv" download target="_blank">
   Download
 </a>
 <br>
@@ -91,7 +91,7 @@ mock_genomes <- data.table::fread('../data/mock_genomes.fa', header = FALSE, col
 mock_genome_names <- unname(unlist(ssBLAST:::fasta_seq_names("../data/mock_genomes.fa")))
 mock_genomes
 ```
-<a href="../data/mock_genomes.fa" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/mock_genomes.fa" download target="_blank">
   Download
 </a>
 <br>
@@ -115,7 +115,7 @@ datatable(metadata, options = list(
           )
 )
 ```
-<a href="../data/sample_metadata.csv" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/sample_metadata.csv" download target="_blank">
   Download
 </a>
 <br>
@@ -152,7 +152,7 @@ datatable(read_counts[ARG != "16S",c(1,2,3,grep('Mock', colnames(read_counts))),
           )
 )
 ```
-<a href="../data/read_counts_from_primers.RDS" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/read_counts_from_primers.RDS" download target="_blank">
   Download
 </a>
 <br>
@@ -185,7 +185,7 @@ datatable(read_counts[ARG != "16S",c(1,2,3,grep('SCI-', colnames(read_counts))),
           )
 )
 ```
-<a href="../data/read_counts_from_primers.RDS" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/read_counts_from_primers.RDS" download target="_blank">
   Download
 </a>
 <br>
@@ -218,7 +218,7 @@ datatable(read_counts[ARG != "16S",c(1,2,3,grep('SCII', colnames(read_counts))),
           )
 )
 ```
-<a href="../data/read_counts_from_primers.RDS" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/read_counts_from_primers.RDS" download target="_blank">
   Download
 </a>
 <br>
@@ -251,7 +251,7 @@ datatable(read_counts[ARG != "16S",c(1,2,3,grep('X1P', colnames(read_counts))), 
           )
 )
 ```
-<a href="../data/read_counts_from_primers.RDS" download>
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/read_counts_from_primers.RDS" download target="_blank">
   Download
 </a>
 <br>

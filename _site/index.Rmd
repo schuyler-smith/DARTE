@@ -53,23 +53,23 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 ### [Antibioti Resistance Genes](data.html#Antibiotic_Resistance_Genes)
 File | Description | Download
 :------------- |:-------------------------------------- |:------------
-[ARG Database](data.html#Antibiotic_Resistance_Genes) | fasta format file of the targeted ARG database | <a href="../data/ARG_database.fa" download>Download</a>
-[Forward Primers](data.html#Antibiotic_Resistance_Genes) | fasta format file of the forward primers | <a href="../data/forward_primers" download>Download</a>
-[Reverse Primers](data.html#Antibiotic_Resistance_Genes) | fasta format file of the reverse primers | <a href="../data/forward_primers" download>Download</a>
-[Target ARGs](data.html#Antibiotic_Resistance_Genes) | table of target ARG classifications | <a href="../data/target_ARG_classifications.tsv" download>Download</a>
+[ARG Database](data.html#Antibiotic_Resistance_Genes) | fasta format file of the targeted ARG database | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/ARG_database.fa" download target="_blank">Download</a>
+[Forward Primers](data.html#Antibiotic_Resistance_Genes) | fasta format file of the forward primers | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/forward_primers" download target="_blank">Download</a>
+[Reverse Primers](data.html#Antibiotic_Resistance_Genes) | fasta format file of the reverse primers | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/forward_primers" download target="_blank">Download</a>
+[Target ARGs](data.html#Antibiotic_Resistance_Genes) | table of target ARG classifications | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/target_ARG_classifications.tsv" download target="_blank">Download</a>
 
 ### [Mock Community](data.html#Mock_Community)
 File | Description | Download
 :------------- |:-------------------------------------- |:------------
-[Mock Strain Info](data.html#Mock_Community) | file containing information about each community member of the mock | <a href="../data/mock_strain_infor.csv" download>Download</a>
-[Mock Genomes](data.html#Mock_Community) | fasta format file of the genomes of mock community members | <a href="../data/mock_genomes.fa" download>Download</a>
+[Mock Strain Info](data.html#Mock_Community) | file containing information about each community member of the mock | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/mock_strain_infor.csv" download target="_blank">Download</a>
+[Mock Genomes](data.html#Mock_Community) | fasta format file of the genomes of mock community members | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/mock_genomes.fa" download target="_blank">Download</a>
 
 ### [Samples](data.html#Sample_Info)
 File | Description | Download
 :------------- |:------------------------------------- |:------------
 [Sequencing Data](data.html#Sample_Info) | where to find the raw sequence files | 
-[Sample ARG Counts](data.html#Sample_Info) | count tables for ARGs by sample | <a href="../data/read_counts_from_primers.RDS" download>Download</a>
-[Sample Metadata](data.html#Sample_Info) | file containing metadata for each of the samples analyzed | <a href="../data/sample_metadata.csv" download>Download</a>
+[Sample ARG Counts](data.html#Sample_Info) | count tables for ARGs by sample | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/read_counts_from_primers.RDS" download target="_blank">Download</a>
+[Sample Metadata](data.html#Sample_Info) | file containing metadata for each of the samples analyzed | <a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/sample_metadata.csv" download target="_blank">Download</a>
 <br>
 
 
