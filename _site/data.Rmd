@@ -26,6 +26,29 @@ datatable(args)
 <br>
 <br>
 
+### Primer Details
+```{r aprimers, message=FALSE, warning=FALSE, echo=FALSE}
+aprimers <- data.table::fread('../data/DARTE-QM_primer_design.csv', header = TRUE)
+datatable(aprimers, options = list(
+            columnDefs = list(
+              list(
+                targets = 10,
+                render = JS(
+                  "function(data, type, row, meta) {",
+                  "return type === 'display' && data.length > 12 ?",
+                  "'<span title=\"' + data + '\">' + data.substr(0, 12) + '...</span>' : data;",
+                  "}")
+              )
+            )
+          )
+)
+```
+<a href="https://github.com/schuyler-smith/DARTE-QM/raw/master/data/DARTE-QM_primer_design.csv" download target="_blank">
+  Download
+</a>
+<br>
+<br>
+
 ### Forward Primers
 ```{r fprimers, message=FALSE, warning=FALSE, echo=FALSE}
 fprimers <- data.table::fread('../data/forward_primers', header = FALSE, col.names = "Forward Primers")
