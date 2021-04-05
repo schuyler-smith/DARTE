@@ -18,6 +18,7 @@ library(phyloseq)
 library(schuylR)
 library(ssBLAST)
 library(phylosmith)
+library(DT)
 ```
 
 ## R-Functions {.tabset .tabset-pills}

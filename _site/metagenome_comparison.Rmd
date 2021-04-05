@@ -9,10 +9,13 @@ output:
 <br>
 <br>
 
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
 
 ## All ARGs Found {.tabset .tabset-pills}
 ### Profiles
-```{r shotgun, message=FALSE, warning=FALSE}
+```{r shotgun}
 classification <- 'ARG'
 treatment_name <- 'Matrix'
 
@@ -136,7 +139,7 @@ profile_compare
 <br>
 
 ### Diversity
-```{r apha-div, message=FALSE, warning=FALSE}
+```{r apha-div}
 index = "shannon"
 colors = "default"
 alpha <- compare_data
@@ -184,7 +187,7 @@ div_graph<- ggplot(alpha_data, aes(Matrix, Alpha)) +
   scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))
 ```
 
-```{r div_graph, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+```{r div_graph, echo=FALSE, fig.width=5, fig.height=4}
 div_graph
 ```
 <br>
@@ -230,7 +233,7 @@ datatable(data.frame(ARG = sort(as.character(unique(compare_data[Tech != 'DARTE-
 
 ## DARTE-QM Target ARGs {.tabset .tabset-pills}
 ### Profiles
-```{r compare_targets, message=FALSE, warning=FALSE}
+```{r compare_targets}
 compare_data <- compare_data[ARG %in% classifications$ARG]
 compare_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample')]
 
@@ -273,7 +276,7 @@ profile_compare
 <br>
 
 ### Diversity
-```{r apha-div_DARTE_Only, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+```{r apha-div_DARTE_Only, fig.width=5, fig.height=4}
 index = "shannon"
 colors = "default"
 alpha <- compare_data
@@ -321,7 +324,7 @@ div_graph <- ggplot(alpha_data, aes(Matrix, Alpha)) +
   scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))
 ```
 
-```{r div_graph2, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=4}
+```{r div_graph2, echo=FALSE, fig.width=5, fig.height=4}
 div_graph
 ```
 <br>

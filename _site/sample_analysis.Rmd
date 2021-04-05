@@ -13,7 +13,7 @@ editor_options:
 <br>
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, tidy = FALSE, size="small")
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 ## ARG Profile
@@ -91,35 +91,31 @@ for(i in seq_along(samples)){
   set(graph_data, which(graph_data$Sample == as.character(unique(graph_data$Sample)[i])), 'Sample', samples[i])
 }
 
-profile <- ggplot(graph_data[Tech == 'DARTE-QM'], aes_string(x="Sample", y="relative_abundance", 
-                                                             fill=classification)) + 
+profile <- ggplot(graph_data[Tech == 'DARTE-QM'], 
+                  aes_string(x="Sample", y="relative_abundance", fill=classification)) + 
   guides(fill=guide_legend(ncol=ceiling(length(unique(graph_data[[classification]]))/50))) + 
-  scale_fill_manual(values=graph_colors, aesthetics=c("color", 
-                                                      "fill")) + 
-  geom_bar(stat="identity", position="stack", 
-           size=0.12, width=0.95, color="black") + 
+  scale_fill_manual(values=graph_colors, aesthetics=c("color", "fill")) + 
+  geom_bar(stat="identity", position="stack", size=0.12, width=0.95, color="black") + 
   ylab("Relative Abundance") + 
-  theme_bw() + theme(axis.text.x = element_text(size=12, angle = 330, hjust = -0.05), 
-                     axis.text.y=element_blank(), 
-                     axis.title.x=element_blank(), 
-                     axis.title.y=element_text(size=12, face="bold"), 
-                     axis.ticks.x=element_blank(), 
-                     legend.title=element_text(size=12, 
-                                               face="bold"), 
-                     legend.text=element_text(size=12), 
-                     legend.spacing.x=unit(0.005, "npc"), legend.key.size=unit(6,"mm"),
-                     panel.background=element_rect(color="black", 
-                                                   size=1.5), panel.spacing=unit(0.01, "npc"), 
-                     strip.text.x=element_text(size=12, face="bold"), 
-                     strip.background=element_rect(colour="black", size=1.4,
-                                                   fill="white"), panel.grid.major.x=element_blank()) + 
-  scale_y_continuous(expand=expansion(mult=c(0.0037, 
-                                             0.003), add=c(0, 0))) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(size=12, angle = 330, hjust = -0.05), 
+     axis.text.y=element_blank(), 
+     axis.title.x=element_blank(), 
+     axis.title.y=element_text(size=12, face="bold"), 
+     axis.ticks.x=element_blank(), 
+     legend.title=element_text(size=12, face="bold"), 
+     legend.text=element_text(size=12), 
+     legend.spacing.x=unit(0.005, "npc"), legend.key.size=unit(6,"mm"),
+     panel.background=element_rect(color="black", size=1.5), panel.spacing=unit(0.01, "npc"), 
+     strip.text.x=element_text(size=12, face="bold"), 
+     strip.background=element_rect(colour="black", size=1.4,
+                                   fill="white"), panel.grid.major.x=element_blank()) + 
+  scale_y_continuous(expand=expansion(mult=c(0.0037, 0.003), add=c(0, 0))) + 
   ggh4x::facet_nested(.~ Matrix, scales = "free", space = "free") + 
   scale_x_discrete(expand=expansion(mult=0, add=0.51))
 ```
 
-```{r profile, echo=FALSE, fig.width=12, fig.height=6, cache=TRUE}
+```{r profile, echo=FALSE, fig.height=6, fig.width=12, cache=TRUE}
 profile
 ```
 <br>
@@ -239,176 +235,40 @@ permanova
 
 ## Hierarchical Clustering {.tabset .tabset-pills}
 
-<br>
-
-### Bray-Curtis
-
-```{r bray_clustering}
-method = 'bray'
-graph_data <- read_counts[,-c(2:3)]
-graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
-distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
-distance_matrix[is.na(distance_matrix)] <- 0
-dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
-graph_data <- ggdendro::dendro_data(dend)
-
-sample_colors <- schuylR::create_palette(length(unique(metadata$Matrix)))[as.factor(metadata$Matrix[match(as.character(graph_data$labels$label), metadata$`Sample Name`)])]
-
-sample_dendrogram <- ggplot(data = ggdendro::segment(graph_data)) + geom_blank() + theme_minimal()
-sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
-                                                                 y = "y", 
-                                                                 xend = "xend", 
-                                                                 yend = "yend",
-                                                                 color = 'y'),
-                                                      show.legend = FALSE,
-                                                      size = 1.3) + 
-  scale_x_continuous(breaks = seq_along(graph_data$labels$label),
-                     labels = gsub('Q3_','',graph_data$labels$label)) + 
-  scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5,
-                                   margin = margin(t = -10),
-                                   color = sample_colors), 
-        axis.text.y = element_text(angle = 90, hjust = -1,
-                                   margin = margin(r = -30),),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
-  guides(color = guide_legend(override.aes = list(alpha=1))) +
-  scale_color_gradientn(colors =  viridis::viridis(10))
+```{r, clusters, results='asis', fig.width=12, fig.height=6, cache=TRUE}
+for (method in c('Bray-Curts', 'Jaccard', 'Euclidean', 'Gower')){
+  cat("###", method, '<br>', '\n\n')
+  graph_data <- read_counts[,-c(2:3)]
+  graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+  distance_matrix <- vegan::vegdist(t(graph_data), gsub("-.*", "",tolower(method)), na.rm = TRUE)
+  distance_matrix[is.na(distance_matrix)] <- 0
+  dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
+  graph_data <- ggdendro::dendro_data(dend)
+  
+  sample_colors <- schuylR::create_palette(length(unique(metadata$Matrix)))[as.factor(metadata$Matrix[match(as.character(graph_data$labels$label), metadata$`Sample Name`)])]
+print(ggplot(data = ggdendro::segment(graph_data)) + 
+    geom_blank() + 
+    theme_minimal() + 
+    geom_segment(aes_string(x = "x", y = "y", xend = "xend", yend = "yend", color = 'y'),
+                 show.legend = FALSE, size = 1.3) + 
+    scale_x_continuous(breaks = seq_along(graph_data$labels$label),
+                       labels = gsub('Q3_','',graph_data$labels$label)) + 
+    scale_y_continuous() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 12,
+                                     margin = margin(t = -10),
+                                     color = sample_colors), 
+          axis.text.y = element_text(angle = 90, hjust = -1,
+                                     margin = margin(r = -30),),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
+    guides(color = guide_legend(override.aes = list(alpha=1))) +
+    scale_color_gradientn(colors =  viridis::viridis(10)))
+  cat('\n', '<br><br><br>', '\n\n')
+}
 ```
-
-```{r bray_dendro, echo=FALSE, fig.width=12, fig.height=6, cache=TRUE}
-sample_dendrogram
-```
-
-<br>
-
-### Jaccard
-
-```{r jaccard_clustering}
-method = 'jaccard'
-graph_data <- read_counts[,-c(2:3)]
-graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
-distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
-distance_matrix[is.na(distance_matrix)] <- 0
-dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
-data <- ggdendro::dendro_data(dend)
-sample_dendrogram <- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
-sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
-                                                                 y = "y", 
-                                                                 xend = "xend", 
-                                                                 yend = "yend",
-                                                                 color = 'y'),
-                                                      show.legend = FALSE,
-                                                      size = 1.3) + 
-  scale_x_continuous(breaks = seq_along(data$labels$label),
-                     labels = gsub('Q3_','',data$labels$label)) + 
-  scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
-                                   margin = margin(t = -10),
-                                   color = sample_colors), 
-        axis.text.y = element_text(angle = 90, hjust = -1,
-                                   margin = margin(r = -30),),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
-  guides(color = guide_legend(override.aes = list(alpha=1))) +
-  scale_color_gradientn(colors =  viridis::viridis(10))
-```
-
-```{r jaccard_dendro, echo=FALSE, fig.width=12, fig.height=6, warning=FALSE, cache=TRUE}
-sample_dendrogram
-```
-
-<br>
-
-### Euclidean
-
-```{r euclidean_clustering}
-method = 'euclidean'
-graph_data <- read_counts[,-c(2:3)]
-graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
-distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
-distance_matrix[is.na(distance_matrix)] <- 0
-dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
-data <- ggdendro::dendro_data(dend)
-
-sample_dendrogram <- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
-sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
-                                                                 y = "y", 
-                                                                 xend = "xend", 
-                                                                 yend = "yend",
-                                                                 color = 'y'),
-                                                      show.legend = FALSE,
-                                                      size = 1.3) + 
-  scale_x_continuous(breaks = seq_along(data$labels$label),
-                     labels = gsub('Q3_','',data$labels$label)) + 
-  scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
-                                   margin = margin(t = -10),
-                                   color = sample_colors), 
-        axis.text.y = element_text(angle = 90, hjust = -1,
-                                   margin = margin(r = -30),),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
-  guides(color = guide_legend(override.aes = list(alpha=1))) +
-  scale_color_gradientn(colors =  viridis::viridis(10))
-```
-
-```{r euclidean_dendro, echo=FALSE, fig.width=12, fig.height=6, cache=TRUE}
-sample_dendrogram
-```
-
-<br>
-
-### Gower
-
-```{r gower_clustering}
-method = 'gower'
-graph_data <- read_counts[,-c(2:3)]
-graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
-distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
-distance_matrix[is.na(distance_matrix)] <- 0
-dend <- as.dendrogram(hclust(as.dist(distance_matrix), method = 'complete'))
-data <- ggdendro::dendro_data(dend)
-
-sample_dendrogram <- ggplot(data = ggdendro::segment(data)) + geom_blank() + theme_minimal()
-sample_dendrogram <- sample_dendrogram + geom_segment(aes_string(x = "x",
-                                                                 y = "y", 
-                                                                 xend = "xend", 
-                                                                 yend = "yend",
-                                                                 color = 'y'),
-                                                      show.legend = FALSE,
-                                                      size = 1.3) + 
-  scale_x_continuous(breaks = seq_along(data$labels$label),
-                     labels = gsub('Q3_','',data$labels$label)) + 
-  scale_y_continuous() + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,
-                                   margin = margin(t = -10),
-                                   color = sample_colors), 
-        axis.text.y = element_text(angle = 90, hjust = -1,
-                                   margin = margin(r = -30),),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        plot.margin=unit(c(5.5, 5.5, 5.5, 5.5),"points")) + #t,r,b,l
-  guides(color = guide_legend(override.aes = list(alpha=1))) +
-  scale_color_gradientn(colors =  viridis::viridis(10))
-```
-
-```{r gower_dendro, fig.width=12, fig.height=6, cache=TRUE}
-sample_dendrogram
-```
-<br>
-<br>
 
 ## K-Means Clustering {.tabset .tabset-pills}
 

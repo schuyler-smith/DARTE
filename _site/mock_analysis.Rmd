@@ -6,6 +6,7 @@ output:
   html_document:
     df_print: paged
     code_folding: hide
+    toc_depth: 2
 editor_options: 
   chunk_output_type: console
 ---
@@ -13,13 +14,10 @@ editor_options:
 <br>
 
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
-library(data.table)
-library(ggplot2)
-library(data.table)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
-## Theoretical ARG Counts {.tabset .tabset-pills}
+## Theoretical ARG Counts {.tabset .tabset-pills} 
 
 ### ARG Abundances
 
@@ -60,6 +58,8 @@ setcolorder(mock_expected_counts, c("Sample", "Microbe", "ARG", "ARG_Family", 'P
 ```{r expected_table, echo=FALSE}
 datatable(mock_expected_counts[,-c('Sample')])
 ```
+<br>
+<br>
 
 ### Profile
 
@@ -77,9 +77,11 @@ mock_profile <- ggplot(graph_data, aes(x="", y=count, fill=ARG_Family)) +
   geom_text(aes(y = ypos, label = ARG_Family), color = "black", size=4, nudge_x = 0.3)
 ```
 
-```{r theoretical_pie_out, echo=FALSE}
+```{r theoretical_pie_out, echo=FALSE, cache=TRUE}
 mock_profile
 ```
+<br>
+<br>
 
 ## Primer Success {.tabset .tabset-pills}
 
@@ -92,13 +94,9 @@ unexpected_primers <- mock_observed_counts$Primer[!(mock_observed_counts$Primer 
 ```
 
 DARTE-QM found **`r length(mock_successful_primers)`** (`r round(length(mock_successful_primers)/length(mock_expected_ARGs) * 100, 1)`%) of the **`r length(mock_expected_ARGs)`** primers in the Mock-Community pangenomes that were targeted.
-
-<br>
 <br>
 
 ### Primer-Heatmap
-<br>
-
 ```{r mock_primers_found}
 classification <- 'Primer'
 expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
@@ -149,13 +147,13 @@ Primer_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = 
   labs(x = "Sample")
 ```
 
-```{r primer_counts_out, echo=FALSE, fig.width=12, fig.height=12}
+```{r primer_counts_out, echo=FALSE, fig.width=12, fig.height=12, cache=TRUE}
 Primer_counts
 ```
-
-### ARG-Heatmap
+<br>
 <br>
 
+### ARG-Heatmap
 ```{r ARG_heatmap}
 classification <- 'ARG'
 expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
@@ -205,13 +203,13 @@ ARG_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Ab
   labs(x = "Sample")
 ```
 
-```{r ARG_counts_out, echo=FALSE, fig.width=7, fig.height=8}
+```{r ARG_counts_out, echo=FALSE, fig.width=7, fig.height=8, cache=TRUE}
 ARG_counts
 ```
-
-### ARG-Family-Heatmap
+<br>
 <br>
 
+### ARG-Family-Heatmap
 ```{r ARG-family_heatmap}
 classification <- 'ARG_Family'
 expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
@@ -261,15 +259,13 @@ ARG_Family_counts <- ggplot(graph_data, aes_string("Sample", classification, fil
   labs(x = "Sample")
 ```
 
-```{r ARG_Family_counts_out, echo=FALSE, fig.width=7, fig.height=8}
+```{r ARG_Family_counts_out, echo=FALSE, fig.width=7, fig.height=8, cache=TRUE}
 ARG_Family_counts
 ```
-
-## {-}
-
+<br>
 <br>
 
-### Distance Matrix
+## Distance Matrix
 
 ```{r distances}
 dist_matrix <- primer_graph_data
@@ -295,31 +291,11 @@ dist_matrix_plot <- ggplot(data = dist_matrix_plot, aes(x=Var2, y=Var1, fill=val
 Assessing the ARGs found in the pangenome of the mock-community, DARTE-QM showed high precision with the mean distance between all observed-samples found to be **`r round(mean(dist_matrix[-1,-c(1)]), 2)`**, whereas the accuracy compared to our theoretical distribution was weaker, with a mean distance of **`r round(mean(dist_matrix[-1,1]), 2)`**. 
 
 
-```{r distances_out, echo=FALSE, fig.width=12, fig.height=7}
+```{r distances_out, echo=FALSE, fig.width=12, fig.height=7, cache=TRUE}
 dist_matrix_plot
 ```
-
-```{r unexpected_graph_data}
-classification = "Primer"
-graph_data <- mock_observed_counts[Primer %in% unexpected_primers]
-graph_data <- melt(graph_data, id.vars = colnames(graph_data)[1:3], variable.name = 'Sample')
-graph_data <- graph_data[, sum(value), by = c('Sample', classification)]
-set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], levels = mock_samples))
-
-graph_data[[classification]] <- factor(graph_data[[classification]], 
-                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
-set(graph_data, which(graph_data[['V1']] < 1), j='V1', value=NA)
-
-unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill = "V1")) + 
-  geom_tile(color = "white", size = 0.25) +
-  guides(colour = guide_legend(ncol = ceiling(length(
-    unique(graph_data[[classification]])
-  ) / 25))) +
-  theme_classic() + theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, size = 10), axis.title.x = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10, face = "bold"), axis.ticks.x = element_blank(), legend.title = element_text(size = 8, face = "bold"), legend.text = element_text(size = 8), legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(6, "mm"), legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), panel.background = element_rect(color = "black", size = 1.4), strip.text.x = element_text(size = 10, face = "bold"), strip.background = element_rect(colour = "black", size = 1.4)) + scale_x_discrete(expand = expansion(mult = 0, add = 0.53)) + 
-  labs(x = "Sample") + 
-  ggraph::scale_fill_viridis(limits = c(0.0001, max(graph_data$V1, na.rm = T))) 
-```
-
+<br>
+<br>
 
 ## Synthetic Oligonucleotide 'Spike' {.tabset .tabset-pills}
 
@@ -327,7 +303,7 @@ unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill
 spike_counts <- read_counts[ARG == 'spike']
 ```
 
-```{r spike_counts, echo=FALSE, message=FALSE, warning=FALSE}
+```{r spike_counts, message=FALSE, warning=FALSE}
 graph_data <- melt(spike_counts, id.vars = c('ARG_Family','ARG','Primer'))
 graph_data <- graph_data[, floor(mean(value)), by = c('variable')]
 graph_data <- graph_data[variable %in% mock_samples]
@@ -336,6 +312,43 @@ setnames(graph_data, colnames(graph_data), c("Sample", "Spike"))
 graph_data <- cbind(graph_data, Spike_Level = as.numeric(gsub('-','.',gsub('Mock-','',gsub('spike-.?','', graph_data$Sample)))))
 setkey(graph_data, 'Spike_Level')
 graph_data[, Color := schuylR::create_palette(length(unique(graph_data[['Spike_Level']])))[as.factor(graph_data[['Spike_Level']])]]
+```
+
+The added levels of the spike-sequence were detected with a linear relation to their laboratory concentrations with an $R^{2}$ = `r round(summary(lm(Spike ~ Spike_Level, graph_data))$r.squared, 2)`.
+
+### Linear Regression
+
+```{r spike_counts_lines}
+spike_points <-  ggplot(graph_data,
+                        aes_string(x = 'Spike_Level', y = 'Spike')) + 
+  geom_smooth(formula = y~x, method = "lm", se = FALSE, aes(x = Spike_Level, y = Spike), color = 'black' ) + 
+  geom_point(stat = "identity", size = 4, alpha = 1, position = position_dodge(width = 0),
+             color = graph_data$Color) + 
+  theme_bw() + theme(axis.text.x = element_text(
+    hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, 
+                                                      size = 10), axis.title.x = element_text(size = 12, face = "bold"), 
+    axis.title.y = element_text(size = 12, face = "bold"), 
+    axis.ticks.x = element_blank(), legend.title = element_text(size = 10, 
+                                                                face = "bold"), legend.text = element_text(size = 8), 
+    legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4, 
+                                                                  "mm"), legend.background = element_rect(fill = (alpha = 0)), 
+    panel.background = element_rect(color = "black", size = 1.5, 
+                                    fill = "white"), panel.spacing = unit(0.015, "npc"), 
+    strip.text.x = element_text(size = 10, face = "bold", 
+                                color = "black"), strip.background = element_rect(colour = "black", 
+                                                                                  size = 1.4, fill = "white")) + 
+  labs(x = "Spike Level", y = "Spike Sequences Detected at >= 98% Identity")
+```
+
+```{r spike_counts_line_reg, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
+spike_points
+```
+<br>
+<br>
+
+### Bar Chart
+
+```{r bar_chart}
 spike_bars <-  ggplot(graph_data,
                       aes_string(x = 'Sample', y = 'Spike')) + 
   geom_bar(stat = "identity", size = 0.45, alpha = 1, position = "dodge",
@@ -373,45 +386,44 @@ spike_bars <-  ggplot(graph_data,
   xlab("")
 ```
 
-```{r spike_counts_lines, echo=FALSE, message=FALSE, warning=FALSE}
-spike_points <-  ggplot(graph_data,
-                        aes_string(x = 'Spike_Level', y = 'Spike')) + 
-  geom_smooth(formula = y~x, method = "lm", se = FALSE, aes(x = Spike_Level, y = Spike), color = 'black' ) + 
-  geom_point(stat = "identity", size = 4, alpha = 1, position = position_dodge(width = 0),
-             color = graph_data$Color) + 
-  theme_bw() + theme(axis.text.x = element_text(
-    hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, 
-                                                      size = 10), axis.title.x = element_text(size = 12, face = "bold"), 
-    axis.title.y = element_text(size = 12, face = "bold"), 
-    axis.ticks.x = element_blank(), legend.title = element_text(size = 10, 
-                                                                face = "bold"), legend.text = element_text(size = 8), 
-    legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(4, 
-                                                                  "mm"), legend.background = element_rect(fill = (alpha = 0)), 
-    panel.background = element_rect(color = "black", size = 1.5, 
-                                    fill = "white"), panel.spacing = unit(0.015, "npc"), 
-    strip.text.x = element_text(size = 10, face = "bold", 
-                                color = "black"), strip.background = element_rect(colour = "black", 
-                                                                                  size = 1.4, fill = "white")) + 
-  labs(x = "Spike Level", y = "Spike Sequences Detected at >= 98% Identity")
-```
-
-### Linear Regression
-```{r spike_counts_line_reg, fig.width=6, fig.height=4, echo=FALSE, warning=FALSE}
-spike_points
-```
-<br>
-<br>
-
-### Bar Chart
-```{r spike_counts_bars, fig.width=6, fig.height=4, echo=FALSE, warning=FALSE}
+```{r spike_counts_bars, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
 spike_bars
 ```
 <br>
 <br>
 
 ### Table
-```{r spike_counts_table, echo=FALSE, warning=FALSE}
+```{r spike_counts_table, echo=FALSE}
 datatable(graph_data[,-c('Color')])
 ```
 <br>
 <br>
+
+## Unexpected ARGs
+
+DARTE-QM also detected `r length(unexpected_primers)` ARGs that were not found in the sequenced genomes of the mock-community.
+
+```{r unexpected_graph_data}
+classification = "Primer"
+graph_data <- mock_observed_counts[Primer %in% unexpected_primers]
+graph_data <- melt(graph_data, id.vars = colnames(graph_data)[1:3], variable.name = 'Sample')
+graph_data <- graph_data[, sum(value), by = c('Sample', classification)]
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], levels = mock_samples))
+
+graph_data[[classification]] <- factor(graph_data[[classification]], 
+                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+set(graph_data, which(graph_data[['V1']] < 1), j='V1', value=NA)
+
+unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill = "V1")) + 
+  geom_tile(color = "white", size = 0.25) +
+  guides(colour = guide_legend(ncol = ceiling(length(
+    unique(graph_data[[classification]])
+  ) / 25))) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, size = 10), axis.title.x = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10, face = "bold"), axis.ticks.x = element_blank(), legend.title = element_text(size = 8, face = "bold"), legend.text = element_text(size = 8), legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(6, "mm"), legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), panel.background = element_rect(color = "black", size = 1.4), strip.text.x = element_text(size = 10, face = "bold"), strip.background = element_rect(colour = "black", size = 1.4)) + scale_x_discrete(expand = expansion(mult = 0, add = 0.53)) + 
+  labs(x = "Sample", fill = "Abundance") + 
+  ggraph::scale_fill_viridis(limits = c(0.0001, max(graph_data$V1, na.rm = T))) 
+```
+
+```{r unexpected_graph_data_out, echo=FALSE, fig.width=12, fig.height=12, cache=TRUE}
+unexpected_graph
+```

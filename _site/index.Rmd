@@ -25,12 +25,16 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 #### [Primer Success Tables](primer_analysis.html#Primer_Success_Tables)
 #### [Success Metrics](primer_analysis.html#Success_Metrics)
 #### [Primer Performance Graphs](primer_analysis.html#Primer_Performance_Graphs)
-#### [PCR-Artifacts](primer_analysis.html#Artifact_Reads)
+#### [Artifact Reads](primer_analysis.html#Artifact_Reads)
 <br>
 
 
 # Mock Evalutaion
+#### [Theoretical ARG Counts](mock_analysis.html#Theoretical_ARG_Counts)
+#### [Primer Success](mock_analysis.html#Primer_Success)
+#### [Distance Matrix](mock_analysis.html#Distance_Matrix)
 #### [Synthetic Oligonucleotide 'Spike'](mock_analysis.html#Synthetic_Oligonucleotide_‘Spike’)
+#### [Unexpecte ARGs](mock_analysis.html#Unexpecte_ARGs)
 <br>
 
 

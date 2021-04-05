@@ -15,7 +15,7 @@ editor_options:
 
 
 ## Primer Success Tables {.tabset .tabset-pills}
-```{r create_succes_file, message=FALSE, warning=FALSE, eval=FALSE}
+```{r create_succes_file, eval=FALSE}
 BLAST_file_path = "../blast/"
 
 if (length(BLAST_file_path) == 1 && dir.exists(BLAST_file_path)) {
@@ -96,15 +96,15 @@ for(file in BLAST_file){
 primer_success[,true_neg := sum(true_pos)-true_pos, by = sample]
 primer_success <- primer_success[n_reads != 'NA']
 primer_success <- primer_success[ARG_Family != '16S']
-saveRDS(primer_success, '../data/primer_success.RDS')
+saveRDS(primer_success, '../data/primers/primer_success.RDS')
 ```
 
 ### Primers by Samples
-```{r readin_success, message=FALSE, warning=FALSE, echo=FALSE}
+```{r readin_success, echo=FALSE}
 primer_success <- readRDS('../data/primers/primer_success.RDS')
 ```
 
-```{r success_table, echo=FALSE, message=FALSE, warning=FALSE}
+```{r success_table, echo=FALSE, cache=TRUE}
 primer_success
 ```
 <a href="../data/primer_success.RDS" download>
@@ -115,7 +115,7 @@ primer_success
 
 
 ### Overall for Primers
-```{r primers, message=FALSE, warning=FALSE}
+```{r primers}
 samples <- primer_success[, sum(true_pos, na.rm = T), by = sample][V1 > 1000]$sample
 primer_success <- primer_success[sample %in% samples]
 primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=primer, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
@@ -123,7 +123,7 @@ primers <- merge(classifications, primers, by.y = 'primer', by.x = 'Primer')
 setorder(primers, -n_reads)
 ```
 
-```{r primers_table, echo=FALSE, message=FALSE, warning=FALSE}
+```{r primers_table, echo=FALSE}
 datatable(primers, options = list(
             columnDefs = list(
               list(
@@ -152,12 +152,12 @@ datatable(primers, options = list(
 <br>
 
 ### Overall for Samples
-```{r samples, message=FALSE, warning=FALSE}
+```{r samples}
 samples <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=sample, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
 setorder(samples, sample)
 ```
 
-```{r samples_table, echo=FALSE, message=FALSE, warning=FALSE}
+```{r samples_table, echo=FALSE}
 datatable(samples, options = list(
             columnDefs = list(
               list(
@@ -177,7 +177,7 @@ datatable(samples, options = list(
 <br>
 
 ### True-Positive Reads by Samples
-```{r sample_t_pos, message=FALSE, warning=FALSE}
+```{r sample_t_pos}
 data.table::set(primer_success, which(primer_success[["success_rate"]] == 0), "success_rate", NA)
 primer_success[, experiment := sapply(strsplit(sample, "-"), "[[", 1)]
 read_count <- data.table::dcast(primer_success, primer ~ sample, value.var=c("true_pos"), fun = sum)
@@ -185,7 +185,7 @@ read_count <- read_count[c(which(rowSums(read_count[,-1]) > 0)),]
 read_count <- merge(classifications, read_count, by.y = 'primer', by.x = 'Primer')
 ```
 
-```{r t_pos_counts, echo=FALSE, message=FALSE, warning=FALSE}
+```{r t_pos_counts, echo=FALSE}
 read_count
 ```
 <br>
@@ -232,7 +232,7 @@ Mean accuracy of each primer, weighted by abundance per sample, was found to be 
 
 
 ## Primer Performance Graphs {.tabset .tabset-pills}
-```{r overall_primer, warning=FALSE}
+```{r overall_primer}
 primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=Primer, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos", "false_neg", "true_neg") ] 
 primers[, percent_artifacts := artifacts/n_reads*100]
 primers[, percent_tp := true_pos/n_reads*100]
@@ -241,7 +241,7 @@ primers[, percent_fn := false_neg/n_reads*100]
 ```
 
 ### All
-```{r primer_artifact_graph, fig.width=12, fig.height=7, echo=FALSE, warning=FALSE}
+```{r primer_artifact_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 setorder(primers, -percent_artifacts)
 set(primers, j = 'Primer', value = factor(primers$Primer, levels = primers$Primer))
 colors <- schuylR::create_palette(5)
@@ -266,7 +266,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 ```
 
 ### Artifact
-```{r _artifact_graph, fig.width=12, fig.height=7, echo=FALSE, warning=FALSE}
+```{r _artifact_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(fill="Artifact")) + 
@@ -281,7 +281,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 ```
 
 ### True-Positive
-```{r _tp_graph, fig.width=12, fig.height=7, echo=FALSE, warning=FALSE}
+```{r _tp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_tp, fill="True-Positive") ) + 
@@ -296,7 +296,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 ```
 
 ### False-Positive
-```{r _fp_graph, fig.width=12, fig.height=7, echo=FALSE, warning=FALSE}
+```{r _fp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_fp, fill="False-Positive") ) + 
@@ -311,7 +311,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 ```
 
 ### False-Negative
-```{r _fn_graph, fig.width=12, fig.height=7, echo=FALSE, warning=FALSE}
+```{r _fn_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_fn, fill="False-Negative") ) + 
@@ -329,7 +329,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 ## Artifact Reads
 
 ### Examples of Artifact Reads
-```{r example_artifacts, warning=FALSE, echo=FALSE}
+```{r example_artifacts, echo=FALSE}
 fread('../data/primers/example_artifacts.fa', header = FALSE, col.names = "SCI-Soil-D59-A R1 Reads")
 ```
 
@@ -337,7 +337,7 @@ fread('../data/primers/example_artifacts.fa', header = FALSE, col.names = "SCI-S
 <br>
 
 ### Artifacts by Primer Count
-```{r by_reads, warning=FALSE, echo=FALSE}
+```{r by_reads, echo=FALSE}
 by_true_pos <- data.frame(sensitivity = 0, number_reads = seq(0, 1000,10), type = "True-Positive Reads")
 for(i in seq_along(by_true_pos$number_reads)){
   by_true_pos[i,1] <- mean(primer_success[true_pos > by_true_pos$number_reads[i]]$sens)
@@ -345,7 +345,7 @@ for(i in seq_along(by_true_pos$number_reads)){
 ```
 <br>
 
-```{r by_read_graph, fig.width=6, fig.height=4, echo=FALSE, warning=FALSE}
+```{r by_read_graph, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
 ggplot(rbind(by_true_pos), aes_string(x = "number_reads", y = "sensitivity", color="type")) +
  geom_line(size = 1.6, show.legend = F) + 
   scale_colour_manual(values = c("#56B4E9")) + theme_bw() + 
@@ -369,7 +369,7 @@ ggplot(rbind(by_true_pos), aes_string(x = "number_reads", y = "sensitivity", col
 <br>
 
 ### Correlation of Artifacts and Read Count
-```{r artifacts, echo=FALSE, warning=FALSE}
+```{r artifacts, echo=FALSE}
 samples <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=sample, .SDcols=c("n_reads", "artifacts") ] 
 samples[,artifacts := artifacts/n_reads*100]
 setorder(samples, sample)
@@ -378,7 +378,7 @@ setorder(samples, sample)
 
 The number of reads produced per sample and the percentage of those reads that were PCR-artifacts had a negative correlation with an R-squared value = **`r round(summary(lm(artifacts ~ n_reads, samples))$r.squared, 2)`**
 
-```{r artifacts_graph, fig.width=7, fig.height=5, echo=FALSE, warning=FALSE}
+```{r artifacts_graph, fig.width=7, fig.height=5, echo=FALSE, cache=TRUE}
   ggplot(merge(metadata, samples,by.x='Sample Name', by.y='sample'), aes_string(x = "n_reads", y = "artifacts", color="Matrix")) +
    geom_point(size = 4, show.legend = T) + 
   geom_smooth(formula = y~x, method = "lm", se = FALSE, color = 'black' ) +

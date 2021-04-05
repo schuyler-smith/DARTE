@@ -13,11 +13,32 @@ output:
 <br>
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, tidy = FALSE, size="small")
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 # Sequencing Results {.tabset .tabset-pills}
 <br>
+
+```{r, setup_sequencing, eval=FALSE, echo=FALSE}
+ file_path = '../data/raw_reads'
+ files <- dir(file_path, full.names = TRUE)
+ files <- normalizePath(files)
+ mock_files <- files[grep('Mock', files)]
+ mock_qual <- schuylR::sequence_quality(mock_files)
+ saveRDS(mock_qual, "../data/sequencing/mock_qual.RDS")
+
+ sci_files <- files[grep('SCI-', files)]
+ sci_qual <- schuylR::sequence_quality(sci_files)
+ saveRDS(sci_qual, "../data/sequencing/sci_qual.RDS")
+
+ scii_files <- files[grep('SCII-', files)]
+ scii_qual <- schuylR::sequence_quality(scii_files)
+ saveRDS(scii_qual, "../data/sequencing/scii_qual.RDS")
+
+ fecal_files <- files[grep('X1P', files)]
+ fecal_qual <- schuylR::sequence_quality(fecal_files)
+ saveRDS(fecal_qual, "../data/sequencing/fecal_qual.RDS")
+```
 
 ```{r setupsequencing, echo=FALSE}
 sample_seq_results <- fread('../data/samples/sample_seq_results.csv')
@@ -36,7 +57,7 @@ annotations <- mock_qual[[3]]
 n=1
 for (i in grep("_R1_", annotations$file)){
   cat("####", n, '<br>', '\n\n')
-  print(plot_sequence_quality(list(
+  print(schuylR::plot_sequence_quality(list(
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
@@ -68,7 +89,7 @@ annotations <- sci_qual[[3]]
 n=1
 for (i in grep("_R1_", annotations$file)){
   cat("####", n, '<br>', '\n\n')
-  print(plot_sequence_quality(list(
+  print(schuylR::plot_sequence_quality(list(
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
@@ -100,7 +121,7 @@ annotations <- scii_qual[[3]]
 n=1
 for (i in grep("_R1_", annotations$file)){
   cat("####", n, '<br>', '\n\n')
-  print(plot_sequence_quality(list(
+  print(schuylR::plot_sequence_quality(list(
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
@@ -132,7 +153,7 @@ annotations <- fecal_qual[[3]]
 n=1
 for (i in grep("_R1_", annotations$file)){
   cat("####", n, '<br>', '\n\n')
-  print(plot_sequence_quality(list(
+  print(schuylR::plot_sequence_quality(list(
   	graph_data[file %in% annotations$file[c(i,i+1)]],
   	stat_data[file %in% annotations$file[c(i,i+1)]],
   	annotations[file %in% annotations$file[c(i,i+1)]])))
@@ -147,31 +168,6 @@ for (i in grep("_R1_", annotations$file)){
 ### Sequence Results
 ```{r fecal_ressequencing, echo=FALSE}
 datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('X1P', sample_seq_results$Sample)]])
-```
-<br>
-<br>
-<br>
-
-
-```{r, setup_sequencings, echo=FALSE, eval=FALSE}
- file_path = '../data/raw_reads'
- files <- dir(file_path, full.names = TRUE)
- files <- normalizePath(files)
- mock_files <- files[grep('Mock', files)]
- mock_qual <- sequence_quality(mock_files)
- saveRDS(mock_qual, "../data/sequencing/mock_qual.RDS")
-
- sci_files <- files[grep('SCI-', files)]
- sci_qual <- sequence_quality(sci_files)
- saveRDS(sci_qual, "../data/sequencing/sci_qual.RDS")
-
- scii_files <- files[grep('SCII-', files)]
- scii_qual <- sequence_quality(scii_files)
- saveRDS(scii_qual, "../data/sequencing/scii_qual.RDS")
-
- fecal_files <- files[grep('X1P', files)]
- fecal_qual <- sequence_quality(fecal_files)
- saveRDS(fecal_qual, "../data/sequencing/fecal_qual.RDS")
 ```
 <br>
 <br>
