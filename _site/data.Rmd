@@ -13,6 +13,7 @@ editor_options:
 <br>
 <br>
 
+
 ```{r setup, echo=FALSE}
 library(DT)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
