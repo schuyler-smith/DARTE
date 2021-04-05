@@ -264,9 +264,10 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ylab("Percentage of Reads") + 
   scale_fill_manual(values = colors[c(2,5,4,3)], name = "Read Classification")
 ```
+<br>
 
 ### Artifact
-```{r _artifact_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
+```{r artifact_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(fill="Artifact")) + 
@@ -279,9 +280,10 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ylab("Percentage of Reads") + 
   scale_fill_manual(values = colors[c(2)], name = "Read Classification")
 ```
+<br>
 
 ### True-Positive
-```{r _tp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
+```{r tp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_tp, fill="True-Positive") ) + 
@@ -294,9 +296,10 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ylab("Percentage of Reads") + 
   scale_fill_manual(values = colors[c(3)], name = "Read Classification")
 ```
+<br>
 
 ### False-Positive
-```{r _fp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
+```{r fp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_fp, fill="False-Positive") ) + 
@@ -309,9 +312,10 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ylab("Percentage of Reads") + 
   scale_fill_manual(values = colors[c(4)], name = "Read Classification")
 ```
+<br>
 
 ### False-Negative
-```{r _fn_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
+```{r fn_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_fn, fill="False-Negative") ) + 
@@ -324,7 +328,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ylab("Percentage of Reads") + 
   scale_fill_manual(values = colors[c(5)], name = "Read Classification")
 ```
-
+<br>
 
 ## Artifact Reads
 

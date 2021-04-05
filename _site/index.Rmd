@@ -8,6 +8,10 @@ output:
 ---
 <br>
 
+Authors: Schuyler D. Smith, Jinlyung Choi, Nicole Ricker, Fan Yang, Heather Allen, Adina Howe
+
+<br>
+
 # Abstract
 Monitoring the spread of antibiotic resistance genes in environmental ecosystems faces significant obstacles, predominantly due to the cost and efficiency of methods available for the task. We developed Diversity of Antibiotic Resistance genes and Transfer Elements-Quantitative Monitoring (DARTE-QM), a method implementing high-throughput sequencing to simultaneously target thousands of antibiotic resistant genes representing a full-spectrum of antibiotic resistance classes seen in environmental systems. In this study, we demonstrate DARTE-QM screening 673 antibiotic resistant genes in environmental samples originating from manure, soil, and animal feces, in addition to a mock-community used as a control to test performance. DARTE-QM offers a supplemental approach to studying antibiotic resistance in environments, showing advantages in efficiency, ergo ability to scale for many samples, that may alleviate obstacles for researchers in this area.
 
@@ -20,14 +24,12 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 #### [Read Processing Pipeline](sequencing.html#Read_Processing_Pipeline)
 <br>
 
-
 # Primer Analysis
 #### [Primer Success Tables](primer_analysis.html#Primer_Success_Tables)
 #### [Success Metrics](primer_analysis.html#Success_Metrics)
 #### [Primer Performance Graphs](primer_analysis.html#Primer_Performance_Graphs)
 #### [Artifact Reads](primer_analysis.html#Artifact_Reads)
 <br>
-
 
 # Mock Evalutaion
 #### [Theoretical ARG Counts](mock_analysis.html#Theoretical_ARG_Counts)
@@ -37,7 +39,6 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 #### [Unexpecte ARGs](mock_analysis.html#Unexpecte_ARGs)
 <br>
 
-
 # Sample analysis
 #### [ARG Profile](sample_analysis.html#ARG_Profile)
 #### [Ordination](sample_analysis.html#Ordination)
@@ -46,12 +47,10 @@ Monitoring the spread of antibiotic resistance genes in environmental ecosystems
 #### [K-Means Clustering](sample_analysis.html#K-Means_Clustering)
 <br>
 
-
 # Metagenome Comparison
 #### [All ARGs Found](metagenome_comparison.html#All_ARGs_Found)
 #### [DARTE-QM Target ARGs](metagenome_comparison.html#DARTE-QM_Target_ARGs)
 <br>
-
 
 # Data
 ### [Antibioti Resistance Genes](data.html#Antibiotic_Resistance_Genes)
@@ -75,7 +74,6 @@ File | Description
 [Sample ARG Counts](data.html#Sample_Info) | count tables for ARGs by sample 
 [Sample Metadata](data.html#Sample_Info) | file containing metadata for each of the samples analyzed
 <br>
-
 
 # Packages and Functions
 ### [R-Packages](packages_and_functions.html#R-Packages)
