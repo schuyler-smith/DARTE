@@ -12,16 +12,20 @@ output:
 <br>
 <br>
 
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, tidy = FALSE, size="small")
+```
+
 # Sequencing Results {.tabset .tabset-pills}
 <br>
 
-```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
-sample_seq_results <- fread('../data/sample_seq_results.csv')
+```{r setupsequencing, echo=FALSE}
+sample_seq_results <- fread('../data/samples/sample_seq_results.csv')
 ```
 
 ## Mock-Community {.tabset .tabset-pills}
-```{r mock, message=FALSE, warning=FALSE, echo=FALSE}
-mock_qual <- readRDS('../data/seq_qual/mock_qual.RDS')
+```{r mocksequencing, echo=FALSE}
+mock_qual <- readRDS('../data/sequencing/mock_qual.RDS')
 graph_data <- mock_qual[[1]]
 stat_data <- mock_qual[[2]]
 annotations <- mock_qual[[3]]
@@ -44,7 +48,7 @@ for (i in grep("_R1_", annotations$file)){
 <br>
 
 ### Sequence Results
-```{r mock_res, message=FALSE, warning=FALSE, echo=FALSE}
+```{r mock_ressequencing, echo=FALSE}
 datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('Mock', sample_seq_results$Sample)]])
 ```
 <br>
@@ -52,8 +56,8 @@ datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('Mock', 
 
 
 ## Soil Column I {.tabset .tabset-pills}
-```{r sci, message=FALSE, warning=FALSE, echo=FALSE}
-sci_qual <- readRDS('../data/seq_qual/sci_qual.RDS')
+```{r scisequencing, echo=FALSE}
+sci_qual <- readRDS('../data/sequencing/sci_qual.RDS')
 graph_data <- sci_qual[[1]]
 stat_data <- sci_qual[[2]]
 annotations <- sci_qual[[3]]
@@ -76,7 +80,7 @@ for (i in grep("_R1_", annotations$file)){
 <br>
 
 ### Sequence Results
-```{r sci_res, message=FALSE, warning=FALSE, echo=FALSE}
+```{r sci_ressequencing, echo=FALSE}
 datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('SCI_', sample_seq_results$Sample)]])
 ```
 <br>
@@ -84,8 +88,8 @@ datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('SCI_', 
 
 
 ## Soil Column II {.tabset .tabset-pills}
-```{r scii, message=FALSE, warning=FALSE, echo=FALSE}
-scii_qual <- readRDS('../data/seq_qual/scii_qual.RDS')
+```{r sciisequencing, echo=FALSE}
+scii_qual <- readRDS('../data/sequencing/scii_qual.RDS')
 graph_data <- scii_qual[[1]]
 stat_data <- scii_qual[[2]]
 annotations <- scii_qual[[3]]
@@ -108,7 +112,7 @@ for (i in grep("_R1_", annotations$file)){
 <br>
 
 ### Sequence Results
-```{r scii_res, message=FALSE, warning=FALSE, echo=FALSE}
+```{r scii_ressequencing, echo=FALSE}
 datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('SCII_', sample_seq_results$Sample)]])
 ```
 <br>
@@ -116,8 +120,8 @@ datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('SCII_',
 
 
 ## Swine Fecal {.tabset .tabset-pills}
-```{r fecal, message=FALSE, warning=FALSE, echo=FALSE}
-fecal_qual <- readRDS('../data/seq_qual/fecal_qual.RDS')
+```{r fecalsequencing, echo=FALSE}
+fecal_qual <- readRDS('../data/sequencing/fecal_qual.RDS')
 graph_data <- fecal_qual[[1]]
 stat_data <- fecal_qual[[2]]
 annotations <- fecal_qual[[3]]
@@ -141,7 +145,7 @@ for (i in grep("_R1_", annotations$file)){
 <br>
 
 ### Sequence Results
-```{r fecal_res, message=FALSE, warning=FALSE, echo=FALSE}
+```{r fecal_ressequencing, echo=FALSE}
 datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('X1P', sample_seq_results$Sample)]])
 ```
 <br>
@@ -149,34 +153,42 @@ datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('X1P', s
 <br>
 
 
-```{r, setup_seq_quals, echo=FALSE, eval=FALSE}
+```{r, setup_sequencings, echo=FALSE, eval=FALSE}
  file_path = '../data/raw_reads'
  files <- dir(file_path, full.names = TRUE)
  files <- normalizePath(files)
  mock_files <- files[grep('Mock', files)]
  mock_qual <- sequence_quality(mock_files)
- saveRDS(mock_qual, "../data/seq_qual/mock_qual.RDS")
+ saveRDS(mock_qual, "../data/sequencing/mock_qual.RDS")
 
  sci_files <- files[grep('SCI-', files)]
  sci_qual <- sequence_quality(sci_files)
- saveRDS(sci_qual, "../data/seq_qual/sci_qual.RDS")
+ saveRDS(sci_qual, "../data/sequencing/sci_qual.RDS")
 
  scii_files <- files[grep('SCII-', files)]
  scii_qual <- sequence_quality(scii_files)
- saveRDS(scii_qual, "../data/seq_qual/scii_qual.RDS")
+ saveRDS(scii_qual, "../data/sequencing/scii_qual.RDS")
 
  fecal_files <- files[grep('X1P', files)]
  fecal_qual <- sequence_quality(fecal_files)
- saveRDS(fecal_qual, "../data/seq_qual/fecal_qual.RDS")
+ saveRDS(fecal_qual, "../data/sequencing/fecal_qual.RDS")
 ```
 <br>
 <br>
 <br>
 
-# Read Processing Pipeline
+# Read Processing Pipeline {.tabset .tabset-pills}
 <br>
 
-### Software Used for Read Processing
+## Workflow 
+
+![\*Demultiplexing done for analysis, though not necessarily required for practical implementation of DARTE-QM.](images/DARTE-QM_analysis_pipeline.png){width=50%}
+
+<br>
+<br>
+<br>
+
+## Software
 
 [Cutadapt](https://cutadapt.readthedocs.io/en/stable/) - demultiplexing and primer-trimming
 <br>
@@ -191,7 +203,15 @@ datatable(sample_seq_results[Sample %in% sample_seq_results$Sample[grep('X1P', s
 [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) - basic local alignment search tool
 <br>
 [Basic local alignment search tool](https://www.sciencedirect.com/science/article/pii/S0022283605803602)
+
+[RDP-Classifier](http://rdp.cme.msu.edu/classifier/classifier.jsp;jsessionid=F982AA43F66459C6DCA8704AEF608786.10.0.0.9) - 16S classifier
 <br>
+[Naïve Bayesian Classifier for Rapid Assignment of rRNA Sequences into the New Bacterial Taxonomy](https://aem.asm.org/content/73/16/5261.short)
+
+<br>
+<br>
+
+# {-}
 
 ## Primer Trimming and Demultiplexing
 

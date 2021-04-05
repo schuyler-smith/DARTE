@@ -1,0 +1,21 @@
+,Strain,Genome_size,16S_genes,Genome_copies_per_microgram,micrograms,Reference or DSMZc catalogue number,Domain,Phylum,Class,Order,Family,Genus,Species
+1,Campylobacter jejuni 11168,1641481,3,564000000,0.1797,[22],Bacteria,Proteobacteria,Epsilonproteobacteria,Campylobacterales,Campylobacteraceae,Campylobacter,jejuni
+2,Salmonella enterica serovar Typhimurium SL1344,4878012,6,189000000,0.2298,[23],Bacteria,Proteobacteria,Gammaproteobacteria,Enterobacterales,Enterobacteriaceae,Salmonella,enterica
+3,Escherichia coli mg1655,4656144,7,199000000,0.2182,[24],Bacteria,Proteobacteria,Gammaproteobacteria,Enterobacterales,Enterobacteriaceae,Escherichia,coli
+4,Megasphaera elsdenii LC-1,2474718,7,374000000,0.1161,DSM20460,Bacteria,Firmicutes,Negativicutes,Veillonellales,Veillonellaceae,Megasphaera,elsdenii
+5,Cloacibacillus porcorum CL-84,3600000,3,257000000,0.3943,[25],Bacteria,Synergistetes,Synergistia,Synergistales,Synergistaceae,Cloacibacillus,porcorum
+6,Brachyspira hyodysenteriae,3050489,1,304000000,1,[26],Bacteria,Spirochaetes,Spirochaetia,Brachyspirales,Brachyspiraceae,Brachyspira,hyodysenteriae
+7,Glaesserella parasuis 29755,2224137,2,417000000,0.3645,[27],Bacteria,Proteobacteria,Gammaproteobacteria,Pasteurellales,Pasteurellaceae,Glaesserella,parasuis
+8,Bordetella bronchiseptica 1289,5207899,3,178000000,0.5693,[28],Bacteria,Proteobacteria,Betaproteobacteria,Burkholderiales,Alcaligenaceae,Bordetella,bronchiseptica
+9,Staphylococcus aureus USA300,2872915,5,322000000,0.1888,[29],Bacteria,Firmicutes,Bacilli,Bacillales,Staphylococcaceae,Staphylococcus,aureus
+10,Bacteroides thetaiotamicron,6293399,5,147000000,0.4136,DSM 2079,Bacteria,Bacteroidetes,Bacteroidia,Bacteroidales,Bacteroidaceae,Bacteroides,thetaiotamicron
+11,Faecalibacterium prausnitzii A2-165,3080849,3,301000000,0.3367,DSM17677,Bacteria,Firmicutes,Clostridia,Clostridiales,Ruminococcaceae,Faecalibacterium,prausnitzii
+12,Streptococcus parasanguinis,2153652,4,430000000,0.1767,DSM6778,Bacteria,Firmicutes,Bacilli,Lactobacillales,Streptococcaceae,Streptococcus,parasanguinis
+13,Parabacteroides merdae,4431877,3,209000000,0.4848,DSM19495,Bacteria,Bacteroidetes,Bacteroidia,Bacteroidales,Tannerellaceae,Parabacteroides,merdae
+14,Oscillibacter valericigenes,4470622,3,207000000,0.4895,DSM18026,Bacteria,Firmicutes,Clostridia,Clostridiales,Oscillospiraceae,Oscillibacter,valericigenes
+15,Desulfovibrio gigas,3788225,4,245000000,0.3102,DSM1382,Bacteria,Proteobacteria,Deltaproteobacteria,Desulfovibrionales,Desulfovibrionaceae,Desulfovibrio,gigas
+16,Lactobacillus delbruekii subspecies bulgaricus,1864998,9,497000000,0.068,DSM20081,Bacteria,Firmicutes,Bacilli,Lactobacillales,Lactobacillaceae,Lactobacillus,delbruekii
+17,Coriobacterium glomerans,2115681,2,438000000,0.347,DSM20642,Bacteria,Actinobacteria,Coriobacteriia,Coriobacteriales,Coriobacteriaceae,Coriobacterium,glomerans
+18,Oxalobacter formigenes BA-2,2509362,1,369000000,0.8238,DSM4420,Bacteria,Proteobacteria,Betaproteobacteria,Burkholderiales,Oxalobacteraceae,Oxalobacter,formigenes
+19,Roseburia hominis A2-183,3592125,4,258000000,0.2946,DSM 16839,Bacteria,Firmicutes,Clostridia,Eubacteriales,Lachnospiraceae,Roseburia,hominis
+20,Methanobrevibacter smithii,1704865,1,543000000,0.5599,DSM2375,Archaea,Euryarchaeota,Methanomada,Methanobacteriales,Methanobacteriaceae,Methanobrevibacter,smithiid

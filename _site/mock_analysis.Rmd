@@ -5,80 +5,308 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
 <br>
 <br>
 
-
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 library(data.table)
 library(ggplot2)
 library(data.table)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
-```{r create_mock_counts, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
-rrna <- c('HM798937.1.1383','LC124582.1.1424','GQ927630.1.918','FJ680748.1.1374',
-          'FJ455902.1.1529','KY355700.1.900','KP308750.18552.19877','MH337785.1',
-          'AY779826.1.900','FR685529.1.1448','FJ365469.1.1342','JQ278775.1.1454',
-          'MH938429.1','FJ363919.1.1352','FJ516926.1.1472','JN521105.1.1285',
-          'KP090991.1.1467','FJ716960.1.1550','MH938447.1','KT381382.1.900',
-          'KY898052.1','KY898059.1','FPLP01012084.16.1433','FJ478940.1.1496',
-          'b0463','SL1344_RS02425')
+## Theoretical ARG Counts {.tabset .tabset-pills}
 
-mock_blast <- data.table::fread('../../data/mock/reverse_primers.blast')
+### ARG Abundances
 
-mock_blast <- mock_blast[!(V1 %in% rrna)]
-
-mock_blast <- mock_blast[V4 > 20]
-mock_blast <- mock_blast[V3 > 95]
-setorder(mock_blast, 'V2', 'V9')
+```{r create_mock_counts}
+mock_samples <- metadata[grep('Mock', metadata$`Sample Name`),][Analyzed == TRUE]$`Sample Name`
+for_blast <- data.table::fread('../data/mock/forward_primers.blast')
+  for_blast <- merge(for_blast, classifications, by.x = "V1", by.y = "Primer")
+  for_blast <- for_blast[ARG != "16S"]
+  for_blast <- for_blast[V3 == 100]
+  for_blast <- for_blast[V4 >= 18]
+rev_blast <- data.table::fread('../data/mock/reverse_primers.blast')
+  rev_blast <- merge(rev_blast, classifications, by.x = "V1", by.y = "Primer")
+  rev_blast <- rev_blast[ARG != "16S"]
+  rev_blast <- rev_blast[V3 == 100]
+  rev_blast <- rev_blast[V4 >= 18]
+mock_blast <- for_blast[paste0( for_blast[[1]], for_blast[[2]]) %in% paste0(rev_blast[[1]], rev_blast[[2]]),]
 
 strains[, Abundance := Genome_copies_per_microgram * micrograms]
-
 mock_genome <- vector()
+i=1
 for(genome in mock_blast$V2){
 	genome <- mock_genome_names[sapply(strsplit(mock_genome_names, ' '), FUN=function(x){any(x %in% genome)})]
 	genome <- strains[apply(strains,1,FUN=function(x){any(x %in% unlist(strsplit(genome, " ")))})]$Strain
 	mock_genome <- c(mock_genome, genome)
 } 
+set(mock_blast, j = "V2", value = mock_genome)
+setorder(mock_blast, V2, V9)
 
-mock_genomes[, ARG := classifications[[2]][match(mock_genomes[['V1']], classifications[[3]])]]
-mock_genomes[, ARG_Family := classifications[[1]][match(mock_genomes[['V1']], classifications[[3]])]]
-mock_genomes$V4[-c(1,2,39,41,42,44,45,57,82,83)]
-a <- mock_genomes[,c('V2', 'V1', 'V9', 'ARG', 'ARG_Family')]
+mock_expected_counts <- mock_blast[,c('V2', 'V1', 'V9', 'ARG', 'ARG_Family')]
+setnames(mock_expected_counts, c('V2','V1'), c('Microbe', 'Primer'))
+mock_expected_counts <- merge(mock_expected_counts, strains, by.x = "Microbe", by.y = "Strain")
+mock_expected_counts <- mock_expected_counts[, .(count = sum(Abundance)), by = c( 'ARG_Family', "ARG", 'Primer', "Microbe")]
+mock_expected_counts[, count := round(count/sum(count), 4)]
+mock_expected_counts[,Sample := 'Theoretical']
+setcolorder(mock_expected_counts, c("Sample", "Microbe", "ARG", "ARG_Family", 'Primer', "count"))
+```
 
-setnames(a, c('V2','V1'), c('Microbe', 'Primer'))
+```{r expected_table, echo=FALSE}
+datatable(mock_expected_counts[,-c('Sample')])
+```
 
-a[, abundance := mock_info[unlist(sapply(a[[1]], grep, mock_info$Strain))]$Abundance]
-a$abundance[1:3] <- a$abundance[1:3]/3
-a$abundance[39:40] <- a$abundance[39:40]/2
-a$abundance[41:43] <- a$abundance[41:43]/2
-a$abundance[44:46] <- a$abundance[44:46]/3
-a$abundance[57:58] <- a$abundance[57:58]/2
-a$abundance[82:84] <- a$abundance[82:84]/3
+### Profile
 
-a <- a[, .(count = sum(abundance)), by = c( 'ARG_Family', "ARG", 'Primer', "Microbe")]
-a[, count := (count/sum(count))]
-# a
-a[,Sample := 'Theoretical']
-setcolorder(a, c("Sample", "Microbe", "ARG", "ARG_Family", 'Primer', "count"))
-saveRDS(a, '../data/mock_ARG_counts.rds')
-mock_ARGs <- readRDS('../data/mock_ARG_counts.rds')
-set(mock_ARGs, j = "Primer", value = gsub('\\:', '_', mock_ARGs$Primer))
-expected_mock <- mock_ARGs$Primer
-mock_samples <- metadata[grep('Mock', metadata$`Sample Name`),][Analyzed == TRUE]$`Sample Name`
+```{r theoretical_pie}
+graph_data <- mock_expected_counts[, c("Sample", "ARG_Family", "count")]
+graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=ARG_Family, .SDcols=c("count")]
+set(graph_data, j = "ARG_Family", value = factor(graph_data$ARG_Family, levels = sort(graph_data$ARG_Family)))
+setorder(graph_data, -ARG_Family)
+graph_data[, ypos := cumsum(count)- 0.5*count]
+mock_profile <- ggplot(graph_data, aes(x="", y=count, fill=ARG_Family)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) +
+  theme_void() + 
+  scale_fill_manual(values = schuylR::create_palette(length(unique(graph_data[['ARG_Family']])))) +
+  geom_text(aes(y = ypos, label = ARG_Family), color = "black", size=4, nudge_x = 0.3)
+```
 
+```{r theoretical_pie_out, echo=FALSE}
+mock_profile
+```
 
+## Primer Success {.tabset .tabset-pills}
+
+```{r primer_success}
+mock_expected_ARGs <- sort(mock_expected_counts$Primer)
+mock_observed_counts <- read_counts[, c(1:3, grep('Mock', colnames(read_counts))), with = FALSE]
+mock_observed_counts <- mock_observed_counts[rowSums(mock_observed_counts[,-c(1:3)]) > 1,]
+mock_successful_primers <- mock_expected_ARGs[mock_expected_ARGs %in% mock_observed_counts$Primer]
+unexpected_primers <- mock_observed_counts$Primer[!(mock_observed_counts$Primer %in% mock_expected_ARGs)]
+```
+
+DARTE-QM found **`r length(mock_successful_primers)`** (`r round(length(mock_successful_primers)/length(mock_expected_ARGs) * 100, 1)`%) of the **`r length(mock_expected_ARGs)`** primers in the Mock-Community pangenomes that were targeted.
+
+<br>
+<br>
+
+### Primer-Heatmap
+<br>
+
+```{r mock_primers_found}
+classification <- 'Primer'
+expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
+expected_genes[, Abundance := count * 20000]
+expected_genes <- dcast(expected_genes, Primer ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
+
+graph_data <- mock_observed_counts[Primer %in% mock_successful_primers]
+graph_data <- merge(expected_genes, graph_data[,-c(1:3)[!(colnames(graph_data)[1:3] %in% classification)], 
+                                               with=FALSE], by = classification, all = TRUE)
+graph_data <- schuylR::replace_NA(graph_data)
+graph_data <- rarefy(data=graph_data, min(colSums(graph_data[,-1])))
+graph_data <- melt(graph_data, id.vars = classification, variable.name = 'Sample', value.name = 'Abundance')
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], 
+                                               levels = c('Theoretical', mock_samples)))
+primer_graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by = c('Sample', classification), .SDcols=c("Abundance")]
+
+setorder(graph_data, Abundance)
+set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), 
+                                                   levels = unique(as.character(graph_data[[classification]]))))
+set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
+setorder(graph_data, Sample)
+
+Primer_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
+  geom_tile(color = "white", size = 0.25) +
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), 
+        axis.text.y = element_text(hjust = 0.95, size = 10), 
+        axis.title.x = element_text(size = 10, face = "bold"), 
+        axis.title.y = element_text(size = 10, face = "bold"),
+        axis.ticks.x = element_blank(), 
+        legend.title = element_text(size = 8, face = "bold"), 
+        legend.text = element_text(size = 8),
+        legend.spacing.x = unit(0.005, "npc"), 
+        legend.key.size = unit(6, "mm"), 
+        legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), 
+        panel.background = element_rect(color = "black",  size = 1.4), 
+        strip.text.x = element_text(size = 10, face = "bold"), 
+        strip.background = element_rect(colour = "black", size = 1.4)) + 
+  scale_x_discrete(expand = expansion(mult = 0, add = 0.53), 
+  labels = c("Theoretical", 
+    "Mock + spike 0.0 - rep 1","Mock + spike 0.0 - rep 2",
+    "Mock + spike 0.0025 - rep 1","Mock + spike 0.0025 - rep 2","Mock + spike 0.0025 - rep 3",
+    "Mock + spike 0.009 - rep 1","Mock + spike 0.009 - rep 2","Mock + spike 0.009 - rep 3",
+    "Mock + spike 0.025 - rep 1","Mock + spike 0.025 - rep 2",
+    "Mock + spike 0.12 - rep 1","Mock + spike 0.12 - rep 2","Mock + spike 0.12 - rep 3",
+    "Mock + spike 0.25 - rep 1","Mock + spike 0.25 - rep 2","Mock + spike 0.25 - rep 3")) +  
+  ggraph::scale_fill_viridis(limits = c(min(graph_data$Abundance, na.rm = T), max(graph_data$Abundance, na.rm = T))) +
+  labs(x = "Sample")
+```
+
+```{r primer_counts_out, echo=FALSE}
+Primer_counts
+```
+
+### ARG-Heatmap
+<br>
+
+```{r ARG_heatmap}
+classification <- 'ARG'
+expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
+expected_genes[, Abundance := count * 20000]
+expected_genes <- dcast(expected_genes, ARG ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
+
+graph_data <- mock_observed_counts[Primer %in% mock_successful_primers]
+graph_data <- merge(expected_genes, graph_data[,-c(1:3)[!(colnames(graph_data)[1:3] %in% classification)], 
+                                               with=FALSE], by = classification, all = TRUE)
+graph_data <- schuylR::replace_NA(graph_data)
+graph_data <- rarefy(data=graph_data, min(colSums(graph_data[,-1])))
+graph_data <- melt(graph_data, id.vars = classification, variable.name = 'Sample', value.name = 'Abundance')
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], 
+                                               levels = c('Theoretical', mock_samples)))
+graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by = c('Sample', classification), .SDcols=c("Abundance")]
+
+setorder(graph_data, Abundance)
+set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), levels = unique(as.character(graph_data[[classification]]))))
+set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
+
+setorder(graph_data, Sample)
+ARG_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
+  geom_tile(color = "white", size = 0.25) +
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), 
+        axis.text.y = element_text(hjust = 0.95, size = 10), 
+        axis.title.x = element_text(size = 10, face = "bold"), 
+        axis.title.y = element_text(size = 10, face = "bold"),
+        axis.ticks.x = element_blank(), 
+        legend.title = element_text(size = 8, face = "bold"), 
+        legend.text = element_text(size = 8),
+        legend.spacing.x = unit(0.005, "npc"), 
+        legend.key.size = unit(6, "mm"), 
+        legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), 
+        panel.background = element_rect(color = "black",  size = 1.4), 
+        strip.text.x = element_text(size = 10, face = "bold"), 
+        strip.background = element_rect(colour = "black", size = 1.4)) + 
+  scale_x_discrete(expand = expansion(mult = 0, add = 0.53), 
+  labels = c("Theoretical", 
+    "Mock + spike 0.0 - rep 1","Mock + spike 0.0 - rep 2",
+    "Mock + spike 0.0025 - rep 1","Mock + spike 0.0025 - rep 2","Mock + spike 0.0025 - rep 3",
+    "Mock + spike 0.009 - rep 1","Mock + spike 0.009 - rep 2","Mock + spike 0.009 - rep 3",
+    "Mock + spike 0.025 - rep 1","Mock + spike 0.025 - rep 2",
+    "Mock + spike 0.12 - rep 1","Mock + spike 0.12 - rep 2","Mock + spike 0.12 - rep 3",
+    "Mock + spike 0.25 - rep 1","Mock + spike 0.25 - rep 2","Mock + spike 0.25 - rep 3")) +  
+  ggraph::scale_fill_viridis(limits = c(min(graph_data$Abundance, na.rm = T), max(graph_data$Abundance, na.rm = T))) +
+  labs(x = "Sample")
+```
+
+```{r ARG_counts_out, echo=FALSE}
+ARG_counts
+```
+
+### ARG-Family-Heatmap
+<br>
+
+```{r ARG-family_heatmap}
+classification <- 'ARG_Family'
+expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
+expected_genes[, Abundance := count * 20000]
+expected_genes <- dcast(expected_genes, ARG_Family ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
+
+graph_data <- mock_observed_counts[Primer %in% mock_successful_primers]
+graph_data <- merge(expected_genes, graph_data[,-c(1:3)[!(colnames(graph_data)[1:3] %in% classification)], 
+                                               with=FALSE], by = classification, all = TRUE)
+graph_data <- schuylR::replace_NA(graph_data)
+graph_data <- rarefy(data=graph_data, min(colSums(graph_data[,-1])))
+graph_data <- melt(graph_data, id.vars = classification, variable.name = 'Sample', value.name = 'Abundance')
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], 
+                                               levels = c('Theoretical', mock_samples)))
+graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by = c('Sample', classification), .SDcols=c("Abundance")]
+
+setorder(graph_data, Abundance)
+set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), levels = unique(as.character(graph_data[[classification]]))))
+set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
+
+setorder(graph_data, Sample)
+ARG_Family_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
+  geom_tile(color = "white", size = 0.25) +
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), 
+        axis.text.y = element_text(hjust = 0.95, size = 10), 
+        axis.title.x = element_text(size = 10, face = "bold"), 
+        axis.title.y = element_text(size = 10, face = "bold"),
+        axis.ticks.x = element_blank(), 
+        legend.title = element_text(size = 8, face = "bold"), 
+        legend.text = element_text(size = 8),
+        legend.spacing.x = unit(0.005, "npc"), 
+        legend.key.size = unit(6, "mm"), 
+        legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), 
+        panel.background = element_rect(color = "black",  size = 1.4), 
+        strip.text.x = element_text(size = 10, face = "bold"), 
+        strip.background = element_rect(colour = "black", size = 1.4)) + 
+  scale_x_discrete(expand = expansion(mult = 0, add = 0.53), 
+  labels = c("Theoretical", 
+    "Mock + spike 0.0 - rep 1","Mock + spike 0.0 - rep 2",
+    "Mock + spike 0.0025 - rep 1","Mock + spike 0.0025 - rep 2","Mock + spike 0.0025 - rep 3",
+    "Mock + spike 0.009 - rep 1","Mock + spike 0.009 - rep 2","Mock + spike 0.009 - rep 3",
+    "Mock + spike 0.025 - rep 1","Mock + spike 0.025 - rep 2",
+    "Mock + spike 0.12 - rep 1","Mock + spike 0.12 - rep 2","Mock + spike 0.12 - rep 3",
+    "Mock + spike 0.25 - rep 1","Mock + spike 0.25 - rep 2","Mock + spike 0.25 - rep 3")) +  
+  ggraph::scale_fill_viridis(limits = c(min(graph_data$Abundance, na.rm = T), max(graph_data$Abundance, na.rm = T))) +
+  labs(x = "Sample")
+```
+
+```{r ARG_Family_counts_out, echo=FALSE}
+ARG_Family_counts
+```
+
+## {-}
+
+<br>
+
+### Distance Matrix
+
+```{r distances}
+dist_matrix <- primer_graph_data
+dist_matrix <- dcast(dist_matrix[Primer %in% dist_matrix[, sum(Abundance), by = 'Primer'][V1 > 0]$Primer],
+           Primer ~ Sample, value.var = 'Abundance')
+replace_DT_NA(dist_matrix)
+```
+
+`r round(mean(vegdist(t(dist_matrix[,-c(1,2)]))), 2)`
+`r round(mean(as.matrix(vegdist(t(dist_matrix[,-c(1)])))[-1,1]), 2)`
+
+```{r unexpected_graph_data}
+classification = "Primer"
+graph_data <- mock_observed_counts[Primer %in% unexpected_primers]
+graph_data <- melt(graph_data, id.vars = colnames(graph_data)[1:3], variable.name = 'Sample')
+graph_data <- graph_data[, sum(value), by = c('Sample', classification)]
+set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], levels = mock_samples))
+
+graph_data[[classification]] <- factor(graph_data[[classification]], 
+                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+set(graph_data, which(graph_data[['V1']] < 1), j='V1', value=NA)
+
+unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill = "V1")) + 
+  geom_tile(color = "white", size = 0.25) +
+  guides(colour = guide_legend(ncol = ceiling(length(
+    unique(graph_data[[classification]])
+  ) / 25))) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 10), axis.text.y = element_text(hjust = 0.95, size = 10), axis.title.x = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10, face = "bold"), axis.ticks.x = element_blank(), legend.title = element_text(size = 8, face = "bold"), legend.text = element_text(size = 8), legend.spacing.x = unit(0.005, "npc"), legend.key.size = unit(6, "mm"), legend.background = element_rect(fill = (alpha = 0), color = "black", size = 0.25), panel.background = element_rect(color = "black", size = 1.4), strip.text.x = element_text(size = 10, face = "bold"), strip.background = element_rect(colour = "black", size = 1.4)) + scale_x_discrete(expand = expansion(mult = 0, add = 0.53)) + 
+  labs(x = "Sample") + 
+  ggraph::scale_fill_viridis(limits = c(0.0001, max(graph_data$V1, na.rm = T))) 
 ```
 
 
-## Synthetic Oligonucleotide 'Spike'  {.tabset .tabset-pills}
+## Synthetic Oligonucleotide 'Spike' {.tabset .tabset-pills}
 
 ```{r setup_spike, message=FALSE, warning=FALSE, echo=FALSE}
 spike_counts <- read_counts[ARG == 'spike']
-mock_samples <- metadata[grep('Mock', metadata$`Sample Name`),][Analyzed == TRUE]$`Sample Name`
 ```
 
 ```{r spike_counts, echo=FALSE, message=FALSE, warning=FALSE}

@@ -101,7 +101,7 @@ saveRDS(primer_success, '../data/primer_success.RDS')
 
 ### Primers by Samples
 ```{r readin_success, message=FALSE, warning=FALSE, echo=FALSE}
-primer_success <- readRDS('../data/primer_success.RDS')
+primer_success <- readRDS('../data/primers/primer_success.RDS')
 ```
 
 ```{r success_table, echo=FALSE, message=FALSE, warning=FALSE}
@@ -330,7 +330,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 
 ### Examples of Artifact Reads
 ```{r example_artifacts, warning=FALSE, echo=FALSE}
-fread('../data/example_artifacts.fa', header = FALSE, col.names = "SCI-Soil-D59-A R1 Reads")
+fread('../data/primers/example_artifacts.fa', header = FALSE, col.names = "SCI-Soil-D59-A R1 Reads")
 ```
 
 <br>
