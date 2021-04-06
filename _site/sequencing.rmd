@@ -19,7 +19,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 # Sequencing Results {.tabset .tabset-pills}
 <br>
 
-```{r, setup_sequencing, eval=FALSE, echo=FALSE}
+```{r, setup_sequencing, echo=FALSE, eval=FALSE}
  file_path = '../data/raw_reads'
  files <- dir(file_path, full.names = TRUE)
  files <- normalizePath(files)

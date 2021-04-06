@@ -5,6 +5,8 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     code_folding: hide
+editor_options: 
+  chunk_output_type: console
 ---
 <br>
 <br>
@@ -148,17 +150,8 @@ alpha <- alpha[,-1]
 replace_DT_NA(alpha)
 
 alpha <- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
-if (index == "shannon") {
-  alpha <- -alpha * log(alpha)
-} else {
-  alpha <- alpha * alpha
-}
+alpha <- -alpha * log(alpha)
 alpha <- alpha[,lapply(.SD, sum, na.rm = TRUE)]
-if (index == "simpson") {
-  alpha <- 1 - alpha
-} else if (index == "invsimpson") {
-  alpha <- 1/alpha
-}
 
 samples <- dcast(compare_data, Sample + Tech + Matrix ~ ARG, value.var = 'relative_abundance')
 
@@ -169,7 +162,7 @@ alpha_data <- data.table(Sample = samples$Sample,
 color_count <- length(unique(paste(alpha_data$Tech, alpha_data$Matrix)))
 alpha_graph_colors <- schuylR::create_palette(color_count, colors)
   
-div_graph<- ggplot(alpha_data, aes(Matrix, Alpha)) + 
+div_graph <- ggplot(alpha_data, aes(Matrix, Alpha)) + 
     geom_boxplot(show.legend = FALSE, fill = alpha_graph_colors) + 
     theme_bw() +   
   theme(
@@ -285,17 +278,8 @@ alpha <- alpha[,-1]
 replace_DT_NA(alpha)
 
 alpha <- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
-if (index == "shannon") {
-  alpha <- -alpha * log(alpha)
-} else {
-  alpha <- alpha * alpha
-}
+alpha <- -alpha * log(alpha)
 alpha <- alpha[,lapply(.SD, sum, na.rm = TRUE)]
-if (index == "simpson") {
-  alpha <- 1 - alpha
-} else if (index == "invsimpson") {
-  alpha <- 1/alpha
-}
 
 samples <- dcast(compare_data, Sample + Tech + Matrix ~ ARG, value.var = 'relative_abundance')
 
@@ -333,11 +317,24 @@ div_graph
 ### Resitome Differences
 
 #### Swine Manure
-With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found `r length(unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))` of the `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))`, with and alpha diversity of `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"]$Alpha, na.rm = T), 2)`.
+With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found `r length(unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG)))` of the `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))` that DARTE-QM found, with an alpha diversity of `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"]$Alpha, na.rm = T), 2)`. The metagenome technology was able to find `r sum(!(unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG)) %in% unique(as.character(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))))` ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.
+
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName3"> Show Table </button>  
+<div id="BlockName3" class="collapse"> 
+```{r arg_list3, echo=FALSE}
+datatable(data.frame(ARG = unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG))[!(unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG)) %in% unique(as.character(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure"][relative_abundance > 0]$ARG)))]))
+```
+</div>
 <br>
 
 #### Manunre-Soil
-With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found `r length(unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))` of the `r length(unique(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))`, with and alpha diversity of `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"]$Alpha, na.rm = T), 2)`.
+With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found `r length(unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)))` of the `r length(unique(as.character(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)))`, with an alpha diversity of `r round(mean(alpha_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"]$Alpha, na.rm = T), 2)`. The metagenome technology was able to find `r sum(!(unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)) %in% unique(as.character(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))))` ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.
 
-
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName4"> Show Table </button>  
+<div id="BlockName4" class="collapse"> 
+```{r arg_list4, echo=FALSE}
+datatable(data.frame(ARG = unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG))[!(unique(as.character(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)) %in% unique(as.character(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure"][relative_abundance > 0]$ARG)))]))
+```
+</div>
+<br>
 

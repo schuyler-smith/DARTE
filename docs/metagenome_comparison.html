@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-05" />
+<meta name="date" content="2021-04-06" />
 
 <title>Comaprison of DARTE-QM to Metagenome</title>
 
@@ -446,7 +446,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Comaprison of DARTE-QM to Metagenome</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-05</h4>
+<h4 class="date">2021-04-06</h4>
 
 </div>
 
@@ -582,17 +582,8 @@ alpha &lt;- alpha[,-1]
 replace_DT_NA(alpha)
 
 alpha &lt;- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
-if (index == &quot;shannon&quot;) {
-  alpha &lt;- -alpha * log(alpha)
-} else {
-  alpha &lt;- alpha * alpha
-}
+alpha &lt;- -alpha * log(alpha)
 alpha &lt;- alpha[,lapply(.SD, sum, na.rm = TRUE)]
-if (index == &quot;simpson&quot;) {
-  alpha &lt;- 1 - alpha
-} else if (index == &quot;invsimpson&quot;) {
-  alpha &lt;- 1/alpha
-}
 
 samples &lt;- dcast(compare_data, Sample + Tech + Matrix ~ ARG, value.var = &#39;relative_abundance&#39;)
 
@@ -603,7 +594,7 @@ alpha_data &lt;- data.table(Sample = samples$Sample,
 color_count &lt;- length(unique(paste(alpha_data$Tech, alpha_data$Matrix)))
 alpha_graph_colors &lt;- schuylR::create_palette(color_count, colors)
   
-div_graph&lt;- ggplot(alpha_data, aes(Matrix, Alpha)) + 
+div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) + 
     geom_boxplot(show.legend = FALSE, fill = alpha_graph_colors) + 
     theme_bw() +   
   theme(
@@ -632,8 +623,8 @@ div_graph&lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
 Show Table
 </button>
 <div id="BlockName" class="collapse">
-<div id="htmlwidget-8369b7ec5258a8994c40" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-8369b7ec5258a8994c40">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47"],["tetT","tetA(P)","tet(36)","tetM","tet(32)","tetW","tetY","tetZ","tet(40)","tet(33)","tetB(P)","tet(31)","tetG","tetS","tetQ","tetX","APH(3')-Ia","APH(2'')-Ib","ANT(6)-Ib","APH(3'')-Ib","APH(3')-VI","sul1","sul2","lnuA","lnuF","lnuC","ErmG","ErmB","ErmT","ErmC","ErmF","ErmQ","ErmA","ErmX","Erm(47)","Erm(35)","ErmY","Erm(42)","Erm(36)","ANT(6)-Ia","aadA7","aadA5","mdtO","str","APH(4)-Ia","aadA24","mefA"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-2e36001863c17ca869c5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2e36001863c17ca869c5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47"],["tetT","tetA(P)","tet(36)","tetM","tet(32)","tetW","tetY","tetZ","tet(40)","tet(33)","tetB(P)","tet(31)","tetG","tetS","tetQ","tetX","APH(3')-Ia","APH(2'')-Ib","ANT(6)-Ib","APH(3'')-Ib","APH(3')-VI","sul1","sul2","lnuA","lnuF","lnuC","ErmG","ErmB","ErmT","ErmC","ErmF","ErmQ","ErmA","ErmX","Erm(47)","Erm(35)","ErmY","Erm(42)","Erm(36)","ANT(6)-Ia","aadA7","aadA5","mdtO","str","APH(4)-Ia","aadA24","mefA"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br></p>
 </div>
@@ -646,8 +637,8 @@ Show Table
 Show Table
 </button>
 <div id="BlockName2" class="collapse">
-<div id="htmlwidget-42c74a309315023b9c20" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-42c74a309315023b9c20">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62"],["AAC(3)-IVa","AAC(6')-Ib11","aadA15","aadA24","aadA5","aadA7","ACI-1","acrB","ANT(6)-Ia","ANT(6)-Ib","APH(2'')-Ib","APH(3'')-Ib","APH(3')-Ia","APH(3')-IIa","APH(3')-IIIa","APH(4)-Ia","cfr(C)","Erm(35)","Erm(36)","Erm(42)","Erm(47)","ErmA","ErmB","ErmC","ErmF","ErmG","ErmQ","ErmT","ErmX","lnuA","lnuC","lnuD","lnuF","mdsB","mdtA","mdtB","mdtC","mdtO","mefA","mefB","OXA-347","str","sul1","sul2","tet(31)","tet(33)","tet(36)","tet(40)","tetA","tetA(P)","tetB(P)","tetC","tetG","tetL","tetM","tetQ","tetS","tetT","tetW","tetX","tetY","tetZ"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e0f6935f3016f4c4218f" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e0f6935f3016f4c4218f">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62"],["AAC(3)-IVa","AAC(6')-Ib11","aadA15","aadA24","aadA5","aadA7","ACI-1","acrB","ANT(6)-Ia","ANT(6)-Ib","APH(2'')-Ib","APH(3'')-Ib","APH(3')-Ia","APH(3')-IIa","APH(3')-IIIa","APH(4)-Ia","cfr(C)","Erm(35)","Erm(36)","Erm(42)","Erm(47)","ErmA","ErmB","ErmC","ErmF","ErmG","ErmQ","ErmT","ErmX","lnuA","lnuC","lnuD","lnuF","mdsB","mdtA","mdtB","mdtC","mdtO","mefA","mefB","OXA-347","str","sul1","sul2","tet(31)","tet(33)","tet(36)","tet(40)","tetA","tetA(P)","tetB(P)","tetC","tetG","tetL","tetM","tetQ","tetS","tetT","tetW","tetX","tetY","tetZ"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br> <br></p>
 </div>
@@ -702,17 +693,8 @@ alpha &lt;- alpha[,-1]
 replace_DT_NA(alpha)
 
 alpha &lt;- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
-if (index == &quot;shannon&quot;) {
-  alpha &lt;- -alpha * log(alpha)
-} else {
-  alpha &lt;- alpha * alpha
-}
+alpha &lt;- -alpha * log(alpha)
 alpha &lt;- alpha[,lapply(.SD, sum, na.rm = TRUE)]
-if (index == &quot;simpson&quot;) {
-  alpha &lt;- 1 - alpha
-} else if (index == &quot;invsimpson&quot;) {
-  alpha &lt;- 1/alpha
-}
 
 samples &lt;- dcast(compare_data, Sample + Tech + Matrix ~ ARG, value.var = &#39;relative_abundance&#39;)
 
@@ -745,11 +727,27 @@ div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
 <h3>Resitome Differences</h3>
 <div id="swine-manure-1" class="section level4">
 <h4>Swine Manure</h4>
-<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 73 of the 128, with and alpha diversity of 3.06. <br></p>
+<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 73 of the 128 that DARTE-QM found, with an alpha diversity of 3.06. The metagenome technology was able to find 26 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName3">
+Show Table
+</button>
+<div id="BlockName3" class="collapse">
+<div id="htmlwidget-054c510b3a9e600591a3" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-054c510b3a9e600591a3">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26"],["tetO","tetV","tetJ","tetD","tet(45)","APH(2'')-If","APH(6)-Ia","lnuB","Erm(33)","ANT(4')-Ib","AAC(6')-Ip","aadA8","aadA22","aadA1","aadA16","lsaC","mphG","AAC(3)-Ib/AAC(6')-Ib''","AAC(6')-Ib11","AAC(6')-Iid","AAC(6')-Iak","AAC(3)-Ib","AAC(3)-IIc","OXA-258","aadA11","mphB"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<p><br></p>
 </div>
 <div id="manunre-soil" class="section level4">
 <h4>Manunre-Soil</h4>
-<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 106 of the 128, with and alpha diversity of 3.12.</p>
+<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 106 of the 128, with an alpha diversity of 3.12. The metagenome technology was able to find 44 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
+<button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName4">
+Show Table
+</button>
+<div id="BlockName4" class="collapse">
+<div id="htmlwidget-578b2eeba3b56848a2c5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-578b2eeba3b56848a2c5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44"],["tet(32)","tetD","tetO","tetV","tet(45)","tetJ","tet(39)","APH(6)-Ia","APH(2'')-If","APH(3')-VI","lnuB","Erm(33)","ErmY","ANT(4')-Ib","aadA22","aadA1","AAC(6')-Ip","aadA8","aadA6","aadA14","aadA16","aadA11","aadA13","acrA","lsaC","mphB","mphD","AAC(3)-Ib/AAC(6')-Ib''","AAC(6')-Iak","AAC(3)-IIc","AAC(6')-Iid","OXA-258","otrC","lsaB","OXA-29","AAC(3)-Ib","tet(43)","APH(3')-XV","tet(42)","APH(3')-VIa","otrB","AAC(2')-Ib","tetA(46)","OXA-209"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<p><br></p>
 </div>
 </div>
 </div>
