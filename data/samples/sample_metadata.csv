@@ -1,81 +1,81 @@
-Sample Name,Matrix,Day,Concentration (ng/ul) in 20ul volume,Spike,replication,who prepare,Original plate location,Original well location,Actual concentration (DNA concentration (ng/ul) * total volume (ul)),Location on 96-well plate for TruSeq sample prep,Analyzed
-Mock-0spike-A,Mock,NA,5,0,A,USDA,Tubes,NA,86.4,A1,FALSE
-Mock-0spike-B,Mock,NA,5,0,B,USDA,Tubes,NA,86.4,A2,TRUE
-Mock-0spike-C,Mock,NA,5,0,C,USDA,Tubes,NA,86.4,A3,TRUE
-Mock-0-0025spike-A,Mock,NA,5,0.0025,A,USDA,Tubes,NA,86.4,A4,TRUE
-Mock-0-0025spike-B,Mock,NA,5,0.0025,B,USDA,Tubes,NA,86.4,A5,TRUE
-Mock-0-0025spike-C,Mock,NA,5,0.0025,C,USDA,Tubes,NA,86.4,A6,TRUE
-Mock-0-009spike-A,Mock,NA,5,0.009,A,USDA,Tubes,NA,86.4,A7,TRUE
-Mock-0-009spike-B,Mock,NA,5,0.009,B,USDA,Tubes,NA,86.4,A8,TRUE
-Mock-0-009spike-C,Mock,NA,5,0.009,C,USDA,Tubes,NA,86.4,A9,TRUE
-Mock-0-025spike-A,Mock,NA,5,0.025,A,USDA,Tubes,NA,86.4,A10,TRUE
-Mock-0-025spike-B,Mock,NA,5,0.025,B,USDA,Tubes,NA,86.4,A11,TRUE
-Mock-0-025spike-C,Mock,NA,5,0.025,C,USDA,Tubes,NA,86.4,A12,FALSE
-Mock-0-12spike-A,Mock,NA,5,0.12,A,USDA,Tubes,NA,86.4,B1,TRUE
-Mock-0-12spike-B,Mock,NA,5,0.12,B,USDA,Tubes,NA,86.4,B2,TRUE
-Mock-0-12spike-C,Mock,NA,5,0.12,C,USDA,Tubes,NA,86.4,B3,TRUE
-Mock-0-25spike-A,Mock,NA,5,0.25,A,USDA,Tubes,NA,86.4,B4,TRUE
-Mock-0-25spike-B,Mock,NA,5,0.25,B,USDA,Tubes,NA,86.4,B5,TRUE
-Mock-0-25spike-C,Mock,NA,5,0.25,C,USDA,Tubes,NA,86.4,B6,TRUE
-SCI-Soil-D0-A,Soil A,0,86,no,A,Jin,Tubes,NA,1720,B7,FALSE
-SCI-Soil-D0-B,Soil A,0,70,no,B,Jin,Tubes,NA,1400,B8,FALSE
-SCI-Soil-D24-A,Manure-Soil A,24,100,no,A,Jin,Tubes,NA,2000,B9,TRUE
-SCI-Soil-D24-B,Manure-Soil A,24,58,no,B,Jin,Tubes,NA,1160,B10,FALSE
-SCI-Soil-D24-C,Manure-Soil A,24,103,no,C,Jin,Tubes,NA,2060,B11,TRUE
-SCI-Soil-D59-A,Manure-Soil A,59,131,no,A,Jin,Tubes,NA,2620,B12,FALSE
-SCI-Soil-D59-B,Manure-Soil A,59,75.2,no,B,Jin,Tubes,NA,1504,C1,TRUE
-SCI-Soil-D59-C,Manure-Soil A,59,48.4,no,C,Jin,Tubes,NA,968,C2,FALSE
-SCI-Soil-D108-A,Manure-Soil A,108,47.6,no,A,Jin,Tubes,NA,952,C3,FALSE
-SCI-Soil-D108-B,Manure-Soil A,108,44.8,no,B,Jin,Tubes,NA,896,C4,FALSE
-SCI-Soil-D108-C,Manure-Soil A,108,43.2,no,C,Jin,Tubes,NA,864,C5,FALSE
-SCI-Manure-A,Swine Manure,NA,22.21222911,no,A,Jin,Tubes,NA,444.2445822,C6,TRUE
-SCI-Manure-B,Swine Manure,NA,22.45011739,no,B,Jin,Tubes,NA,449.0023478,C7,TRUE
-SCI-Manure-C,Swine Manure,NA,22.51553667,no,C,Jin,Tubes,NA,450.3107333,C8,TRUE
-SCII-SoilPig-D0-A,Soil A,0,18.03134264,no,A,Jin,Tubes,NA,360.6268528,C9,TRUE
-SCII-SoilPig-D0-B,Soil A,0,15.70003752,no,B,Jin,Tubes,NA,314.0007504,C10,TRUE
-SCII-SoilPig-D0-C,Soil A,0,16.60996018,no,C,Jin,Tubes,NA,332.1992036,C11,FALSE
-SCII-SoilBeef-D0-A,Soil B,0,30.49668837,no,A,Jin,Tubes,NA,609.9337674,C12,TRUE
-SCII-SoilBeef-D0-B,Soil B,0,29.08720033,no,B,Jin,Tubes,NA,581.7440065,D1,TRUE
-SCII-SoilBeef-D0-C,Soil B,0,29.39050788,no,C,Jin,Tubes,NA,587.8101576,D2,TRUE
-SCII-SwineManure-A,Swine Manure,NA,29.62244895,no,A,Jin,Tubes,NA,592.448979,D3,TRUE
-SCII-SwineManure-B,Swine Manure,NA,26.48232369,no,B,Jin,Tubes,NA,529.6464738,D4,TRUE
-SCII-SwineManure-C,Swine Manure,NA,26.50016531,no,C,Jin,Tubes,NA,530.0033062,D5,TRUE
-SCII-BeefManure-A,Bovine Manure,NA,27.93344218,no,A,Jin,Tubes,NA,558.6688436,D6,FALSE
-SCII-BeefManure-B,Bovine Manure,NA,31.9775429,no,B,Jin,Tubes,NA,639.5508579,D7,FALSE
-SCII-BeefManure-C,Bovine Manure,NA,27.83828687,no,C,Jin,Tubes,NA,556.7657374,D8,FALSE
-SCII-Water-D11-A,Effluent,11,10,no,A,Jin,Tubes,NA,200,D9,FALSE
-SCII-Water-D11-B,Effluent,11,10,no,B,Jin,Tubes,NA,200,D10,FALSE
-SCII-Water-D11-C,Effluent,11,10,no,C,Jin,Tubes,NA,200,D11,FALSE
-X1P5N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A01,200,E1,FALSE
-X1P22N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B01,200,E2,FALSE
-X1P23N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C01,200,E3,FALSE
-X1P24N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D01,200,E4,FALSE
-X1P25N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,E01,200,E5,FALSE
-X1P26N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,F01,200,E6,FALSE
-X1P27N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,G01,200,E7,FALSE
-X1P28N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H01,200,E8,FALSE
-X1P36N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H02,200,E9,FALSE
-X1P37N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A03,200,E10,FALSE
-X1P38N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B03,200,E11,FALSE
-X1P39N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C03,200,E12,TRUE
-X1P40N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D03,200,F1,FALSE
-X1P41N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,E03,200,F2,FALSE
-X1P42N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,F03,200,F3,FALSE
-X1P43N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,G03,200,F4,FALSE
-X1P44N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H03,200,F5,FALSE
-X1P45N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A04,200,F6,TRUE
-X1P46N1AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B04,200,F7,TRUE
-X1P47N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C04,200,F8,FALSE
-X1P48N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D04,200,F9,FALSE
-X1P49N1BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,E04,200,F10,FALSE
-X1P59N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,F05,200,F11,FALSE
-X1P60N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,G05,200,F12,FALSE
-X1P61N3AFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,H05,200,G1,TRUE
-X1P63N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,A06,200,G2,TRUE
-X1P64N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,B06,200,G3,TRUE
-X1P65N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,C06,200,G4,FALSE
-X1P66N3BFD7,Swine Fecal,7,10,no,no,USDA,FS1-Fecal-Plate-1,D06,200,G5,FALSE
-SCI-Manure-0-025spike-A,Swine Manure,NA,22.21222911,0.025,A,"Jin, USDA",Tubes,NA,444.2445822,G6,TRUE
-SCI-Manure-0-025spike-B,Swine Manure,NA,22.21222911,0.025,B,"Jin, USDA",Tubes,NA,444.2445822,G7,TRUE
-SCI-Manure-0-025spike-C,Swine Manure,NA,22.21222911,0.025,C,"Jin, USDA",Tubes,NA,444.2445822,G8,TRUE
-NTC,Water,NA,NA,NA,no,USDA,NA,NA,0,H11,FALSE
+ID,Sample,Description,Matrix,Spike,Replicate,prepared by,Concentration (ng/ul) in 20ul volume,Actual concentration (DNA concentration (ng/ul) * total volume (ul)),Location on 96-well plate for TruSeq sample prep,Reference,Passed QC
+Q3_Mock_0spike_A,"Mock, 1",Mock with spike (0 ng/ml),Mock,0,1,USDA,5,86.4,A1,10.25380/iastate.14390342,FALSE
+Q3_Mock_0spike_B,"Mock, 2",Mock with spike (0 ng/ml),Mock,0,2,USDA,5,86.4,A2,10.25380/iastate.14390343,TRUE
+Q3_Mock_0spike_C,"Mock, 3",Mock with spike (0 ng/ml),Mock,0,3,USDA,5,86.4,A3,10.25380/iastate.14390344,TRUE
+Q3_Mock_0_0025spike_A,"Mock + spike (0.0025), 1",Mock with spike (x ng/ml),Mock,0.0025,1,USDA,5,86.4,A4,10.25380/iastate.14390345,TRUE
+Q3_Mock_0_0025spike_B,"Mock + spike (0.0025), 2",Mock with spike (x ng/ml),Mock,0.0025,2,USDA,5,86.4,A5,10.25380/iastate.14390346,TRUE
+Q3_Mock_0_0025spike_C,"Mock + spike (0.0025), 3",Mock with spike (x ng/ml),Mock,0.0025,3,USDA,5,86.4,A6,10.25380/iastate.14390347,TRUE
+Q3_Mock_0_009spike_A,"Mock + spike (0.009), 1",Mock with spike (x ng/ml),Mock,0.009,1,USDA,5,86.4,A7,10.25380/iastate.14390348,TRUE
+Q3_Mock_0_009spike_B,"Mock + spike (0.009), 2",Mock with spike (x ng/ml),Mock,0.009,2,USDA,5,86.4,A8,10.25380/iastate.14390349,TRUE
+Q3_Mock_0_009spike_C,"Mock + spike (0.009), 3",Mock with spike (x ng/ml),Mock,0.009,3,USDA,5,86.4,A9,10.25380/iastate.14390350,TRUE
+Q3_Mock_0_025spike_A,"Mock + spike (0.025), 1",Mock with spike (x ng/ml),Mock,0.025,1,USDA,5,86.4,A10,10.25380/iastate.14390351,TRUE
+Q3_Mock_0_025spike_B,"Mock + spike (0.025), 2",Mock with spike (x ng/ml),Mock,0.025,2,USDA,5,86.4,A11,10.25380/iastate.14390352,TRUE
+Q3_Mock_0_025spike_C,"Mock + spike (0.025), 3",Mock with spike (x ng/ml),Mock,0.025,3,USDA,5,86.4,A12,10.25380/iastate.14390353,FALSE
+Q3_Mock_0_12spike_A,"Mock + spike (0.12), 1",Mock with spike (x ng/ml),Mock,0.12,1,USDA,5,86.4,B1,10.25380/iastate.14390354,TRUE
+Q3_Mock_0_12spike_B,"Mock + spike (0.12), 2",Mock with spike (x ng/ml),Mock,0.12,2,USDA,5,86.4,B2,10.25380/iastate.14390355,TRUE
+Q3_Mock_0_12spike_C,"Mock + spike (0.12), 3",Mock with spike (x ng/ml),Mock,0.12,3,USDA,5,86.4,B3,10.25380/iastate.14390356,TRUE
+Q3_Mock_0_25spike_A,"Mock + spike (0.25), 1",Mock with spike (x ng/ml),Mock,0.25,1,USDA,5,86.4,B4,10.25380/iastate.14390357,TRUE
+Q3_Mock_0_25spike_B,"Mock + spike (0.25), 2",Mock with spike (x ng/ml),Mock,0.25,2,USDA,5,86.4,B5,10.25380/iastate.14390358,TRUE
+Q3_Mock_0_25spike_C,"Mock + spike (0.25), 3",Mock with spike (x ng/ml),Mock,0.25,3,USDA,5,86.4,B6,10.25380/iastate.14390359,TRUE
+Q3_SCI_Soil_D0_A,"Soil-A, 1","Soil-A (Nashua, IA, history of swine manure application)",Soil-A,NA,1,Jin,86,1720,B7,Smith et. al,FALSE
+Q3_SCI_Soil_D0_B,"Soil-A, 2","Soil-A (Nashua, IA, history of swine manure application)",Soil-A,NA,2,Jin,70,1400,B8,Smith et. al,FALSE
+Q3_SCI_Manure_A,"Swine Manure-A, 1",Swine manure used for manure treatment of Soil-A,Swine Manure-A,NA,1,Jin,22.21222911,444.2445822,C6,Smith et. al,TRUE
+Q3_SCI_Manure_B,"Swine Manure-A, 2",Swine manure used for manure treatment of Soil-A,Swine Manure-A,NA,2,Jin,22.45011739,449.0023478,C7,Smith et. al,TRUE
+Q3_SCI_Manure_C,"Swine Manure-A, 3",Swine manure used for manure treatment of Soil-A,Swine Manure-A,NA,3,Jin,22.51553667,450.3107333,C8,Smith et. al,TRUE
+Q3_SCI_Soil_D24_A,"Soil-A + Manure, Day 24, 1",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,1,Jin,100,2000,B9,Smith et. al,TRUE
+Q3_SCI_Soil_D24_B,"Soil-A + Manure, Day 24, 2",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,2,Jin,58,1160,B10,Smith et. al,FALSE
+Q3_SCI_Soil_D24_C,"Soil-A + Manure, Day 24, 3",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,3,Jin,103,2060,B11,Smith et. al,TRUE
+Q3_SCI_Soil_D59_A,"Soil-A + Manure, Day 59, 1",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,1,Jin,131,2620,B12,Smith et. al,FALSE
+Q3_SCI_Soil_D59_B,"Soil-A + Manure, Day 59, 2",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,2,Jin,75.2,1504,C1,Smith et. al,TRUE
+Q3_SCI_Soil_D59_C,"Soil-A + Manure, Day 59, 3",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,3,Jin,48.4,968,C2,Smith et. al,FALSE
+Q3_SCI_Soil_D108_A,"Soil-A + Manure, Day 108, 1",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,1,Jin,47.6,952,C3,Smith et. al,FALSE
+Q3_SCI_Soil_D108_B,"Soil-A + Manure, Day 108, 2",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,2,Jin,44.8,896,C4,Smith et. al,FALSE
+Q3_SCI_Soil_D108_C,"Soil-A + Manure, Day 108, 3",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,3,Jin,43.2,864,C5,Smith et. al,FALSE
+Q3_SCII_SoilPig_D0_A,"Soil-B, 1","Soil-B (Black Hawk Lake Watershed, IA, history of swine manure application)",Soil-B,NA,1,Jin,18.03134264,360.6268528,C9,Smith et. al,TRUE
+Q3_SCII_SoilPig_D0_B,"Soil-B, 2","Soil-B (Black Hawk Lake Watershed, IA, history of swine manure application)",Soil-B,NA,2,Jin,15.70003752,314.0007504,C10,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662623,TRUE
+Q3_SCII_SoilPig_D0_C,"Soil-B, 3","Soil-B (Black Hawk Lake Watershed, IA, history of swine manure application)",Soil-B,NA,3,Jin,16.60996018,332.1992036,C11,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662624,FALSE
+Q3_SCII_SoilBeef_D0_A,"Soil-C, 1","Soil-C (Allee Demonstration Farm, IA, history of beef manure application)",Soil-C,NA,1,Jin,30.49668837,609.9337674,C12,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662625,TRUE
+Q3_SCII_SoilBeef_D0_B,"Soil-C, 2","Soil-C (Allee Demonstration Farm, IA, history of beef manure application)",Soil-C,NA,2,Jin,29.08720033,581.7440065,D1,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662626,TRUE
+Q3_SCII_SoilBeef_D0_C,"Soil-C, 3","Soil-C (Allee Demonstration Farm, IA, history of beef manure application)",Soil-C,NA,3,Jin,29.39050788,587.8101576,D2,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662627,TRUE
+Q3_SCII_SwineManure_A,"Swine Manure-B, 1",Swine Manure B used for manure treatment of Soil-B,Swine Manure-B,NA,1,Jin,29.62244895,592.448979,D3,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662628,TRUE
+Q3_SCII_SwineManure_B,"Swine Manure-B, 2",Swine Manure B used for manure treatment of Soil-B,Swine Manure-B,NA,2,Jin,26.48232369,529.6464738,D4,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662629,TRUE
+Q3_SCII_SwineManure_C,"Swine Manure-B, 3",Swine Manure B used for manure treatment of Soil-B,Swine Manure-B,NA,3,Jin,26.50016531,530.0033062,D5,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662630,TRUE
+Q3_SCII_BeefManure_A,"Bovine Manure, 1",Bovine Manure used for manure treatment of Soil-C,Bovine Manure,NA,1,Jin,27.93344218,558.6688436,D6,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662631,FALSE
+Q3_SCII_BeefManure_B,"Bovine Manure, 2",Bovine Manure used for manure treatment of Soil-C,Bovine Manure,NA,2,Jin,31.9775429,639.5508579,D7,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662632,FALSE
+Q3_SCII_BeefManure_C,"Bovine Manure, 3",Bovine Manure used for manure treatment of Soil-C,Bovine Manure,NA,3,Jin,27.83828687,556.7657374,D8,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662633,FALSE
+Q3_SCII_Water_D11_A,"Effluent via Soil + Manure, 1",Effluent from soil with manure treatment,Effluent,NA,1,Jin,10,200,D9,10.25380/iastate.14390342,FALSE
+Q3_SCII_Water_D11_B,"Effluent via Soil + Manure, 2",Effluent from soil with manure treatment,Effluent,NA,2,Jin,10,200,D10,10.25380/iastate.14390342,FALSE
+Q3_SCII_Water_D11_C,"Effluent via Soil + Manure, 3",Effluent from soil with manure treatment,Effluent,NA,3,Jin,10,200,D11,10.25380/iastate.14390342,FALSE
+Q3_X1P5N1BFD7,"Swine Fecal, 1",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E1,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00255",FALSE
+Q3_X1P22N1AFD7,"Swine Fecal, 2",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E2,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00255",FALSE
+Q3_X1P23N1AFD7,"Swine Fecal, 3",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E3,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00257",FALSE
+Q3_X1P24N1AFD7,"Swine Fecal, 4",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E4,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00258",FALSE
+Q3_X1P25N1BFD7,"Swine Fecal, 5",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E5,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00259",FALSE
+Q3_X1P26N1BFD7,"Swine Fecal, 6",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E6,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00260",FALSE
+Q3_X1P27N1BFD7,"Swine Fecal, 7",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E7,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00261",FALSE
+Q3_X1P28N1BFD7,"Swine Fecal, 8",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E8,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00262",FALSE
+Q3_X1P36N3AFD7,"Swine Fecal, 9",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E9,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00263",FALSE
+Q3_X1P37N3AFD7,"Swine Fecal, 10",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E10,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00264",FALSE
+Q3_X1P38N3AFD7,"Swine Fecal, 11",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E11,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00265",FALSE
+Q3_X1P39N3BFD7,"Swine Fecal, 12",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,E12,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00266",TRUE
+Q3_X1P40N3BFD7,"Swine Fecal, 13",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F1,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00267",FALSE
+Q3_X1P41N3BFD7,"Swine Fecal, 14",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F2,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00268",FALSE
+Q3_X1P42N3BFD7,"Swine Fecal, 15",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F3,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00269",FALSE
+Q3_X1P43N1AFD7,"Swine Fecal, 16",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F4,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00270",FALSE
+Q3_X1P44N1AFD7,"Swine Fecal, 17",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F5,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00271",FALSE
+Q3_X1P45N1AFD7,"Swine Fecal, 18",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F6,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00272",TRUE
+Q3_X1P46N1AFD7,"Swine Fecal, 19",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F7,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00273",TRUE
+Q3_X1P47N1BFD7,"Swine Fecal, 20",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F8,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00274",FALSE
+Q3_X1P48N1BFD7,"Swine Fecal, 21",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F9,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00275",FALSE
+Q3_X1P49N1BFD7,"Swine Fecal, 22",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F10,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00276",FALSE
+Q3_X1P59N3AFD7,"Swine Fecal, 23",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F11,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00277",FALSE
+Q3_X1P60N3AFD7,"Swine Fecal, 24",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,F12,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00278",FALSE
+Q3_X1P61N3AFD7,"Swine Fecal, 25",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,G1,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00279",TRUE
+Q3_X1P63N3BFD7,"Swine Fecal, 26",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,G2,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00280",TRUE
+Q3_X1P64N3BFD7,"Swine Fecal, 27",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,G3,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00281",TRUE
+Q3_X1P65N3BFD7,"Swine Fecal, 28",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,G4,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00282",FALSE
+Q3_X1P66N3BFD7,"Swine Fecal, 29",Swine Fecal,Swine Fecal,NA,1,USDA,10,200,G5,"Ricker, N. et al. Frontiers in Veterinary Science. 7:255. doi: 10.3389/fvets.2020.00283",FALSE
+Q3_SCI_Manure_0_025spike_A,"Swine Manure-A + spike, 1",Swine manure used for manure treatment of Soil-A,Swine Manure-A,0.025,1,"Jin, USDA",22.21222911,444.2445822,G6,Smith et. al,TRUE
+Q3_SCI_Manure_0_025spike_B,"Swine Manure-A + spike, 2",Swine manure used for manure treatment of Soil-A,Swine Manure-A,0.025,2,"Jin, USDA",22.21222911,444.2445822,G7,Smith et. al,TRUE
+Q3_SCI_Manure_0_025spike_C,"Swine Manure-A + spike, 3",Swine manure used for manure treatment of Soil-A,Swine Manure-A,0.025,3,"Jin, USDA",22.21222911,444.2445822,G8,Smith et. al,TRUE
+Q3_NTC,No-template Control,Water,Water,NA,NA,USDA,NA,0,H11,Non Template Control - remove from here,FALSE

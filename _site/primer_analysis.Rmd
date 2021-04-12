@@ -383,10 +383,10 @@ setorder(samples, sample)
 The number of reads produced per sample and the percentage of those reads that were PCR-artifacts had a negative correlation with an R-squared value = **`r round(summary(lm(artifacts ~ n_reads, samples))$r.squared, 2)`**
 
 ```{r artifacts_graph, fig.width=7, fig.height=5, echo=FALSE, cache=TRUE}
-  ggplot(merge(metadata, samples,by.x='Sample Name', by.y='sample'), aes_string(x = "n_reads", y = "artifacts", color="Matrix")) +
+  ggplot(merge(metadata, samples,by.x='ID', by.y='sample'), aes_string(x = "n_reads", y = "artifacts", color="Matrix")) +
    geom_point(size = 4, show.legend = T) + 
   geom_smooth(formula = y~x, method = "lm", se = FALSE, color = 'black' ) +
-  scale_colour_manual(values = schuylR::create_palette(8)) + theme_bw() + 
+  scale_colour_manual(values = schuylR::create_palette(length(unique(metadata$Matrix)))) + theme_bw() + 
   theme(axis.text.x = element_text(size = 10), 
         axis.text.y = element_text(size = 10),  
         axis.title.x = element_text(size = 12, face = "bold"), 

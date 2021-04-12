@@ -149,9 +149,10 @@ mock_genomes
 ### Metadata
 ```{r metadata}
 metadata <- data.table::fread('../data/samples/sample_metadata.csv')
-metadata[[1]] <- gsub('Q3_', '', metadata[[1]])
-metadata[[1]] <- gsub('_', '-', metadata[[1]])
-data.table::set(metadata, j = 'Matrix', value = factor(metadata[[2]], levels = unique(metadata[[2]])))
+metadata[['ID']] <- gsub('Q3_', '', metadata[['ID']])
+metadata[['ID']] <- gsub('_', '-', metadata[['ID']])
+data.table::set(metadata, j = 'Sample', value = factor(metadata[['Sample']], levels = unique(metadata[['Sample']])))
+data.table::set(metadata, j = 'Matrix', value = factor(metadata[['Matrix']], levels = unique(metadata[['Matrix']])))
 ```
 
 ```{r metadata_out, echo=FALSE}

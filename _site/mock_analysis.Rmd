@@ -22,7 +22,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ### ARG Abundances
 
 ```{r create_mock_counts}
-mock_samples <- metadata[grep('Mock', metadata$`Sample Name`),][Analyzed == TRUE]$`Sample Name`
+mock_samples <- metadata[grep('Mock', metadata$`ID`),][`Passed QC` == TRUE]$`ID`
 for_blast <- data.table::fread('../data/mock/forward_primers.blast')
   for_blast <- merge(for_blast, classifications, by.x = "V1", by.y = "Primer")
   for_blast <- for_blast[ARG != "16S"]
@@ -275,7 +275,7 @@ replace_DT_NA(dist_matrix)
 dist_matrix <- as.matrix(round(vegdist(t(dist_matrix[,-c(1)])), 3))
 dist_matrix_plot <- dist_matrix
 dist_matrix_plot[upper.tri(dist_matrix)] <- NA
-dist_matrix_plot <- melt(dist_matrix_plot)
+dist_matrix_plot <- data.table(melt(dist_matrix_plot))
 set(dist_matrix_plot, j = "Var1", value = factor(dist_matrix_plot$Var1, levels = rev(unique(dist_matrix_plot$Var1))))
 dist_matrix_plot <- ggplot(data = dist_matrix_plot, aes(x=Var2, y=Var1, fill=value)) + 
   geom_tile() + 

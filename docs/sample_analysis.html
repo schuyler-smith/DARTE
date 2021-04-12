@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-06" />
+<meta name="date" content="2021-04-12" />
 
 <title>Sample Analysis</title>
 
@@ -440,7 +440,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Sample Analysis</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-06</h4>
+<h4 class="date">2021-04-12</h4>
 
 </div>
 
@@ -465,63 +465,44 @@ setnames(SC_I, &#39;Gene&#39;, &#39;ARG&#39;)
 graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
 graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
 graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
-graph_data &lt;- merge(metadata[,c(1:3)], graph_data, by.x = &#39;Sample Name&#39;, by.y = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample Name&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;Day&#39;, &#39;ARG&#39;)]
+graph_data &lt;- merge(metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;ARG&#39;)]
 
 set(graph_data, j = classification, 
     value = factor(graph_data[[classification]], 
                    levels = c(&#39;spike&#39;, rev(unique(graph_data[[classification]][!(graph_data[[classification]]==&#39;spike&#39;)])))))
-setkey(graph_data, &quot;ARG&quot;, &quot;Sample Name&quot;)
-
-set(graph_data, which(is.na(graph_data[[&#39;Day&#39;]])), j=&#39;Day&#39;, value=0)
-setnames(graph_data, c(&#39;Sample Name&#39;, &#39;Day&#39;, &#39;Matrix&#39;), c(&#39;Sample&#39;, &#39;Day&#39;, &#39;Matrix&#39;))
+setkey(graph_data, &quot;ARG&quot;, &quot;Sample&quot;)
 
 graph_data &lt;- rbindlist(list(
-  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;Day&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
-  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;Day&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
+  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
+  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 set(graph_data, j = &#39;Matrix&#39;, value = as.character(graph_data$Matrix))
 
-setkey(graph_data, &#39;Sample&#39;, &#39;Day&#39;)
+setkey(graph_data, &#39;Sample&#39;)
 graph_data &lt;- graph_data[!(is.na(relative_abundance))]
 graph_data &lt;- graph_data[graph_data$Matrix != &#39;effluent&#39;,]
 graph_data &lt;- graph_data[graph_data$Matrix != &#39;Effluent&#39;,]
 graph_data &lt;- graph_data[V1 != 0]
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 
-classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), by=ARG_Family, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
-classification_order &lt;- classification_order[round(classification_order[[2]]*100 / length(unique(graph_data[Tech == &quot;DARTE-QM&quot;]$Sample)),1) &gt;= 0.5,]
+classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), 
+                                            by=ARG_Family, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
+classification_order &lt;- classification_order[round(classification_order[[2]]*100 / 
+                                                     length(unique(graph_data[Tech == &quot;DARTE-QM&quot;]$Sample)),1) &gt;= 0.5,]
 graph_data &lt;- graph_data[ARG_Family %in% classification_order$ARG_Family]
 set(graph_data, j = &#39;ARG_Family&#39;, value = factor(graph_data$ARG_Family, levels = classification_order[[1]]))
-set(graph_data, which(graph_data$Matrix == &quot;Soil Ammended&quot;), &#39;Matrix&#39;, &#39;Manure-Soil&#39;)
-set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(metadata$Matrix)[c(1,2,5,4,6,3,8,9)]))
 graph_colors &lt;- schuylR::create_palette(length(levels(graph_data[[classification]])))
-graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG_Family&quot;, &quot;Day&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
+graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG_Family&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
                          .SDcols=c(&quot;V1&quot;, &quot;relative_abundance&quot;) ] 
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 
-samples &lt;- c(
-  &quot;Mock + spike 0.0025 - rep 1&quot;,&quot;Mock + spike 0.0025 - rep 2&quot;,&quot;Mock + spike 0.0025 - rep 3&quot;,
-  &quot;Mock + spike 0.009 - rep 1&quot;,&quot;Mock + spike 0.009 - rep 2&quot;,&quot;Mock + spike 0.009 - rep 3&quot;,
-  &quot;Mock + spike 0.025 - rep 1&quot;,&quot;Mock + spike 0.025 - rep 2&quot;,
-  &quot;Mock + spike 0.12 - rep 1&quot;,&quot;Mock + spike 0.12 - rep 2&quot;,&quot;Mock + spike 0.12 - rep 3&quot;,
-  &quot;Mock + spike 0.25 - rep 1&quot;,&quot;Mock + spike 0.25 - rep 2&quot;,&quot;Mock + spike 0.25 - rep 3&quot;,
-  &quot;Mock + spike 0.0 - rep 1&quot;,&quot;Mock + spike 0.0 - rep 2&quot;,
-  &quot;Swine Manure rep 1&quot;, &quot;Swine Manure rep 2&quot;, &quot;Swine Manure rep 3&quot;, 
-  &quot;Swine Manure rep 4&quot;, &quot;Swine Manure rep 5&quot;, &quot;Swine Manure rep 6&quot;, 
-  &quot;Soil A + Manure Day-24 rep 1&quot;, &quot;Soil A + Manure Day-24 rep 2&quot;,
-  &quot;Soil A + Manure Day-59&quot;, 
-  &quot;Soil A rep 1&quot;, &quot;Soil A rep 2&quot;, &quot;Soil A rep 3&quot;, 
-  &quot;Soil A rep 1&quot;, &quot;Soil A rep 2&quot;, 
-  &quot;Swine Fecal rep 1&quot;, &quot;Swine Fecal rep 2&quot;, &quot;Swine Fecal rep 3&quot;, 
-  &quot;Swine Fecal rep 4&quot;, &quot;Swine Fecal rep 5&quot;, &quot;Swine Fecal rep 6&quot;)
-for(i in seq_along(samples)){
-  set(graph_data, which(graph_data$Sample == as.character(unique(graph_data$Sample)[i])), &#39;Sample&#39;, samples[i])
-}
+set(graph_data, j = &#39;Sample&#39;, value = factor(graph_data[[&#39;Sample&#39;]], levels = unique(graph_data[[&#39;Sample&#39;]])))
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data[[&#39;Matrix&#39;]], levels = unique(graph_data[[&#39;Matrix&#39;]])))
 
 profile &lt;- ggplot(graph_data[Tech == &#39;DARTE-QM&#39;], 
                   aes_string(x=&quot;Sample&quot;, y=&quot;relative_abundance&quot;, fill=classification)) + 
-  guides(fill=guide_legend(ncol=ceiling(length(unique(graph_data[[classification]]))/50))) + 
+  guides(fill=guide_legend(ncol=2)) + 
   scale_fill_manual(values=graph_colors, aesthetics=c(&quot;color&quot;, &quot;fill&quot;)) + 
   geom_bar(stat=&quot;identity&quot;, position=&quot;stack&quot;, size=0.12, width=0.95, color=&quot;black&quot;) + 
   ylab(&quot;Relative Abundance&quot;) + 
@@ -559,11 +540,12 @@ distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] &lt;- 0
 MDS &lt;- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
 graph_data &lt;- cbind(x = MDS$points[,x], y = MDS$points[,y])
-graph_data &lt;- merge(graph_data, metadata[,c(&#39;Sample Name&#39;, &#39;Matrix&#39;)], by.x = 0, by.y = &#39;Sample Name&#39;)
+graph_data &lt;- data.table(merge(graph_data, metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], by.x = 0, by.y = &#39;ID&#39;))
 
 color_count &lt;- length(unique(graph_data[[treatment]]))
 graph_colors &lt;- schuylR::create_palette(color_count)
-set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(graph_data$Matrix)))
+set(graph_data, j = &#39;Sample&#39;, value = factor(graph_data[[&#39;Sample&#39;]], levels = unique(graph_data[[&#39;Sample&#39;]])))
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data[[&#39;Matrix&#39;]], levels = unique(graph_data[[&#39;Matrix&#39;]])))
 
 pca &lt;- ggplot(data = graph_data, aes_string(&#39;x&#39;, &#39;y&#39;, group = treatment)) + 
   geom_point(aes_string(fill = treatment), shape = 21,
@@ -595,12 +577,12 @@ distance_matrix[is.na(distance_matrix)] &lt;- 0
 
 MDS &lt;- metaMDS(t(distance_matrix), autotransform = FALSE, distance = method, 
   k = 3, trymax = 100, trace = FALSE)
-graph_data &lt;- merge(scores(MDS)[,c(1,2)], 
-                    metadata[,c(&#39;Sample Name&#39;, &#39;Matrix&#39;)], by.x = 0, by.y = &#39;Sample Name&#39;)
+graph_data &lt;- data.table(merge(scores(MDS)[,c(1,2)], metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], by.x = 0, by.y = &#39;ID&#39;))
 
 color_count &lt;- length(unique(graph_data[[treatment]]))
 graph_colors &lt;- schuylR::create_palette(color_count)
-set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(graph_data$Matrix)))
+set(graph_data, j = &#39;Sample&#39;, value = factor(graph_data[[&#39;Sample&#39;]], levels = unique(graph_data[[&#39;Sample&#39;]])))
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data[[&#39;Matrix&#39;]], levels = unique(graph_data[[&#39;Matrix&#39;]])))
 
 nmds &lt;- ggplot(data = graph_data, aes_string(&#39;NMDS1&#39;, &#39;NMDS2&#39;, group = treatment)) + 
   geom_point(aes_string(fill = treatment), shape = 21,
@@ -630,10 +612,10 @@ nmds &lt;- ggplot(data = graph_data, aes_string(&#39;NMDS1&#39;, &#39;NMDS2&#39;
 graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 graph_data &lt;- graph_data[rowSums(graph_data) &gt;=5, ]
 
-permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`Sample Name` %in% colnames(graph_data)])</code></pre>
+permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`ID` %in% colnames(graph_data)])</code></pre>
 <pre><code>## 
 ## Call:
-## vegan::adonis(formula = t(graph_data) ~ Matrix, data = metadata[`Sample Name` %in%      colnames(graph_data)]) 
+## vegan::adonis(formula = t(graph_data) ~ Matrix, data = metadata[ID %in%      colnames(graph_data)]) 
 ## 
 ## Permutation: free
 ## Number of permutations: 999
@@ -641,8 +623,8 @@ permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`Sample Na
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(&gt;F)    
-## Matrix     6    5.0681 0.84468  11.293 0.69312  0.001 ***
-## Residuals 30    2.2439 0.07480         0.30688           
+## Matrix     6    5.0794 0.84656  11.375 0.69466  0.001 ***
+## Residuals 30    2.2326 0.07442         0.30534           
 ## Total     36    7.3120                 1.00000           
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
@@ -654,21 +636,24 @@ permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`Sample Na
   cat(&quot;###&quot;, method, &#39;&lt;br&gt;&#39;, &#39;\n\n&#39;)
   graph_data &lt;- read_counts[,-c(2:3)]
   graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
+  sample_order &lt;- colnames(graph_data)
   distance_matrix &lt;- vegan::vegdist(t(graph_data), gsub(&quot;-.*&quot;, &quot;&quot;,tolower(method)), na.rm = TRUE)
   distance_matrix[is.na(distance_matrix)] &lt;- 0
   dend &lt;- as.dendrogram(hclust(as.dist(distance_matrix), method = &#39;complete&#39;))
-  graph_data &lt;- ggdendro::dendro_data(dend)
   
-  sample_colors &lt;- schuylR::create_palette(length(unique(metadata$Matrix)))[as.factor(metadata$Matrix[match(as.character(graph_data$labels$label), metadata$`Sample Name`)])]
+  graph_data &lt;- ggdendro::dendro_data(dend)
+  sample_colors &lt;- schuylR::create_palette(length(unique(metadata$Matrix))
+    )[as.factor(metadata$Matrix[match(as.character(graph_data$labels$label), metadata$`ID`)])]
+  
 print(ggplot(data = ggdendro::segment(graph_data)) + 
     geom_blank() + 
     theme_minimal() + 
     geom_segment(aes_string(x = &quot;x&quot;, y = &quot;y&quot;, xend = &quot;xend&quot;, yend = &quot;yend&quot;, color = &#39;y&#39;),
                  show.legend = FALSE, size = 1.3) + 
     scale_x_continuous(breaks = seq_along(graph_data$labels$label),
-                       labels = gsub(&#39;Q3_&#39;,&#39;&#39;,graph_data$labels$label)) + 
+                       labels = as.factor(metadata$Sample[match(as.character(graph_data$labels$label), metadata$`ID`)])) + 
     scale_y_continuous() + 
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 12,
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 12,
                                      margin = margin(t = -10),
                                      color = sample_colors), 
           axis.text.y = element_text(angle = 90, hjust = -1,
@@ -748,7 +733,7 @@ opt_k_means &lt;- ggplot(data.frame(k = 2:n_k, graph_data), aes(k, graph_data)) 
 treatment = &#39;Matrix&#39;
 MDS &lt;- cmdscale(distance_matrix, k = max(c(x,y)), eig = TRUE)
 graph_data &lt;- cbind(x = MDS$points[,x], y = MDS$points[,y])
-graph_data &lt;- merge(graph_data, metadata, by.x = 0, by.y = &#39;Sample Name&#39;)
+graph_data &lt;- merge(graph_data, metadata, by.x = 0, by.y = &#39;ID&#39;)
 km &lt;- kmeans(distance_matrix, centers = k, iter.max = 10, nstart = 20)$cluster
 graph_data &lt;- cbind(graph_data, cluster =  factor(km[match(names(km), graph_data$Row.names)])) 
 graph_colors &lt;- schuylR::create_palette(length(unique(graph_data[[treatment]])))

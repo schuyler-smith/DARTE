@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-06" />
+<meta name="date" content="2021-04-12" />
 
 <title>Comaprison of DARTE-QM to Metagenome</title>
 
@@ -446,7 +446,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Comaprison of DARTE-QM to Metagenome</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-06</h4>
+<h4 class="date">2021-04-12</h4>
 
 </div>
 
@@ -469,54 +469,32 @@ set(SC_I, j = &#39;ARG&#39;, value = factor(genes, levels = unique(genes)))
 graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
 graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
 graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
-graph_data &lt;- merge(metadata[,c(1:3)], graph_data, by.x = &#39;Sample Name&#39;, by.y = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample Name&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;Day&#39;, &#39;ARG&#39;, &#39;Primer&#39;)]
+graph_data &lt;- merge(metadata[,c(1,2,4)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Primer&#39;)]
 
 set(graph_data, j = classification, value = factor(graph_data[[classification]], levels = c(&#39;spike&#39;, rev(unique(graph_data[[classification]][!(graph_data[[classification]]==&#39;spike&#39;)])))))
-setkey(graph_data, &quot;ARG&quot;, &quot;Sample Name&quot;)
+setkey(graph_data, &quot;ARG&quot;, &quot;Sample&quot;)
 set(graph_data, which(is.na(graph_data[[&#39;Day&#39;]])), j=&#39;Day&#39;, value=0)
-setnames(graph_data, c(&#39;Sample Name&#39;), c(&#39;Sample&#39;))
-
-samples &lt;- c(
-  &quot;Mock + spike 0.0025 - rep 1&quot;,&quot;Mock + spike 0.0025 - rep 2&quot;,&quot;Mock + spike 0.0025 - rep 3&quot;,
-  &quot;Mock + spike 0.009 - rep 1&quot;,&quot;Mock + spike 0.009 - rep 2&quot;,&quot;Mock + spike 0.009 - rep 3&quot;,
-  &quot;Mock + spike 0.025 - rep 1&quot;,&quot;Mock + spike 0.025 - rep 2&quot;,
-  &quot;Mock + spike 0.12 - rep 1&quot;,&quot;Mock + spike 0.12 - rep 2&quot;,&quot;Mock + spike 0.12 - rep 3&quot;,
-  &quot;Mock + spike 0.25 - rep 1&quot;,&quot;Mock + spike 0.25 - rep 2&quot;,&quot;Mock + spike 0.25 - rep 3&quot;,
-  &quot;Mock + spike 0.0 - rep 1&quot;,&quot;Mock + spike 0.0 - rep 2&quot;,
-  &quot;Swine Manure rep 1&quot;, &quot;Swine Manure rep 2&quot;, &quot;Swine Manure rep 3&quot;, 
-  &quot;Swine Manure rep 4&quot;, &quot;Swine Manure rep 5&quot;, &quot;Swine Manure rep 6&quot;, 
-  &quot;Soil A + Manure Day-24 rep 1&quot;, &quot;Soil A + Manure Day-24 rep 2&quot;,
-  &quot;Soil A + Manure Day-59&quot;, 
-  &quot;Soil B rep 1&quot;, &quot;Soil B rep 2&quot;, &quot;Soil B rep 3&quot;, 
-  &quot;Soil A rep 1&quot;, &quot;Soil A rep 2&quot;, 
-  &quot;Water&quot;,
-  &quot;Swine Fecal rep 1&quot;, &quot;Swine Fecal rep 2&quot;, &quot;Swine Fecal rep 3&quot;, 
-  &quot;Swine Fecal rep 4&quot;, &quot;Swine Fecal rep 5&quot;, &quot;Swine Fecal rep 6&quot;)
-for(i in seq_along(samples)){
-  set(graph_data, which(graph_data$Sample == as.character(unique(graph_data$Sample)[i])), &#39;Sample&#39;, samples[i])
-}
 
 graph_data &lt;- rbindlist(list(
-  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;Day&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
-  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;Day&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
+  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
+  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 set(graph_data, j = &#39;Matrix&#39;, value = as.character(graph_data$Matrix))
+set(graph_data, which(graph_data$Matrix == &quot;manure&quot;), &#39;Matrix&#39;, &quot;Swine Manure-A&quot;)
+set(graph_data, which(graph_data$Matrix == &quot;effluent&quot;), &#39;Matrix&#39;, &quot;Effluent&quot;)
+set(graph_data, which(graph_data$Matrix == &quot;Manure-Soil A&quot;), &#39;Matrix&#39;, &quot;Soil-A + Manure-A&quot;)
 
-setkey(graph_data, &#39;Sample&#39;, &#39;Day&#39;)
 graph_data &lt;- graph_data[!(is.na(relative_abundance))]
-graph_data &lt;- graph_data[graph_data$Matrix != &#39;effluent&#39;,]
 graph_data &lt;- graph_data[graph_data$Matrix != &#39;Effluent&#39;,]
 graph_data &lt;- graph_data[V1 != 0]
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
-graph_data$Matrix &lt;- gsub(&#39;manure&#39;, &#39;Swine Manure&#39;, graph_data$Matrix)
 
 classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), by=ARG_Family, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
 classification_order &lt;- classification_order[round(classification_order[[2]]*100 / length(unique(graph_data[Tech == &quot;DARTE-QM&quot;]$Sample)),1) &gt;= 0.5,]
 
 graph_data &lt;- graph_data[ARG_Family %in% classification_order$ARG_Family]
 set(graph_data, j = &#39;ARG_Family&#39;, value = factor(graph_data$ARG_Family, levels = classification_order[[1]]))
-
 
 missing &lt;- unique(sort(as.character(graph_data[Tech != &quot;DARTE-QM&quot;]$ARG_Family[!(graph_data[Tech != &quot;DARTE-QM&quot;]$ARG_Family %in% graph_data[Tech == &quot;DARTE-QM&quot;]$ARG_Family)])))
 setorder(graph_data, &#39;ARG_Family&#39;)
@@ -525,20 +503,20 @@ for(i in seq_along(missing)){
   genes[genes %in% missing[i]] &lt;- c(&quot;ceo&quot;, &quot;mex&quot;, &quot;mux&quot;, &quot;ole&quot;, &quot;bla&quot;, &quot;rph&quot;, &quot;bla&quot;, &quot;tlr&quot;, &quot;Van&quot;)[i]
 }
 set(graph_data, j = &#39;ARG_Family&#39;, value = factor(genes, levels = unique(genes)))
-setkey(graph_data, &#39;Sample&#39;, &#39;Day&#39;)
+setkey(graph_data, &#39;Sample&#39;)
+set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(metadata$Matrix)))
 
-set(graph_data, which(graph_data$Matrix == &quot;Soil Ammended&quot;), &#39;Matrix&#39;, &#39;Manure-Soil&#39;)
-set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(metadata$Matrix)[c(7,5,8,1,4,3,2,6,9)]))
-
-graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG&quot;, &quot;ARG_Family&quot;, &quot;Day&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
+graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG&quot;, &quot;ARG_Family&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
                          .SDcols=c(&quot;V1&quot;, &quot;relative_abundance&quot;) ] 
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
-
 graph_colors &lt;- schuylR::create_palette(length(unique(graph_data[[&#39;ARG_Family&#39;]])))
 
 gene_classes &lt;- sort(unique(graph_data[[&#39;ARG_Family&#39;]]))
-compare_data &lt;- graph_data[c(grep(&#39;Swine Manure&#39;, graph_data$Sample), grep(&#39;Soil A&#39;, graph_data$Sample), grep(&#39;_L0&#39;, graph_data$Sample)), ]
-compare_data &lt;- compare_data[Matrix %in% c(&#39;Manure-Soil A&#39;, &#39;Swine Manure&#39;)]
+compare_data &lt;- graph_data[c(grep(&#39;Swine Manure-A&#39;, graph_data$Sample), grep(&#39;Soil-A&#39;, graph_data$Sample), grep(&#39;_L0&#39;, graph_data$Sample)), ]
+compare_data &lt;- compare_data[Matrix %in% c(&#39;Swine Manure-A&#39;, &#39;Soil-A + Manure-A&#39;)]
+
+set(compare_data, j = &#39;Sample&#39;, value = factor(compare_data[[&#39;Sample&#39;]], levels = unique(graph_data[[&#39;Sample&#39;]])))
+set(compare_data, j = &#39;Matrix&#39;, value = factor(compare_data[[&#39;Matrix&#39;]], levels = unique(graph_data[[&#39;Matrix&#39;]])))
 
 profile_compare &lt;- ggplot(compare_data, 
        aes_string(x = &quot;Sample&quot;, 
@@ -565,7 +543,7 @@ profile_compare &lt;- ggplot(compare_data,
          legend.key.size = unit(6, &quot;mm&quot;), 
          panel.background = element_rect(color = &quot;black&quot;, size = 1.5), 
          panel.spacing = unit(0.01, &quot;npc&quot;), 
-         strip.text.x = element_text(size = 12, face = &quot;bold&quot;), 
+         strip.text.x = element_text(size = 10, face = &quot;bold&quot;), 
          strip.background = element_rect(colour = &quot;black&quot;, size = 1.4, fill = &quot;white&quot;),
          panel.grid.major.x = element_blank()) + 
   scale_y_continuous(expand = expansion(mult = c(0.0037, 0.003), add = c(0, 0))) + 
@@ -614,31 +592,31 @@ div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
 </div>
 <div id="resitome-differences" class="section level3">
 <h3>Resitome Differences</h3>
-<div id="swine-manure" class="section level4">
-<h4>Swine Manure</h4>
-<p>DARTE-QM had 128 ARGs in Swine Manure samples, with an alpha-diversity measured at 3.37. <br></p>
-<p>compared to metagenomes which had 84 ARGs in Swine Manure samples, with an alpha-diversity measured at 3.18. <br></p>
+<div id="swine-manure-a" class="section level4">
+<h4>Swine Manure-A</h4>
+<p>DARTE-QM had 128 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 3.37. <br></p>
+<p>compared to metagenomes which had 84 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 3.18. <br></p>
 <p>The metagenome found 47 ARGs that were not detected with DARTE-QM.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName">
 Show Table
 </button>
 <div id="BlockName" class="collapse">
-<div id="htmlwidget-2e36001863c17ca869c5" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2e36001863c17ca869c5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47"],["tetT","tetA(P)","tet(36)","tetM","tet(32)","tetW","tetY","tetZ","tet(40)","tet(33)","tetB(P)","tet(31)","tetG","tetS","tetQ","tetX","APH(3')-Ia","APH(2'')-Ib","ANT(6)-Ib","APH(3'')-Ib","APH(3')-VI","sul1","sul2","lnuA","lnuF","lnuC","ErmG","ErmB","ErmT","ErmC","ErmF","ErmQ","ErmA","ErmX","Erm(47)","Erm(35)","ErmY","Erm(42)","Erm(36)","ANT(6)-Ia","aadA7","aadA5","mdtO","str","APH(4)-Ia","aadA24","mefA"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-dcafb6c34209ecab17ec" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-dcafb6c34209ecab17ec">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47"],["tetT","tetA(P)","tet(36)","tetM","tet(32)","tetW","tetY","tetZ","tet(40)","tet(33)","tetB(P)","tet(31)","tetG","tetS","tetQ","tetX","APH(3')-Ia","APH(2'')-Ib","ANT(6)-Ib","APH(3'')-Ib","APH(3')-VI","sul1","sul2","lnuA","lnuF","lnuC","ErmG","ErmB","ErmT","ErmC","ErmF","ErmQ","ErmA","ErmX","Erm(47)","Erm(35)","ErmY","Erm(42)","Erm(36)","ANT(6)-Ia","aadA7","aadA5","mdtO","str","APH(4)-Ia","aadA24","mefA"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br></p>
 </div>
 <div id="manure-soil" class="section level4">
 <h4>Manure-Soil</h4>
 <p>DARTE-QM had 128 ARGs in Manure-Soil samples, with an alpha-diversity measured at 3.38. <br></p>
-<p>compared to metagenomes which had 139 ARGs in Swine Manure samples, with an alpha-diversity measured at 3.4. <br></p>
+<p>compared to metagenomes which had 139 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 3.4. <br></p>
 <p>The metagenome found 62 ARGs that were not detected with DARTE-QM.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName2">
 Show Table
 </button>
 <div id="BlockName2" class="collapse">
-<div id="htmlwidget-e0f6935f3016f4c4218f" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e0f6935f3016f4c4218f">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62"],["AAC(3)-IVa","AAC(6')-Ib11","aadA15","aadA24","aadA5","aadA7","ACI-1","acrB","ANT(6)-Ia","ANT(6)-Ib","APH(2'')-Ib","APH(3'')-Ib","APH(3')-Ia","APH(3')-IIa","APH(3')-IIIa","APH(4)-Ia","cfr(C)","Erm(35)","Erm(36)","Erm(42)","Erm(47)","ErmA","ErmB","ErmC","ErmF","ErmG","ErmQ","ErmT","ErmX","lnuA","lnuC","lnuD","lnuF","mdsB","mdtA","mdtB","mdtC","mdtO","mefA","mefB","OXA-347","str","sul1","sul2","tet(31)","tet(33)","tet(36)","tet(40)","tetA","tetA(P)","tetB(P)","tetC","tetG","tetL","tetM","tetQ","tetS","tetT","tetW","tetX","tetY","tetZ"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-36cd0a3bd2dc61afe388" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-36cd0a3bd2dc61afe388">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62"],["AAC(3)-IVa","AAC(6')-Ib11","aadA15","aadA24","aadA5","aadA7","ACI-1","acrB","ANT(6)-Ia","ANT(6)-Ib","APH(2'')-Ib","APH(3'')-Ib","APH(3')-Ia","APH(3')-IIa","APH(3')-IIIa","APH(4)-Ia","cfr(C)","Erm(35)","Erm(36)","Erm(42)","Erm(47)","ErmA","ErmB","ErmC","ErmF","ErmG","ErmQ","ErmT","ErmX","lnuA","lnuC","lnuD","lnuF","mdsB","mdtA","mdtB","mdtC","mdtO","mefA","mefB","OXA-347","str","sul1","sul2","tet(31)","tet(33)","tet(36)","tet(40)","tetA","tetA(P)","tetB(P)","tetC","tetG","tetL","tetM","tetQ","tetS","tetT","tetW","tetX","tetY","tetZ"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br> <br></p>
 </div>
@@ -676,7 +654,7 @@ profile_compare &lt;- ggplot(compare_data,
          legend.key.size = unit(6, &quot;mm&quot;), 
          panel.background = element_rect(color = &quot;black&quot;, size = 1.5), 
          panel.spacing = unit(0.01, &quot;npc&quot;), 
-         strip.text.x = element_text(size = 12, face = &quot;bold&quot;), 
+         strip.text.x = element_text(size = 10, face = &quot;bold&quot;), 
          strip.background = element_rect(colour = &quot;black&quot;, size = 1.4, fill = &quot;white&quot;),
          panel.grid.major.x = element_blank()) + 
   scale_y_continuous(expand = expansion(mult = c(0.0037, 0.003), add = c(0, 0))) + 
@@ -725,15 +703,15 @@ div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
 </div>
 <div id="resitome-differences-1" class="section level3">
 <h3>Resitome Differences</h3>
-<div id="swine-manure-1" class="section level4">
-<h4>Swine Manure</h4>
+<div id="swine-manure-a-1" class="section level4">
+<h4>Swine Manure-A</h4>
 <p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 73 of the 128 that DARTE-QM found, with an alpha diversity of 3.06. The metagenome technology was able to find 26 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName3">
 Show Table
 </button>
 <div id="BlockName3" class="collapse">
-<div id="htmlwidget-054c510b3a9e600591a3" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-054c510b3a9e600591a3">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26"],["tetO","tetV","tetJ","tetD","tet(45)","APH(2'')-If","APH(6)-Ia","lnuB","Erm(33)","ANT(4')-Ib","AAC(6')-Ip","aadA8","aadA22","aadA1","aadA16","lsaC","mphG","AAC(3)-Ib/AAC(6')-Ib''","AAC(6')-Ib11","AAC(6')-Iid","AAC(6')-Iak","AAC(3)-Ib","AAC(3)-IIc","OXA-258","aadA11","mphB"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-50b766226a687439895d" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-50b766226a687439895d">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26"],["tetO","tetV","tetJ","tetD","tet(45)","APH(2'')-If","APH(6)-Ia","lnuB","Erm(33)","ANT(4')-Ib","AAC(6')-Ip","aadA8","aadA22","aadA1","aadA16","lsaC","mphG","AAC(3)-Ib/AAC(6')-Ib''","AAC(6')-Ib11","AAC(6')-Iid","AAC(6')-Iak","AAC(3)-Ib","AAC(3)-IIc","OXA-258","aadA11","mphB"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br></p>
 </div>
@@ -744,8 +722,8 @@ Show Table
 Show Table
 </button>
 <div id="BlockName4" class="collapse">
-<div id="htmlwidget-578b2eeba3b56848a2c5" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-578b2eeba3b56848a2c5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44"],["tet(32)","tetD","tetO","tetV","tet(45)","tetJ","tet(39)","APH(6)-Ia","APH(2'')-If","APH(3')-VI","lnuB","Erm(33)","ErmY","ANT(4')-Ib","aadA22","aadA1","AAC(6')-Ip","aadA8","aadA6","aadA14","aadA16","aadA11","aadA13","acrA","lsaC","mphB","mphD","AAC(3)-Ib/AAC(6')-Ib''","AAC(6')-Iak","AAC(3)-IIc","AAC(6')-Iid","OXA-258","otrC","lsaB","OXA-29","AAC(3)-Ib","tet(43)","APH(3')-XV","tet(42)","APH(3')-VIa","otrB","AAC(2')-Ib","tetA(46)","OXA-209"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-14a0a82a9e87ea578466" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-14a0a82a9e87ea578466">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44"],["tet(32)","tetD","tetO","tetV","tet(45)","tetJ","tet(39)","APH(6)-Ia","APH(2'')-If","APH(3')-VI","lnuB","Erm(33)","ErmY","ANT(4')-Ib","aadA22","aadA1","AAC(6')-Ip","aadA8","aadA6","aadA14","aadA16","aadA11","aadA13","acrA","lsaC","mphB","mphD","AAC(3)-Ib/AAC(6')-Ib''","AAC(6')-Iak","AAC(3)-IIc","AAC(6')-Iid","OXA-258","otrC","lsaB","OXA-29","AAC(3)-Ib","tet(43)","APH(3')-XV","tet(42)","APH(3')-VIa","otrB","AAC(2')-Ib","tetA(46)","OXA-209"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br></p>
 </div>
