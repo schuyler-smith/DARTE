@@ -34,7 +34,7 @@ set(SC_I, which(SC_I[['Matrix']]=='soil' & SC_I[['Day']]!=0), j='Matrix', value=
 SC_I$Sample <- factor(SC_I$Sample, levels = unique(SC_I$Sample[order(as.numeric(SC_I$Day))]))
 setnames(SC_I, 'Gene', 'ARG')
 
-graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Primer'), variable.name = 'Sample_Name')
+graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Variant', 'Primer'), variable.name = 'Sample_Name')
 graph_data <- graph_data[ARG != 'spike']
 graph_data <- graph_data[!(ARG %in% c('16S'))]
 graph_data <- merge(metadata[,c('ID', 'Sample', 'Matrix')], graph_data, by.x = 'ID', by.y = 'Sample_Name')
@@ -115,7 +115,7 @@ x = 1
 y = 2
 method = 'bray'
 circle = 0.95
-graph_data <- read_counts[,-c(2,3)]
+graph_data <- read_counts[,-c(2,3,4)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] <- 0
@@ -157,7 +157,7 @@ pca
 
 ### NMDS
 ```{r nmds}
-graph_data <- read_counts[,-c(2,3)]
+graph_data <- read_counts[,-c(2,3,4)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] <- 0
@@ -201,7 +201,7 @@ nmds
 
 ## PERMANOVA
 ```{r permanova_code}
-graph_data <- read_counts[,-c(2,3)]
+graph_data <- read_counts[,-c(2,3,4)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 graph_data <- graph_data[rowSums(graph_data) >=5, ]
 
@@ -220,7 +220,7 @@ permanova
 ```{r, clusters, results='asis', fig.width=12, fig.height=6, cache=TRUE}
 for (method in c('Bray-Curts', 'Jaccard', 'Euclidean', 'Gower')){
   cat("###", method, '<br>', '\n\n')
-  graph_data <- read_counts[,-c(2:3)]
+  graph_data <- read_counts[,-c(2,3,4)]
   graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
   sample_order <- colnames(graph_data)
   distance_matrix <- vegan::vegdist(t(graph_data), gsub("-.*", "",tolower(method)), na.rm = TRUE)
@@ -265,7 +265,7 @@ print(ggplot(data = ggdendro::segment(graph_data)) +
 method = 'bray'
 x = 1
 y = 2
-graph_data <- read_counts[,-c(2:3)]
+graph_data <- read_counts[,-c(2,3,4)]
 graph_data <- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])>5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix <- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] <- 0

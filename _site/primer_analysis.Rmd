@@ -48,7 +48,7 @@ for(file in BLAST_file){
                                            'rstart', 'rend', 'e', 'bit'))
   unknown <- unknown[length >= 90]
   setorder(unknown, 'query', 'perc_id')
-  unknown <- merge(categories, unknown, by.x = "Primer", by.y = "reference")
+  unknown <- merge(classifications, unknown, by.x = "Primer", by.y = "reference")
   unknown <- unique(unknown, by=c("query", "Primer"))
   unknown <- unknown[unknown[, .I[length == max(length, na.rm=T)], by = c('query', 'Primer')][[3]]]
   unknown <- unknown[unknown[, .I[perc_id == max(perc_id, na.rm=T)], by = c('query', 'Primer')][[3]]]
@@ -61,7 +61,8 @@ for(file in BLAST_file){
                                                'mismatch', 'gap', 'qstart', 'qend', 
                                                'rstart', 'rend', 'e', 'bit'))
       setorder(blast, 'query', 'perc_id')
-      blast <- merge(categories, blast, by.x = "Primer", by.y = "reference")
+      blast <- blast[perc_id > 95]
+      blast <- merge(classifications, blast, by.x = "Primer", by.y = "reference")
       n_reads <- length(unique(blast[['query']]))
       blast <- blast[length >= 90]
       analyzed <- length(unique(blast[['query']]))
@@ -94,9 +95,16 @@ for(file in BLAST_file){
   print(sample_name)
 }
 primer_success[,true_neg := sum(true_pos)-true_pos, by = sample]
+primer_success <- merge(classifications, primer_success, by.x = 'Primer', by.y = 'primer')
 primer_success <- primer_success[n_reads != 'NA']
 primer_success <- primer_success[ARG_Family != '16S']
 saveRDS(primer_success, '../data/primers/primer_success.RDS')
+data.table::set(primer_success, which(primer_success[["success_rate"]] == 0), "success_rate", NA)
+primer_success[, experiment := sapply(strsplit(sample, "-"), "[[", 1)]
+read_count <- data.table::dcast(primer_success, Primer ~ sample, value.var=c("true_pos"), fun = sum)
+read_count <- read_count[c(which(rowSums(read_count[,-1]) > 0)),]
+read_count <- merge(classifications, read_count, by = 'Primer')
+saveRDS(read_count, '../data/primers/read_counts_from_primers.RDS')
 ```
 
 ### Primers by Samples
@@ -118,8 +126,7 @@ primer_success
 ```{r primers}
 samples <- primer_success[, sum(true_pos, na.rm = T), by = sample][V1 > 1000]$sample
 primer_success <- primer_success[sample %in% samples]
-primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=primer, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
-primers <- merge(classifications, primers, by.y = 'primer', by.x = 'Primer')
+primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=Primer, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
 setorder(primers, -n_reads)
 ```
 
@@ -153,12 +160,12 @@ datatable(primers, options = list(
 
 ### Overall for Samples
 ```{r samples}
-samples <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=sample, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
-setorder(samples, sample)
+sample_success <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=sample, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
+setorder(sample_success, sample)
 ```
 
 ```{r samples_table, echo=FALSE}
-datatable(samples, options = list(
+datatable(sample_success, options = list(
             columnDefs = list(
               list(
                 targets = 1,
@@ -180,9 +187,9 @@ datatable(samples, options = list(
 ```{r sample_t_pos}
 data.table::set(primer_success, which(primer_success[["success_rate"]] == 0), "success_rate", NA)
 primer_success[, experiment := sapply(strsplit(sample, "-"), "[[", 1)]
-read_count <- data.table::dcast(primer_success, primer ~ sample, value.var=c("true_pos"), fun = sum)
+read_count <- data.table::dcast(primer_success, Primer ~ sample, value.var=c("true_pos"), fun = sum)
 read_count <- read_count[c(which(rowSums(read_count[,-1]) > 0)),]
-read_count <- merge(classifications, read_count, by.y = 'primer', by.x = 'Primer')
+read_count <- merge(classifications, read_count, by = 'Primer')
 ```
 
 ```{r t_pos_counts, echo=FALSE}
@@ -194,7 +201,6 @@ read_count
 
 ## Success Metrics {.tabset .tabset-pills}
 ```{r primer_table}
-primer_success <- merge(classifications, primer_success, by.x = 'Primer', by.y = 'primer')
 primer_success[, experiment := NULL]
 setorder(primer_success, -n_reads)
 ```
@@ -262,7 +268,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
   ) + 
   scale_y_discrete(expand=expansion(mult=0, add=1), limits = seq(0,100,10)) + 
   ylab("Percentage of Reads") + 
-  scale_fill_manual(values = colors[c(2,5,4,3)], name = "Read Classification")
+  scale_fill_manual(values = colors[c(2,4,5,3)], name = "Read Classification")
 ```
 <br>
 

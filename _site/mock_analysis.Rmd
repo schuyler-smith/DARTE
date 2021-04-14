@@ -86,7 +86,7 @@ mock_profile
 ## Primer Success {.tabset .tabset-pills}
 
 ```{r primer_success}
-mock_expected_ARGs <- sort(mock_expected_counts$Primer)
+mock_expected_ARGs <- c(unique(sort(mock_expected_counts$Primer)), 'spike')
 mock_observed_counts <- read_counts[, c(1:3, grep('Mock', colnames(read_counts))), with = FALSE]
 mock_observed_counts <- mock_observed_counts[rowSums(mock_observed_counts[,-c(1:3)]) > 1,]
 mock_successful_primers <- mock_expected_ARGs[mock_expected_ARGs %in% mock_observed_counts$Primer]
@@ -112,14 +112,15 @@ graph_data <- melt(graph_data, id.vars = classification, variable.name = 'Sample
 set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], 
                                                levels = c('Theoretical', mock_samples)))
 primer_graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by = c('Sample', classification), .SDcols=c("Abundance")]
+setorder(primer_graph_data, Abundance)
+set(primer_graph_data, j = classification, value = factor(as.character(primer_graph_data[[classification]]), 
+                                                   levels = unique(as.character(primer_graph_data[[classification]]))))
+set(primer_graph_data, which(primer_graph_data[['Abundance']] < 1), j='Abundance', value=NA)
 
-setorder(graph_data, Abundance)
-set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), 
-                                                   levels = unique(as.character(graph_data[[classification]]))))
-set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
-setorder(graph_data, Sample)
+primer_graph_data$Primer <- gsub('_.?_DARTE-QM', '', primer_graph_data$Primer)
+set(primer_graph_data, j = 'Primer', value = factor(primer_graph_data$Primer, levels = rev(gsub('_.?_DARTE-QM', '', mock_expected_ARGs))))
 
-Primer_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
+Primer_counts <- ggplot(primer_graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
   geom_tile(color = "white", size = 0.25) +
   theme_classic() + 
   theme(axis.text.x = element_text(angle = 20, hjust = 1, size = 10), 
@@ -170,11 +171,10 @@ set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']],
                                                levels = c('Theoretical', mock_samples)))
 graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by = c('Sample', classification), .SDcols=c("Abundance")]
 
-setorder(graph_data, Abundance)
-set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), levels = unique(as.character(graph_data[[classification]]))))
+set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), 
+                                                   levels = rev(c(sort(unique(graph_data[get(classification) != 'spike'][[classification]])), 'spike'))))
 set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
-
-setorder(graph_data, Sample)
+ 
 ARG_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
   geom_tile(color = "white", size = 0.25) +
   theme_classic() + 
@@ -271,6 +271,8 @@ ARG_Family_counts
 dist_matrix <- primer_graph_data
 dist_matrix <- dcast(dist_matrix[Primer %in% dist_matrix[, sum(Abundance), by = 'Primer'][V1 > 0]$Primer],
            Primer ~ Sample, value.var = 'Abundance')
+setnames(dist_matrix, colnames(dist_matrix)[colnames(dist_matrix) %in% metadata$ID],
+         as.character(metadata$Sample[match(colnames(dist_matrix[,-c(1,2)]), metadata$ID)]))
 replace_DT_NA(dist_matrix)
 dist_matrix <- as.matrix(round(vegdist(t(dist_matrix[,-c(1)])), 3))
 dist_matrix_plot <- dist_matrix
@@ -304,7 +306,7 @@ spike_counts <- read_counts[ARG == 'spike']
 ```
 
 ```{r spike_counts, message=FALSE, warning=FALSE}
-graph_data <- melt(spike_counts, id.vars = c('ARG_Family','ARG','Primer'))
+graph_data <- melt(spike_counts, id.vars = c('ARG_Family','ARG', 'Variant','Primer'))
 graph_data <- graph_data[, floor(mean(value)), by = c('variable')]
 graph_data <- graph_data[variable %in% mock_samples]
 graph_data[['variable']] <- factor(graph_data[['variable']], levels = mock_samples)

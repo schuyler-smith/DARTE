@@ -323,7 +323,7 @@ datatable(fecal,
 
 ```{r curate_read_counts, echo=FALSE, warning=FALSE}
 read_counts <- read_counts[ARG != "16S"]
-low_samples <- names(which(colSums(read_counts[,-c(1:3)], na.rm = T) < 5000))
+low_samples <- names(which(colSums(read_counts[,-c(1:4)], na.rm = T) < 5000))
 read_counts[, (low_samples) := NULL]
 ```
 

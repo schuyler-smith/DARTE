@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-12" />
+<meta name="date" content="2021-04-14" />
 
 <title>Sample Analysis</title>
 
@@ -440,7 +440,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Sample Analysis</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-12</h4>
+<h4 class="date">2021-04-14</h4>
 
 </div>
 
@@ -462,7 +462,7 @@ set(SC_I, which(SC_I[[&#39;Matrix&#39;]]==&#39;soil&#39; &amp; SC_I[[&#39;Day&#3
 SC_I$Sample &lt;- factor(SC_I$Sample, levels = unique(SC_I$Sample[order(as.numeric(SC_I$Day))]))
 setnames(SC_I, &#39;Gene&#39;, &#39;ARG&#39;)
 
-graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
+graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Variant&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
 graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
 graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
 graph_data &lt;- merge(metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
@@ -534,7 +534,7 @@ x = 1
 y = 2
 method = &#39;bray&#39;
 circle = 0.95
-graph_data &lt;- read_counts[,-c(2,3)]
+graph_data &lt;- read_counts[,-c(2,3,4)]
 graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] &lt;- 0
@@ -570,7 +570,7 @@ pca &lt;- ggplot(data = graph_data, aes_string(&#39;x&#39;, &#39;y&#39;, group =
 </div>
 <div id="nmds" class="section level3">
 <h3>NMDS</h3>
-<pre class="r"><code>graph_data &lt;- read_counts[,-c(2,3)]
+<pre class="r"><code>graph_data &lt;- read_counts[,-c(2,3,4)]
 graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] &lt;- 0
@@ -608,7 +608,7 @@ nmds &lt;- ggplot(data = graph_data, aes_string(&#39;NMDS1&#39;, &#39;NMDS2&#39;
 </div>
 <div id="permanova" class="section level2">
 <h2>PERMANOVA</h2>
-<pre class="r"><code>graph_data &lt;- read_counts[,-c(2,3)]
+<pre class="r"><code>graph_data &lt;- read_counts[,-c(2,3,4)]
 graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 graph_data &lt;- graph_data[rowSums(graph_data) &gt;=5, ]
 
@@ -623,9 +623,9 @@ permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`ID` %in% 
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(&gt;F)    
-## Matrix     6    5.0794 0.84656  11.375 0.69466  0.001 ***
-## Residuals 30    2.2326 0.07442         0.30534           
-## Total     36    7.3120                 1.00000           
+## Matrix     6    4.9208 0.82013  11.403 0.70231  0.001 ***
+## Residuals 29    2.0857 0.07192         0.29769           
+## Total     35    7.0065                 1.00000           
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p><br> <br></p>
@@ -634,7 +634,7 @@ permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`ID` %in% 
 <h2>Hierarchical Clustering</h2>
 <pre class="r"><code>for (method in c(&#39;Bray-Curts&#39;, &#39;Jaccard&#39;, &#39;Euclidean&#39;, &#39;Gower&#39;)){
   cat(&quot;###&quot;, method, &#39;&lt;br&gt;&#39;, &#39;\n\n&#39;)
-  graph_data &lt;- read_counts[,-c(2:3)]
+  graph_data &lt;- read_counts[,-c(2,3,4)]
   graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
   sample_order &lt;- colnames(graph_data)
   distance_matrix &lt;- vegan::vegdist(t(graph_data), gsub(&quot;-.*&quot;, &quot;&quot;,tolower(method)), na.rm = TRUE)
@@ -692,7 +692,7 @@ print(ggplot(data = ggdendro::segment(graph_data)) +
 <pre class="r"><code>method = &#39;bray&#39;
 x = 1
 y = 2
-graph_data &lt;- read_counts[,-c(2:3)]
+graph_data &lt;- read_counts[,-c(2,3,4)]
 graph_data &lt;- rarefy(data=graph_data[, c(1, which(colSums(graph_data[,-1])&gt;5000)+1), with=FALSE], min(colSums(graph_data[,-1])))[,-1]
 distance_matrix &lt;- vegan::vegdist(t(graph_data), method, na.rm = TRUE)
 distance_matrix[is.na(distance_matrix)] &lt;- 0

@@ -24,11 +24,36 @@ treatment_name <- 'Matrix'
 missing <- unique(sort(as.character(SC_I$ARG)))
 genes <- as.character(SC_I$ARG)
 for(i in seq_along(missing)){
-  genes[genes %in% missing[i]] <- c("AAC(2')-Ib", "AAC(2')-Ie", "AAC(3)-Ib", "AAC(3)-IIc", "AAC(3)-IVa", "AAC(6')-Iae", "AAC(6')-Iak", "AAC(3)-Ib/AAC(6')-Ib''", "AAC(6')-Ib11", "AAC(6')-Ie-APH(2'')-Ia", "AAC(6')-IIa", "AAC(6')-Iid", "AAC(6')-Ip", "ANT(6)-Ia", "aadA1", "aadA11", "aadA13", "aadA14", "aadA15", "aadA16", "aadA22", "aadA24", "aadA25", "aadA3", "aadA5", "aadA6", "aadA7", "aadA8", "aadA9", "ACI-1", "acrA", "acrB", "acrD", "AcrF", "AdeB", "AdeF", "AdeI", "AdeJ", "AIM-1", "AmrA", "AmrB", "ANT(4')-Ib", "ANT(6)-Ia", "ANT(6)-Ib", "ANT(9)-Ia", "APH(2'')-If", "APH(2'')-Ib", "APH(2'')-IIIa", "APH(3'')-Ib", "APH(3')-Ia", "APH(3')-IIa", "APH(3')-IIIa", "APH(3')-VI", "APH(3')-VIa", "APH(3')-XV", "APH(4)-Ia", "APH(6)-Ia", "APH(6)-Ib", "APH(6)-Ic", "APH(6)-Id", "AQU-1", "arnA", "ARR-1", "AxyX", "AxyY", "BcI", "BcII", "bcr-1", "BJP-1", "blaA", "Bla2", "BlaB", "blaF", "blaL1", "BUT-1", "carA", "carB-1", "carB-4", "carB-8", "cat", "cat-TC", "cat", "catB6", "catB8", "catQ", "ceoA", "ceoB", "cfr(C)", "cfxA3", "cfxA6", "clbA", "cml", "cmlV", "cmx", "cpxa", "crp", "CTX-M-63", "CTX-M-75", "dfrA1", "dfrA20", "dfrA21", "dfrB3", "dfrD", "dfrG", "efpA", "efrA", "ereB", "Erm(33)", "Erm(35)", "Erm(36)", "Erm(42)", "Erm(47)", "ErmA", "ErmB", "ErmC", "ErmF", "ErmG", "ErmQ", "ErmT", "ErmX", "ErmY", "EXO-1", "facT", "farA", "FEZ-1", "floR", "FosB", "fusH", "gadX", "GES-23", "gyrA", "ileS", "iri", "JOHN-1", "linG", "lnuA", "lnuB", "lnuC", "lnuD", "lnuF", "lnuG", "LRA-1", "LRA-13", "LRA-19", "LRA-3", "LRA-8", "LRA-9", "lrfA", "lsaB", "lsaC", "lsaE", "macB", "mdsB", "mdsC", "mdtA", "mdtB", "mdtC", "mdtF", "mdtG", "mdtK", "mdtN", "mdtO", "mefA", "mefB", "mefC", "mel", "MexA", "MexB", "MexC", "MexD", "MexE", "MexF", "MexI", "MexK", "MexL", "MexM", "MexN", "MexQ", "MexV", "MexW", "MexX", "MexY", "mgtA", "MOX-9", "mphB", "mphD", "mphG", "mphL", "mprF", "msrA", "msrE", "mtrA", "mtrD", "mupA", "MuxA", "MuxB", "MuxC", "novA", "npmA", "OCH-2", "OCH-6", "OCH-7", "OKP-B-20", "oleB", "oleC", "oleD", "opcM", "OpmB", "OpmE", "OpmH", "OprA", "OprM", "OprN", "OprZ", "optrA", "oqxB", "otrA", "otrB", "otrC", "OXA-114a", "OXA-209", "OXA-22", "OXA-258", "OXA-29", "OXA-347", "OXA-368", "OXA-415", "OXA-60", "OXA-74", "patA", "PDC-75", "PmpM", "pmrE", "qacH", "QepA4", "QnrB12", "RbpA", "rgt1438", "Rm3", "rmtF", "rphA", "rphB", "SAT-1", "SAT-3", "SAT-4", "smeA", "smeB", "smeC", "smeD", "smeE", "smeF", "smeR", "smeS", "spd", "SPG-1", "srmB", "str", "sul1", "sul2", "TaeA", "tap", "tcmA", "tcr3", "TEM-220", "tet(31)", "tet(33)", "tet(39)", "tet(40)", "tet(41)", "tet(42)", "tet(43)", "tet(44)", "tet(45)", "tetA", "tetC", "tetD", "tetG", "tetH", "tetJ", "tetL", "tetV", "tet(W/N/W)", "tetY", "tetZ", "tet(32)", "tet(36)", "tetA(46)", "tetA(P)", "tetB(P)", "tetM", "tetO", "tetQ", "tetS", "tetT", "tetW", "tetX", "tlrC", "TolC", "TriA", "triC", "VanHO", "vanJ", "vanO", "vanRG", "vanRI", "VanRM", "VanRO", "VanSA", "VanSF", "VanSM", "VanSO", "VanTG", "VanXO", "VanXYG", "vatE", "vatH", "vga(A)LC", "vgaB", "vgaE")[i]
+  genes[genes %in% missing[i]] <- c(
+    "AAC(2')", "AAC(2')", "AAC(3)", "AAC(3)", "AAC(3)", "AAC(6')", "AAC(6')", "AAC(3)", "AAC(6')", "AAC(6')", 
+    "AAC(6')", "AAC(6')", "AAC(6')", "ANT(6)", "aadA", "aadA", "aadA", "aadA", "aadA", "aadA", "aadA", "aadA", 
+    "aadA", "aadA", "aadA", "aadA", "aadA", "aadA", "aadA", "ACI", "acrA", "acrB", "acrD", "AcrF", "AdeB", 
+    "AdeF", "AdeI", "AdeJ", "AIM", "AmrA", "AmrB", "ANT(4')", "ANT(6)", "ANT(6)", "ANT(9)", "APH(2'')", 
+    "APH(2'')", "APH(2'')", "APH(3'')", "APH(3'')", "APH(3'')", "APH(3'')", "APH(3'')", "APH(3'')", "APH(3'')", 
+    "APH(4)", "APH(6)", "APH(6)", "APH(6)", "APH(6)", "AQU", "arnA", "ARR-1", "Axy", "Axy", "BcI", "BcII", 
+    "bcr", "BJP", "blaA", "BlaA", "BlaB", "blaF", "blaL", "BUT-1", "CARA", "CARB", "CARB", "CARB", "cat", 
+    "cat", "cat", "catB", "catB", "catQ", "ceoA", "ceoB", "cfr(C)", "CfxA", "CfxA", "clbA", "cml", "cmlV", "cmx", 
+    "cpxa", "crp", "CTX-M", "CTX-M", "dfrA", "dfrA", "dfrA", "dfrB", "dfrD", "dfrG", "efpA", "efrA", "EreB", 
+    "Erm", "Erm", "Erm", "Erm", "Erm", "ErmA", "ErmB", "ErmC", "ErmF", "ErmG", "ErmQ", "ErmT", "ErmX", "ErmY", 
+    "EXO", "facT", "FAR", "FEZ", "floR", "FosB", "fusH", "gadX", "GES", "gyrA", "ileS", "iri", "JOHN", 
+    "linG", "lnuA", "lnuB", "lnuC", "lnuD", "lnuF", "lnuG", "LRA", "LRA", "LRA", "LRA", "LRA", "LRA", "lrfA", 
+    "lsaB", "lsaC", "lsaE", "macB", "mdsB", "mdsC", "mdtA", "mdtB", "mdtC", "mdtF", "mdtG", "mdtK", "mdtN", 
+    "mdtO", "mefA", "mefB", "mefC", "mel", "MexA", "MexB", "MexC", "MexD", "MexE", "MexF", "MexI", "MexK", 
+    "MexL", "MexM", "MexN", "MexQ", "MexV", "MexW", "MexX", "MexY", "mgtA", "MOX", "mphB", "mphD", "mphG", 
+    "mphL", "mprF", "msrA", "msrE", "mtrA", "mtrD", "mupA", "MuxA", "MuxB", "MuxC", "novA", "npmA", "OCH", "OCH", 
+    "OCH", "OKP-B", "oleB", "oleC", "oleD", "opcM", "OpmB", "OpmE", "OpmH", "OprA", "OprM", "OprN", "OprZ", 
+    "optrA", "oqxB", "otrA", "otrB", "otrC", "OXA", "OXA", "OXA", "OXA", "OXA", "OXA", "OXA", "OXA", "OXA", "OXA", 
+    "patA", "PDC", "PmpM", "pmrE", "qacH", "QepA", "QnrB", "RbpA", "rgt1438", "Rm3", "rmtF", "rphA", "rphB", 
+    "SAT", "SAT", "SAT", "SME", "smeB", "smeC", "smeD", "smeE", "smeF", "smeR", "smeS", "spd", "SPG", "srmB", 
+    "str", "sul1", "sul2", "TaeA", "tap", "tcmA", "tcr3", "TEM", "tet", "tet", "tet", "tet", "tet", "tet", "tet", 
+    "tet", "tet", "tetA", "tetC", "tetD", "tetG", "tetH", "tetJ", "tetL", "tetV", "tetW", "tetY", "tetZ", 
+    "tet", "tet", "tetA", "tetA", "tetB", "tetM", "tetO", "tetQ", "tetS", "tetT", "tetW", "tetX", "tlrC", "TolC", 
+    "TriA", "triC", "VanH", "vanJ", "vanO", "vanR", "vanR", "VanR", "VanR", "VanS", "VanS", "VanS", "VanS", 
+    "VanT", "VanX", "VanXY", "vatE", "vatH", "vgaA", "vgaB", "vgaE")[i]
 }
 set(SC_I, j = 'ARG', value = factor(genes, levels = unique(genes)))
 
-graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Primer'), variable.name = 'Sample_Name')
+graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Variant', 'Primer'), variable.name = 'Sample_Name')
 graph_data <- graph_data[ARG != 'spike']
 graph_data <- graph_data[!(ARG %in% c('16S'))]
 graph_data <- merge(metadata[,c(1,2,4)], graph_data, by.x = 'ID', by.y = 'Sample_Name')
@@ -62,7 +87,7 @@ missing <- unique(sort(as.character(graph_data[Tech != "DARTE-QM"]$ARG_Family[!(
 setorder(graph_data, 'ARG_Family')
 genes <- as.character(graph_data$ARG_Family)
 for(i in seq_along(missing)){
-  genes[genes %in% missing[i]] <- c("ceo", "mex", "mux", "ole", "bla", "rph", "bla", "tlr", "Van")[i]
+  genes[genes %in% missing[i]] <- c("mex", "mux", "noc", "oxa")[i]
 }
 set(graph_data, j = 'ARG_Family', value = factor(genes, levels = unique(genes)))
 setkey(graph_data, 'Sample')
