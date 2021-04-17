@@ -18,6 +18,27 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 ## ARG Profile
 
+```{r ARG_counts}
+graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Variant', 'Primer'), variable.name = 'Sample_Name')
+graph_data <- graph_data[ARG != 'spike']
+graph_data <- graph_data[!(ARG %in% c('16S'))]
+graph_data <- merge(metadata[,c('ID', 'Sample', 'Matrix')], graph_data, by.x = 'ID', by.y = 'Sample_Name')
+variant_counts <- data.table(Matrix = c("Mock", "Swine Manure-A", "Soil-A + Manure-A", "Soil-C", "Soil-B", "Effluent", "Swine Fecal", "Total"),
+           Variants = c(length(unique(graph_data[Matrix == "Mock"][value > 0]$Primer)),
+                        length(unique(graph_data[Matrix == "Swine Manure-A"][value > 0]$Primer)),
+                        length(unique(graph_data[Matrix == "Soil-A + Manure-A"][value > 0]$Primer)),
+                        length(unique(graph_data[Matrix == "Soil-C"][value > 0]$Primer)),
+                        length(unique(graph_data[Matrix == "Soil-B"][value > 0]$Primer)),
+                        length(unique(graph_data[Matrix == "Effluent"][value > 0]$Primer)),
+                        length(unique(graph_data[Matrix == "Swine Fecal"][value > 0]$Primer)),
+                        length(unique(graph_data[value > 0]$Primer))))
+```
+
+```{r ARG_counts_out, echo=FALSE}
+datatable(variant_counts)
+```
+
+
 <br>
   
 ```{r ARG_Families}

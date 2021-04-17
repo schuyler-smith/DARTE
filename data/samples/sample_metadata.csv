@@ -22,15 +22,15 @@ Q3_SCI_Soil_D0_B,"Soil-A, 2","Soil-A (Nashua, IA, history of swine manure applic
 Q3_SCI_Manure_A,"Swine Manure-A, 1",Swine manure used for manure treatment of Soil-A,Swine Manure-A,NA,1,Jin,22.21222911,444.2445822,C6,Smith et. al,TRUE
 Q3_SCI_Manure_B,"Swine Manure-A, 2",Swine manure used for manure treatment of Soil-A,Swine Manure-A,NA,2,Jin,22.45011739,449.0023478,C7,Smith et. al,TRUE
 Q3_SCI_Manure_C,"Swine Manure-A, 3",Swine manure used for manure treatment of Soil-A,Swine Manure-A,NA,3,Jin,22.51553667,450.3107333,C8,Smith et. al,TRUE
-Q3_SCI_Soil_D24_A,"Soil-A + Manure, Day 24, 1",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,1,Jin,100,2000,B9,Smith et. al,TRUE
-Q3_SCI_Soil_D24_B,"Soil-A + Manure, Day 24, 2",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,2,Jin,58,1160,B10,Smith et. al,FALSE
-Q3_SCI_Soil_D24_C,"Soil-A + Manure, Day 24, 3",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,3,Jin,103,2060,B11,Smith et. al,TRUE
-Q3_SCI_Soil_D59_A,"Soil-A + Manure, Day 59, 1",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,1,Jin,131,2620,B12,Smith et. al,FALSE
-Q3_SCI_Soil_D59_B,"Soil-A + Manure, Day 59, 2",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,2,Jin,75.2,1504,C1,Smith et. al,TRUE
-Q3_SCI_Soil_D59_C,"Soil-A + Manure, Day 59, 3",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,3,Jin,48.4,968,C2,Smith et. al,FALSE
-Q3_SCI_Soil_D108_A,"Soil-A + Manure, Day 108, 1",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,1,Jin,47.6,952,C3,Smith et. al,FALSE
-Q3_SCI_Soil_D108_B,"Soil-A + Manure, Day 108, 2",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,2,Jin,44.8,896,C4,Smith et. al,FALSE
-Q3_SCI_Soil_D108_C,"Soil-A + Manure, Day 108, 3",Soil-A with experimental manure treatment,Soil-A + Manure-A,NA,3,Jin,43.2,864,C5,Smith et. al,FALSE
+Q3_SCI_Soil_D24_A,"Soil-A + Manure, Day 24, 1",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,1,Jin,100,2000,B9,Smith et. al,TRUE
+Q3_SCI_Soil_D24_B,"Soil-A + Manure, Day 24, 2",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,2,Jin,58,1160,B10,Smith et. al,FALSE
+Q3_SCI_Soil_D24_C,"Soil-A + Manure, Day 24, 3",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,3,Jin,103,2060,B11,Smith et. al,TRUE
+Q3_SCI_Soil_D59_A,"Soil-A + Manure, Day 59, 1",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,1,Jin,131,2620,B12,Smith et. al,FALSE
+Q3_SCI_Soil_D59_B,"Soil-A + Manure, Day 59, 2",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,2,Jin,75.2,1504,C1,Smith et. al,TRUE
+Q3_SCI_Soil_D59_C,"Soil-A + Manure, Day 59, 3",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,3,Jin,48.4,968,C2,Smith et. al,FALSE
+Q3_SCI_Soil_D108_A,"Soil-A + Manure, Day 108, 1",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,1,Jin,47.6,952,C3,Smith et. al,FALSE
+Q3_SCI_Soil_D108_B,"Soil-A + Manure, Day 108, 2",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,2,Jin,44.8,896,C4,Smith et. al,FALSE
+Q3_SCI_Soil_D108_C,"Soil-A + Manure, Day 108, 3",Soil-A with experimental manure treatment from Swine Manure-A,Soil + Manure-A,NA,3,Jin,43.2,864,C5,Smith et. al,FALSE
 Q3_SCII_SoilPig_D0_A,"Soil-B, 1","Soil-B (Black Hawk Lake Watershed, IA, history of swine manure application)",Soil-B,NA,1,Jin,18.03134264,360.6268528,C9,Smith et. al,TRUE
 Q3_SCII_SoilPig_D0_B,"Soil-B, 2","Soil-B (Black Hawk Lake Watershed, IA, history of swine manure application)",Soil-B,NA,2,Jin,15.70003752,314.0007504,C10,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662623,TRUE
 Q3_SCII_SoilPig_D0_C,"Soil-B, 3","Soil-B (Black Hawk Lake Watershed, IA, history of swine manure application)",Soil-B,NA,3,Jin,16.60996018,332.1992036,C11,https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=662624,FALSE

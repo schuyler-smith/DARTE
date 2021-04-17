@@ -145,18 +145,17 @@ profile_compare
 
 ### Diversity
 ```{r apha-div}
-index = "shannon"
-colors = "default"
 alpha <- compare_data
 alpha <- dcast(alpha, ARG ~ Sample, value.var = 'relative_abundance', fun.aggregate = sum)
-alpha <- alpha[,-1]
+alpha <- alpha[rowSums(alpha[,-1]) > 0 ,-1]
 replace_DT_NA(alpha)
 
 alpha <- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
 alpha <- -alpha * log(alpha)
 alpha <- alpha[,lapply(.SD, sum, na.rm = TRUE)]
 
-samples <- dcast(compare_data, Sample + Tech + Matrix ~ ARG, value.var = 'relative_abundance')
+samples <- dcast(compare_data, Sample + Tech + Matrix ~ ARG, 
+                 value.var = 'relative_abundance', fun.aggregate = sum)
 
 alpha_data <- data.table(Sample = samples$Sample, 
     Matrix = samples$Matrix,
@@ -199,6 +198,8 @@ compared to metagenomes which had `r length(unique(compare_data[Tech != 'DARTE-Q
 
 The metagenome found `r sum(unique(compare_data[Tech != 'DARTE-QM'][Matrix == "Swine Manure-A"][relative_abundance > 0]$ARG) %in% unique(compare_data[Tech == 'DARTE-QM'][Matrix == "Swine Manure-A"][relative_abundance > 0]$ARG))` ARGs that were not detected with DARTE-QM.
 
+The mean BC = `r round(mean(as.matrix(vegdist(dcast(compare_data[Matrix == "Swine Manure-A"], Sample + Tech + Matrix ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = sum)[,-c(1:3)]))[,1]), 2)` for ARG Families in Swine Manure-A Samples between both technologies.
+
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName"> Show Table </button>  
 <div id="BlockName" class="collapse"> 
 ```{r arg_list2, echo=FALSE}
@@ -217,6 +218,8 @@ compared to metagenomes which had `r length(unique(compare_data[Tech != 'DARTE-Q
 
 The metagenome found `r sum(unique(compare_data[Tech != 'DARTE-QM'][Matrix != "Swine Manure-A"][relative_abundance > 0]$ARG) %in% unique(compare_data[Tech == 'DARTE-QM'][Matrix != "Swine Manure-A"][relative_abundance > 0]$ARG))` ARGs that were not detected with DARTE-QM.
 
+The mean BC = `r round(mean(as.matrix(vegdist(dcast(compare_data[Matrix != "Swine Manure-A"], Sample + Tech + Matrix ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = sum)[,-c(1:3)]))[,1]),2)` for ARG Families in Manure + Soil-A Samples between both technologies.
+
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName2"> Show Table </button>  
 <div id="BlockName2" class="collapse"> 
 ```{r arg_list, echo=FALSE}
@@ -224,6 +227,21 @@ datatable(data.frame(ARG = sort(as.character(unique(compare_data[Tech != 'DARTE-
 ```
 </div>
 
+<br>
+<br>
+
+## Source Differentiation
+
+```{r darte_dist}
+darte_manure <- dcast(compare_data[Tech == "DARTE-QM"][Matrix == "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+darte_soil_manure <- dcast(compare_data[Tech == "DARTE-QM"][Matrix != "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+
+meta_manure <- dcast(compare_data[Tech != "DARTE-QM"][Matrix == "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+meta_soil_manure <- dcast(compare_data[Tech != "DARTE-QM"][Matrix != "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+```
+For ARGs characterized by DARTE-QM, the mean distance between manure and soil-manure samples was BC = `r round(mean(vegdist(rbind(darte_manure, darte_soil_manure)[,-c(1)])), 2)`.
+<br>
+For ARGs characterized by metagenomes, the mean distance between manure and soil-manure samples was BC = `r round(mean(vegdist(rbind(meta_manure, meta_soil_manure, fill=TRUE)[,-c(1)], na.rm = TRUE)), 2)`.
 <br>
 <br>
 
@@ -273,8 +291,6 @@ profile_compare
 
 ### Diversity
 ```{r apha-div_DARTE_Only, fig.width=5, fig.height=4}
-index = "shannon"
-colors = "default"
 alpha <- compare_data
 alpha <- dcast(alpha, ARG ~ Sample, value.var = 'relative_abundance', fun.aggregate = sum)
 alpha <- alpha[,-1]
@@ -340,4 +356,18 @@ datatable(data.frame(ARG = unique(as.character(compare_data[Tech != 'DARTE-QM'][
 ```
 </div>
 <br>
+<br>
 
+## Source Differentiation for DARTE-QM Targets
+
+```{r darte_target_dist}
+darte_manure <- dcast(compare_data[Tech == "DARTE-QM"][Matrix == "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+darte_soil_manure <- dcast(compare_data[Tech == "DARTE-QM"][Matrix != "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+
+meta_manure <- dcast(compare_data[Tech != "DARTE-QM"][Matrix == "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+meta_soil_manure <- dcast(compare_data[Tech != "DARTE-QM"][Matrix != "Swine Manure-A"], Tech ~ ARG_Family, value.var = 'relative_abundance', fun.aggregate = mean)
+```
+
+For ARGs characterized by DARTE-QM, the mean distance between manure and soil-manure samples was BC = `r round(mean(vegdist(rbind(darte_manure, darte_soil_manure)[,-c(1)])), 2)`.
+<br>
+For ARGs characterized by metagenomes, the mean distance between manure and soil-manure samples was BC = `r round(mean(vegdist(rbind(meta_manure, meta_soil_manure, fill=TRUE)[,-c(1)], na.rm = TRUE)), 2)`.

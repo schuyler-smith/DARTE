@@ -1,5 +1,4 @@
 base
-phyloseq
 ggplot2
 plotly
 ggpubr
@@ -9,6 +8,7 @@ lattice
 vegan
 data.table
 ggh4x
+phyloseq
 schuylR
 ssBLAST
 phylosmith

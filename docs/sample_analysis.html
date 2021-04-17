@@ -11,11 +11,11 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-14" />
+<meta name="date" content="2021-04-15" />
 
 <title>Sample Analysis</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -39,6 +39,14 @@
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
 <script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.17/datatables.js"></script>
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -440,7 +448,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Sample Analysis</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-14</h4>
+<h4 class="date">2021-04-15</h4>
 
 </div>
 
@@ -448,6 +456,21 @@ div.tocify {
 <p><br> <br></p>
 <div id="arg-profile" class="section level2">
 <h2>ARG Profile</h2>
+<pre class="r"><code>graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Variant&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
+graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
+graph_data &lt;- merge(metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
+variant_counts &lt;- data.table(Matrix = c(&quot;Mock&quot;, &quot;Swine Manure-A&quot;, &quot;Soil-A + Manure-A&quot;, &quot;Soil-C&quot;, &quot;Soil-B&quot;, &quot;Effluent&quot;, &quot;Swine Fecal&quot;, &quot;Total&quot;),
+           Variants = c(length(unique(graph_data[Matrix == &quot;Mock&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[Matrix == &quot;Swine Manure-A&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[Matrix == &quot;Soil-A + Manure-A&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[Matrix == &quot;Soil-C&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[Matrix == &quot;Soil-B&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[Matrix == &quot;Effluent&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[Matrix == &quot;Swine Fecal&quot;][value &gt; 0]$Primer)),
+                        length(unique(graph_data[value &gt; 0]$Primer))))</code></pre>
+<div id="htmlwidget-785bb5a1d9d1de93f0e5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-785bb5a1d9d1de93f0e5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["Mock","Swine Manure-A","Soil-A + Manure-A","Soil-C","Soil-B","Effluent","Swine Fecal","Total"],[154,202,181,182,167,139,153,230]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Matrix<\/th>\n      <th>Variants<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <p><br></p>
 <pre class="r"><code>classification &lt;- &#39;ARG_Family&#39;
 treatment_name &lt;- &#39;Matrix&#39;
@@ -623,9 +646,9 @@ permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`ID` %in% 
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(&gt;F)    
-## Matrix     6    4.9208 0.82013  11.403 0.70231  0.001 ***
-## Residuals 29    2.0857 0.07192         0.29769           
-## Total     35    7.0065                 1.00000           
+## Matrix     6    4.9263 0.82104  11.448 0.70314  0.001 ***
+## Residuals 29    2.0799 0.07172         0.29686           
+## Total     35    7.0061                 1.00000           
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p><br> <br></p>
