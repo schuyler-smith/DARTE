@@ -181,11 +181,11 @@ read_counts <- readRDS('../data/primers/read_counts_from_primers.RDS')
 ```
 
 ```{r mock_counts_out, echo=FALSE}
-datatable(read_counts[ARG != "16S",c(1,2,3,grep('Mock', colnames(read_counts))), with=FALSE], 
+datatable(read_counts[Gene != "16S",c(1,2,3,grep('Mock', colnames(read_counts))), with=FALSE], 
                         options = list(
             autoWidth = TRUE,
             columnDefs = list(
-              list(width = '100px', targets = c(1,4:ncol(read_counts[ARG != "16S",c(1,2,3,grep('Mock', colnames(read_counts))), with=FALSE]))),
+              list(width = '100px', targets = c(1,4:ncol(read_counts[Gene != "16S",c(1,2,3,grep('Mock', colnames(read_counts))), with=FALSE]))),
               list(
                 targets = c(1,2),
                 render = JS(
@@ -214,14 +214,14 @@ datatable(read_counts[ARG != "16S",c(1,2,3,grep('Mock', colnames(read_counts))),
 
 #### Soil Column I
 ```{r sci_counts}
-sc_i <- read_counts[ARG != "16S",c(1,2,3,grep('SCI-', colnames(read_counts))), with=FALSE]
+sc_i <- read_counts[Gene != "16S",c(1,2,3,grep('SCI-', colnames(read_counts))), with=FALSE]
 ```
 
 ```{r sci_counts_out, echo=FALSE}
 datatable(sc_i, options = list(
             autoWidth = TRUE,
             columnDefs = list(
-              list(width = '100px', targets = c(4:ncol(read_counts[ARG != "16S",c(1,2,3,grep('SCI-', colnames(read_counts))), with=FALSE]))),
+              list(width = '100px', targets = c(4:ncol(read_counts[Gene != "16S",c(1,2,3,grep('SCI-', colnames(read_counts))), with=FALSE]))),
               list(
                 targets = c(1,2),
                 render = JS(
@@ -250,14 +250,14 @@ datatable(sc_i, options = list(
   
 #### Soil Column II
 ```{r scii_counts}
-sc_ii <- read_counts[ARG != "16S",c(1,2,3,grep('SCII', colnames(read_counts))), with=FALSE]
+sc_ii <- read_counts[Gene != "16S",c(1,2,3,grep('SCII', colnames(read_counts))), with=FALSE]
 ```
 
 ```{r scii_counts_out, echo=FALSE}
 datatable(sc_ii, options = list(
             autoWidth = TRUE,
             columnDefs = list(
-              list(width = '100px', targets = c(4:ncol(read_counts[ARG != "16S",c(1,2,3,grep('SCII', colnames(read_counts))), with=FALSE]))),
+              list(width = '100px', targets = c(4:ncol(read_counts[Gene != "16S",c(1,2,3,grep('SCII', colnames(read_counts))), with=FALSE]))),
               list(
                 targets = c(1,2),
                 render = JS(
@@ -283,10 +283,10 @@ datatable(sc_ii, options = list(
 </a>
 <br>
 <br>
-
+♫
 #### Fecal
 ```{r fecal_counts}
-fecal <- read_counts[ARG != "16S",c(1,2,3,grep('X1P', colnames(read_counts))), with=FALSE]
+fecal <- read_counts[Gene != "16S",c(1,2,3,grep('X1P', colnames(read_counts))), with=FALSE]
 ```
 
 ```{r fecal_counts_out, echo=FALSE}
@@ -294,7 +294,7 @@ datatable(fecal,
           options = list(
             autoWidth = TRUE,
             columnDefs = list(
-              list(width = '100px', targets = c(4:ncol(read_counts[ARG != "16S",c(1,2,3,grep('X1P', colnames(read_counts))), with=FALSE]))),
+              list(width = '100px', targets = c(4:ncol(read_counts[Gene != "16S",c(1,2,3,grep('X1P', colnames(read_counts))), with=FALSE]))),
               list(
                 targets = c(1,2),
                 render = JS(
@@ -322,7 +322,7 @@ datatable(fecal,
 <br>
 
 ```{r curate_read_counts, echo=FALSE, warning=FALSE}
-read_counts <- read_counts[ARG != "16S"]
+read_counts <- read_counts[Gene != "16S"]
 low_samples <- names(which(colSums(read_counts[,-c(1:4)], na.rm = T) < 5000))
 read_counts[, (low_samples) := NULL]
 ```

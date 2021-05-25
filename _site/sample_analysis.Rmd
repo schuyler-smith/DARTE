@@ -19,56 +19,48 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ## ARG Profile
 
 ```{r ARG_counts}
-graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Variant', 'Primer'), variable.name = 'Sample_Name')
-graph_data <- graph_data[ARG != 'spike']
-graph_data <- graph_data[!(ARG %in% c('16S'))]
-graph_data <- merge(metadata[,c('ID', 'Sample', 'Matrix')], graph_data, by.x = 'ID', by.y = 'Sample_Name')
-variant_counts <- data.table(Matrix = c("Mock", "Swine Manure-A", "Soil-A + Manure-A", "Soil-C", "Soil-B", "Effluent", "Swine Fecal", "Total"),
-           Variants = c(length(unique(graph_data[Matrix == "Mock"][value > 0]$Primer)),
-                        length(unique(graph_data[Matrix == "Swine Manure-A"][value > 0]$Primer)),
-                        length(unique(graph_data[Matrix == "Soil-A + Manure-A"][value > 0]$Primer)),
-                        length(unique(graph_data[Matrix == "Soil-C"][value > 0]$Primer)),
-                        length(unique(graph_data[Matrix == "Soil-B"][value > 0]$Primer)),
-                        length(unique(graph_data[Matrix == "Effluent"][value > 0]$Primer)),
-                        length(unique(graph_data[Matrix == "Swine Fecal"][value > 0]$Primer)),
-                        length(unique(graph_data[value > 0]$Primer))))
+graph_data <- primer_success
+graph_data <- graph_data[Gene != 'Ref']
+graph_data <- graph_data[!(Gene %in% c('16S'))]
+graph_data <- merge(metadata[,c('ID', 'Sample', 'Matrix')], graph_data, by.x = 'ID', by.y = 'sample')
+target_counts <- data.table(Matrix = c("Mock", "Soil-A","Soil-B","Soil-C", 
+                    "Swine Manure-A","Swine Manure-B", "Soil-A + Manure-A", 
+                    "Bovine Manure", "Effluent", "Swine Fecal", "Total"),
+           Targets = c(length(unique(graph_data[Matrix == "Mock"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Soil-A"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Soil-B"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Soil-C"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Swine Manure-A"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Swine Manure-B"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Soil-A + Manure-A"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Bovine Manure"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Effluent"][true_pos > 0]$Target)),
+                        length(unique(graph_data[Matrix == "Swine Fecal"][true_pos > 0]$Target)),
+                        length(unique(graph_data[true_pos > 0]$Target))))
 ```
 
 ```{r ARG_counts_out, echo=FALSE}
-datatable(variant_counts)
+datatable(target_counts)
 ```
 
 
 <br>
   
 ```{r ARG_Families}
-classification <- 'ARG_Family'
+classification <- 'Class'
 treatment_name <- 'Matrix'
-SC_I <- phylosmith::melt_phyloseq(soil_column_I_ARGS)
-SC_I <- SC_I[Sample %in% SC_I[,sum(Abundance), by = c('Sample')]$Sample[SC_I[,sum(Abundance), by = c('Sample')]$V1 > 1000]]
-SC_I <- SC_I[, sum(Abundance), by = c('Sample', 'Gene', 'Treatment', 'Matrix', 'Day')]
-set(SC_I, j = 'Gene', value = tolower((SC_I[['Gene']])))
-SC_I[, ARG_Family := tolower(substr(SC_I[['Gene']],1,3))]
-set(SC_I, j = 'Matrix', value = tolower(SC_I[['Matrix']]))
-set(SC_I, which(SC_I[['Matrix']]=='soil' & SC_I[['Day']]==0), j='Matrix', value='Soil A')
-set(SC_I, which(SC_I[['Matrix']]=='soil' & SC_I[['Day']]!=0), j='Matrix', value='Manure-Soil A')
-SC_I$Sample <- factor(SC_I$Sample, levels = unique(SC_I$Sample[order(as.numeric(SC_I$Day))]))
-setnames(SC_I, 'Gene', 'ARG')
 
-graph_data <- melt(read_counts, id.vars = c('ARG_Family', 'ARG', 'Variant', 'Primer'), variable.name = 'Sample_Name')
-graph_data <- graph_data[ARG != 'spike']
-graph_data <- graph_data[!(ARG %in% c('16S'))]
+graph_data <- melt(read_counts, id.vars = c('Class', 'Family', 'Gene', 'Target'), variable.name = 'Sample_Name')
+graph_data <- graph_data[Gene != 'Ref']
+graph_data <- graph_data[!(Gene %in% c('16S'))]
 graph_data <- merge(metadata[,c('ID', 'Sample', 'Matrix')], graph_data, by.x = 'ID', by.y = 'Sample_Name')
-graph_data <- graph_data[, sum(value), by = c('Sample', 'Matrix', 'ARG_Family', 'ARG')]
+graph_data <- graph_data[, sum(value), by = c('Sample', 'Matrix', 'Class', 'Family')]
 
 set(graph_data, j = classification, 
     value = factor(graph_data[[classification]], 
-                   levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')])))))
-setkey(graph_data, "ARG", "Sample")
+                   levels = c('Ref', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='Ref')])))))
+setkey(graph_data, "Class", "Sample")
 
-graph_data <- rbindlist(list(
-  cbind(graph_data[,c('Sample', 'ARG_Family', 'Matrix', 'V1')], Tech = 'DARTE-QM'), 
-  cbind(SC_I[,c('Sample', 'ARG_Family', 'Matrix', 'V1')], Tech = 'Metagenome')), fill = TRUE)
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample')]
 set(graph_data, j = 'Matrix', value = as.character(graph_data$Matrix))
 
@@ -80,20 +72,20 @@ graph_data <- graph_data[V1 != 0]
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample')]
 
 classification_order <- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), 
-                                            by=ARG_Family, .SDcols=c("relative_abundance")], -relative_abundance)
+                                            by=Class, .SDcols=c("relative_abundance")], -relative_abundance)
 classification_order <- classification_order[round(classification_order[[2]]*100 / 
-                                                     length(unique(graph_data[Tech == "DARTE-QM"]$Sample)),1) >= 0.5,]
-graph_data <- graph_data[ARG_Family %in% classification_order$ARG_Family]
-set(graph_data, j = 'ARG_Family', value = factor(graph_data$ARG_Family, levels = classification_order[[1]]))
+                                                     length(unique(graph_data$Sample)),1) >= 0.5,]
+graph_data <- graph_data[Class %in% classification_order$Class]
+set(graph_data, j = 'Class', value = factor(graph_data$Class, levels = classification_order[[1]]))
 graph_colors <- schuylR::create_palette(length(levels(graph_data[[classification]])))
-graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c('Sample', "ARG_Family", 'Matrix', 'Tech'), 
+graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c('Sample', "Class", 'Matrix'), 
                          .SDcols=c("V1", "relative_abundance") ] 
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c('Sample')]
 
 set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], levels = unique(graph_data[['Sample']])))
 set(graph_data, j = 'Matrix', value = factor(graph_data[['Matrix']], levels = unique(graph_data[['Matrix']])))
 
-profile <- ggplot(graph_data[Tech == 'DARTE-QM'], 
+profile <- ggplot(graph_data, 
                   aes_string(x="Sample", y="relative_abundance", fill=classification)) + 
   guides(fill=guide_legend(ncol=2)) + 
   scale_fill_manual(values=graph_colors, aesthetics=c("color", "fill")) + 

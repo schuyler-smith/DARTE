@@ -19,18 +19,16 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 ## Theoretical ARG Counts {.tabset .tabset-pills} 
 
-### ARG Abundances
-
 ```{r create_mock_counts}
 mock_samples <- as.character(metadata[grep('Mock', metadata$`ID`),][`Passed QC` == TRUE][["Sample"]])
 for_blast <- data.table::fread('../data/mock/forward_primers.blast')
-  for_blast <- merge(for_blast, classifications, by.x = "V1", by.y = "Primer")
-  for_blast <- for_blast[ARG != "16S"]
+  for_blast <- merge(for_blast, classifications, by.x = "V1", by.y = "Target")
+  for_blast <- for_blast[Gene != "16S"]
   for_blast <- for_blast[V3 == 100]
   for_blast <- for_blast[V4 >= 18]
 rev_blast <- data.table::fread('../data/mock/reverse_primers.blast')
-  rev_blast <- merge(rev_blast, classifications, by.x = "V1", by.y = "Primer")
-  rev_blast <- rev_blast[ARG != "16S"]
+  rev_blast <- merge(rev_blast, classifications, by.x = "V1", by.y = "Target")
+  rev_blast <- rev_blast[Gene != "16S"]
   rev_blast <- rev_blast[V3 == 100]
   rev_blast <- rev_blast[V4 >= 18]
 mock_blast <- for_blast[paste0( for_blast[[1]], for_blast[[2]]) %in% paste0(rev_blast[[1]], rev_blast[[2]]),]
@@ -46,35 +44,32 @@ for(genome in mock_blast$V2){
 set(mock_blast, j = "V2", value = mock_genome)
 setorder(mock_blast, V2, V9)
 
-mock_expected_counts <- mock_blast[,c('V2', 'V1', 'V9', 'ARG', 'ARG_Family')]
-setnames(mock_expected_counts, c('V2','V1'), c('Microbe', 'Primer'))
-mock_expected_counts <- merge(mock_expected_counts, strains, by.x = "Microbe", by.y = "Strain")
-mock_expected_counts <- mock_expected_counts[, .(count = sum(Abundance)), by = c( 'ARG_Family', "ARG", 'Primer', "Microbe")]
+mock_expected_counts <- mock_blast[,c('V2', 'V1', 'V9', 'Family', 'Class')]
+setnames(mock_expected_counts, c('V2','V1'), c('Microbe', 'Target'))
+mock_expected_counts <- merge(mock_expected_counts, strains[,c(1:5,14)], by.x = "Microbe", by.y = "Strain")
+mock_expected_counts <- mock_expected_counts[, .(count = sum(Abundance)), by = c( 'Class', "Family", 'Target', "Microbe")]
 mock_expected_counts[, count := round(count/sum(count), 4)]
-mock_expected_counts[,Sample := 'Theoretical']
-setcolorder(mock_expected_counts, c("Sample", "Microbe", "ARG", "ARG_Family", 'Primer', "count"))
+mock_expected_counts[, Sample := 'Theoretical']
+setcolorder(mock_expected_counts, c("Sample", "Microbe", "Family", "Class", 'Target', "count"))
 ```
 
-```{r expected_table, echo=FALSE}
-datatable(mock_expected_counts[,-c('Sample')])
-```
 <br>
 <br>
 
 ### Profile
 
 ```{r theoretical_pie}
-graph_data <- mock_expected_counts[, c("Sample", "ARG_Family", "count")]
-graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=ARG_Family, .SDcols=c("count")]
-set(graph_data, j = "ARG_Family", value = factor(graph_data$ARG_Family, levels = sort(graph_data$ARG_Family)))
-setorder(graph_data, -ARG_Family)
+graph_data <- mock_expected_counts[, c("Sample", "Class", "count")]
+graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=Class, .SDcols=c("count")]
+set(graph_data, j = "Class", value = factor(graph_data$Class, levels = sort(graph_data$Class)))
+setorder(graph_data, -Class)
 graph_data[, ypos := cumsum(count)- 0.5*count]
-mock_profile <- ggplot(graph_data, aes(x="", y=count, fill=ARG_Family)) +
+mock_profile <- ggplot(graph_data, aes(x="", y=count, fill=Class)) +
   geom_bar(stat="identity", width=1) +
   coord_polar("y", start=0) +
   theme_void() + 
-  scale_fill_manual(values = schuylR::create_palette(length(unique(graph_data[['ARG_Family']])))) +
-  geom_text(aes(y = ypos, label = ARG_Family), color = "black", size=4, nudge_x = 0.3)
+  scale_fill_manual(values = schuylR::create_palette(length(unique(graph_data[['Class']])))) +
+  geom_text(aes(y = ypos, label = Class), color = "black", size=4, nudge_x = 0.3)
 ```
 
 ```{r theoretical_pie_out, echo=FALSE, cache=TRUE}
@@ -83,14 +78,21 @@ mock_profile
 <br>
 <br>
 
+### ARG Abundances
+```{r expected_table, echo=FALSE}
+datatable(mock_expected_counts[,-c('Sample')])
+```
+<br>
+<br>
+
 ## Primer Success {.tabset .tabset-pills}
 
 ```{r primer_success}
-mock_expected_ARGs <- c(unique(sort(mock_expected_counts$Primer)), 'spike')
+mock_expected_ARGs <- c(unique(sort(mock_expected_counts$Target)), 'Ref')
 mock_observed_counts <- read_counts[, c(1:3, grep('Mock', colnames(read_counts))), with = FALSE]
 mock_observed_counts <- mock_observed_counts[rowSums(mock_observed_counts[,-c(1:3)]) > 1,]
-mock_successful_primers <- mock_expected_ARGs[mock_expected_ARGs %in% mock_observed_counts$Primer]
-unexpected_primers <- mock_observed_counts$Primer[!(mock_observed_counts$Primer %in% mock_expected_ARGs)]
+mock_successful_primers <- mock_expected_ARGs[mock_expected_ARGs %in% mock_observed_counts$Target]
+unexpected_primers <- mock_observed_counts$Target[!(mock_observed_counts$Target %in% mock_expected_ARGs)]
 setnames(mock_observed_counts, colnames(mock_observed_counts)[-c(1:3)], 
          as.character(metadata$Sample[match(colnames(mock_observed_counts)[-c(1:3)], metadata$ID)]))
 ```
@@ -100,12 +102,12 @@ setnames(mock_observed_counts, colnames(mock_observed_counts)[-c(1:3)],
 ### ARG-Heatmap
 
 ```{r ARG_heatmap}
-classification <- 'ARG'
+classification <- 'Family'
 expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
 expected_genes[, Abundance := count * 20000]
-expected_genes <- dcast(expected_genes, ARG ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
+expected_genes <- dcast(expected_genes, Family ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
 
-graph_data <- mock_observed_counts[get(classification) %in% c(mock_expected_counts[[classification]], "spike")]
+graph_data <- mock_observed_counts[get(classification) %in% c(mock_expected_counts[[classification]], "Ref")]
 graph_data <- merge(expected_genes, graph_data[,-c(1:3)[!(colnames(graph_data)[1:3] %in% classification)], 
                                                with=FALSE], by = classification, all = TRUE)
 graph_data <- schuylR::replace_NA(graph_data)
@@ -116,7 +118,7 @@ set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']],
 graph_data <- graph_data[, lapply(.SD, sum, na.rm=TRUE), by = c('Sample', classification), .SDcols=c("Abundance")]
 
 set(graph_data, j = classification, value = factor(as.character(graph_data[[classification]]), 
-                                                   levels = rev(c(sort(unique(graph_data[get(classification) != 'spike'][[classification]])), 'spike'))))
+      levels = rev(c(sort(unique(graph_data[get(classification) != 'Ref'][[classification]])),'Ref'))))
 set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
 set(graph_data, j = "Abundance", value = log(graph_data$Abundance, base = 2))
 ARG_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
@@ -140,7 +142,7 @@ ARG_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Ab
   labs(x = "Sample")
 ```
 
-DARTE-QM found **`r length(unique(graph_data[Sample != "Theoretical"][ARG != "spike"][Abundance > 0]$ARG))`** (`r round(length(unique(graph_data[Sample != "Theoretical"][ARG != "spike"][Abundance > 0]$ARG))/length(unique(graph_data[Sample == "Theoretical"][ARG != "spike"]$ARG)) * 100, 1)`%) of the **`r length(unique(graph_data[Sample == "Theoretical"][ARG != "spike"]$ARG))`** primers in the Mock-Community pangenomes that were targeted.
+DARTE-QM found **`r length(unique(graph_data[Sample != "Theoretical"][Family != "Ref"][Abundance > 0]$Family))`** (`r round(length(unique(graph_data[Sample != "Theoretical"][Family != "Ref"][Abundance > 0]$Family))/length(unique(graph_data[Sample == "Theoretical"][Family != "Ref"]$Family)) * 100, 1)`%) of the **`r length(unique(graph_data[Sample == "Theoretical"][Family != "Ref"]$Family))`** primers in the Mock-Community pangenomes that were targeted.
 
 ```{r ARG_counts_out, echo=FALSE, fig.width=7, fig.height=8, cache=TRUE}
 ARG_counts
@@ -153,12 +155,12 @@ ARG_counts
 DARTE-QM found **`r length(mock_successful_primers)`** (`r round(length(mock_successful_primers)/length(mock_expected_ARGs) * 100, 1)`%) of the **`r length(mock_expected_ARGs)`** primers in the Mock-Community pangenomes that were targeted.
 
 ```{r mock_primers_found}
-classification <- 'Primer'
+classification <- 'Target'
 expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
 expected_genes[, Abundance := count * 20000]
-expected_genes <- dcast(expected_genes, Primer ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
+expected_genes <- dcast(expected_genes, Target ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
 
-graph_data <- mock_observed_counts[get(classification) %in% c(mock_expected_counts[[classification]], "spike")]
+graph_data <- mock_observed_counts[get(classification) %in% c(mock_expected_counts[[classification]], "Ref")]
 graph_data <- merge(expected_genes, graph_data[,-c(1:3)[!(colnames(graph_data)[1:3] %in% classification)], 
                                                with=FALSE], by = classification, all = TRUE)
 graph_data <- schuylR::replace_NA(graph_data)
@@ -172,8 +174,8 @@ set(primer_graph_data, j = classification, value = factor(as.character(primer_gr
                                                    levels = unique(as.character(primer_graph_data[[classification]]))))
 set(primer_graph_data, which(primer_graph_data[['Abundance']] < 1), j='Abundance', value=NA)
 
-primer_graph_data$Primer <- gsub('_.?_DARTE-QM', '', primer_graph_data$Primer)
-set(primer_graph_data, j = 'Primer', value = factor(primer_graph_data$Primer, levels = rev(gsub('_.?_DARTE-QM', '', mock_expected_ARGs))))
+primer_graph_data$Target <- gsub('_.?_DARTE-QM', '', primer_graph_data$Target)
+set(primer_graph_data, j = 'Target', value = factor(primer_graph_data$Target, levels = rev(gsub('_.?_DARTE-QM', '', mock_expected_ARGs))))
 
 Primer_counts <- ggplot(primer_graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
   geom_tile(color = "white", size = 0.25) +
@@ -204,12 +206,12 @@ Primer_counts
 
 ### ARG-Family-Heatmap
 ```{r ARG-family_heatmap}
-classification <- 'ARG_Family'
+classification <- 'Class'
 expected_genes <- mock_expected_counts[,c('Sample', classification, 'count'), with=FALSE]
 expected_genes[, Abundance := count * 20000]
-expected_genes <- dcast(expected_genes, ARG_Family ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
+expected_genes <- dcast(expected_genes, Class ~ Sample, value.var = 'Abundance', fun.aggregate = sum)
 
-graph_data <- mock_observed_counts[get(classification) %in% c(mock_expected_counts[[classification]], "spike")]
+graph_data <- mock_observed_counts[get(classification) %in% c(mock_expected_counts[[classification]], "Ref")]
 graph_data <- merge(expected_genes, graph_data[,-c(1:3)[!(colnames(graph_data)[1:3] %in% classification)], 
                                                with=FALSE], by = classification, all = TRUE)
 graph_data <- schuylR::replace_NA(graph_data)
@@ -224,7 +226,7 @@ set(graph_data, j = classification, value = factor(as.character(graph_data[[clas
 set(graph_data, which(graph_data[['Abundance']] < 1), j='Abundance', value=NA)
 
 setorder(graph_data, Sample)
-ARG_Family_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
+Class_counts <- ggplot(graph_data, aes_string("Sample", classification, fill = "Abundance")) + 
   geom_tile(color = "white", size = 0.25) +
   theme_classic() + 
   theme(axis.text.x = element_text(angle = 20, hjust = 1, size = 10), 
@@ -245,8 +247,8 @@ ARG_Family_counts <- ggplot(graph_data, aes_string("Sample", classification, fil
   labs(x = "Sample")
 ```
 
-```{r ARG_Family_counts_out, echo=FALSE, fig.width=7, fig.height=8, cache=TRUE}
-ARG_Family_counts
+```{r Class_counts_out, echo=FALSE, fig.width=7, fig.height=8, cache=TRUE}
+Class_counts
 ```
 <br>
 <br>
@@ -255,8 +257,8 @@ ARG_Family_counts
 
 ```{r distances}
 dist_matrix <- primer_graph_data
-dist_matrix <- dcast(dist_matrix[Primer %in% dist_matrix[, sum(Abundance), by = 'Primer'][V1 > 0]$Primer],
-           Primer ~ Sample, value.var = 'Abundance')
+dist_matrix <- dcast(dist_matrix[Target %in% dist_matrix[, sum(Abundance), by = 'Target'][V1 > 0]$Target],
+           Target ~ Sample, value.var = 'Abundance')
 replace_DT_NA(dist_matrix)
 dist_matrix <- as.matrix(round(vegdist(t(dist_matrix[,-c(1)])), 3))
 dist_matrix_plot <- dist_matrix
@@ -283,28 +285,28 @@ dist_matrix_plot
 <br>
 <br>
 
-## Synthetic Oligonucleotide 'Spike' {.tabset .tabset-pills}
+## Synthetic Oligonucleotide 'Ref' {.tabset .tabset-pills}
 
-```{r setup_spike, message=FALSE, warning=FALSE, echo=FALSE}
-spike_counts <- mock_observed_counts[ARG == 'spike']
+```{r setup_Ref, message=FALSE, warning=FALSE, echo=FALSE}
+Ref_counts <- mock_observed_counts[Family == 'Ref']
 ```
 
-```{r spike_counts, message=FALSE, warning=FALSE}
-graph_data <- melt(spike_counts, id.vars = c('ARG_Family','ARG', 'Primer'))
-setnames(graph_data, colnames(graph_data[,-c(1:3)]), c("Sample", "Spike"))
-graph_data[, Spike_Level := as.numeric(gsub('-','.',
+```{r Ref_counts, message=FALSE, warning=FALSE}
+graph_data <- melt(Ref_counts, id.vars = c('Family','Class', 'Target'))
+setnames(graph_data, colnames(graph_data[,-c(1:3)]), c("Sample", "Ref"))
+graph_data[, Ref_Level := as.numeric(gsub('-','.',
               gsub('Mock-','', gsub('spike-.?','', metadata$ID[match(as.character(graph_data$Sample), metadata$Sample)]))))]
-setkey(graph_data, 'Spike_Level')
-graph_data[, Color := schuylR::create_palette(length(unique(graph_data[['Spike_Level']])))[as.factor(graph_data[['Spike_Level']])]]
+setkey(graph_data, 'Ref_Level')
+graph_data[, Color := schuylR::create_palette(length(unique(graph_data[['Ref_Level']])))[as.factor(graph_data[['Ref_Level']])]]
 ```
 
-The added levels of the spike-sequence were detected with a linear relation to their laboratory concentrations with an $R^{2}$ = `r round(summary(lm(Spike ~ Spike_Level, graph_data))$r.squared, 2)`.
+The added levels of the Ref-sequence were detected with a linear relation to their laboratory concentrations with an $R^{2}$ = `r round(summary(lm(Ref ~ Ref_Level, graph_data))$r.squared, 2)`.
 
 ### Linear Regression
 
-```{r spike_counts_lines}
-spike_points <-  ggplot(graph_data, aes_string(x = 'Spike_Level', y = 'Spike')) + 
-  geom_smooth(formula = y~x, method = "lm", se = FALSE, aes(x = Spike_Level, y = Spike), color = 'black' ) + 
+```{r Ref_counts_lines}
+Ref_points <-  ggplot(graph_data, aes_string(x = 'Ref_Level', y = 'Ref')) + 
+  geom_smooth(formula = y~x, method = "lm", se = FALSE, aes(x = Ref_Level, y = Ref), color = 'black' ) + 
   geom_point(stat = "identity", size = 4, alpha = 1, position = position_dodge(width = 0), color = graph_data$Color) + 
   theme_bw() + 
   theme(axis.text.x = element_text(hjust = 1, size = 10), 
@@ -321,11 +323,11 @@ spike_points <-  ggplot(graph_data, aes_string(x = 'Spike_Level', y = 'Spike')) 
     panel.spacing = unit(0.015, "npc"), 
     strip.text.x = element_text(size = 10, face = "bold", color = "black"), 
     strip.background = element_rect(colour = "black", size = 1.4, fill = "white")) + 
-  labs(x = "Spike Level", y = "Spike Sequences Detected at >= 98% Identity")
+  labs(x = "Ref Level", y = "Ref Sequences Detected at >= 98% Identity")
 ```
 
-```{r spike_counts_line_reg, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
-spike_points
+```{r Ref_counts_line_reg, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
+Ref_points
 ```
 <br>
 <br>
@@ -333,8 +335,8 @@ spike_points
 ### Bar Chart
 
 ```{r bar_chart}
-spike_bars <-  ggplot(graph_data,
-                      aes_string(x = 'Sample', y = 'Spike')) + 
+Ref_bars <-  ggplot(graph_data,
+                      aes_string(x = 'Sample', y = 'Ref')) + 
   geom_bar(stat = "identity", size = 0.45, alpha = 1, position = "dodge",
            fill = graph_data$Color) + 
   theme_light() +
@@ -366,18 +368,18 @@ spike_bars <-  ggplot(graph_data,
     strip.background = element_rect(colour = 'black', size = 1.4, fill = 'white')
   ) +
   scale_y_continuous(expand = expansion(mult = c(0.0025, 0.01))) +
-  ylab("Read Count of Spike Sequence") + 
+  ylab("Read Count of Ref Sequence") + 
   xlab("")
 ```
 
-```{r spike_counts_bars, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
-spike_bars
+```{r Ref_counts_bars, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
+Ref_bars
 ```
 <br>
 <br>
 
 ### Table
-```{r spike_counts_table, echo=FALSE}
+```{r Ref_counts_table, echo=FALSE}
 datatable(graph_data[,-c('Color')])
 ```
 <br>
@@ -388,7 +390,7 @@ datatable(graph_data[,-c('Color')])
 ### ARGs
 
 ```{r unexpected_ARG_graph_data}
-classification = "ARG"
+classification = "Family"
 graph_data <- mock_observed_counts[!(get(classification) %in% mock_expected_counts[[classification]])]
 
 graph_data <- melt(graph_data, id.vars = colnames(graph_data)[1:3], variable.name = 'Sample')
@@ -396,7 +398,7 @@ graph_data <- graph_data[, sum(value), by = c('Sample', classification)]
 set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], levels = mock_samples))
 
 graph_data[[classification]] <- factor(graph_data[[classification]], 
-                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+                                       levels = c('Ref', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='Ref')]))))
 set(graph_data, which(graph_data[['V1']] < 1), j='V1', value=NA)
 
 unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill = "V1")) + 
@@ -431,14 +433,14 @@ unexpected_graph
 DARTE-QM also detected `r length(unexpected_primers)` primers that were not found in the sequenced genomes of the mock-community.
 
 ```{r unexpected_graph_data}
-classification = "Primer"
-graph_data <- mock_observed_counts[Primer %in% unexpected_primers]
+classification = "Target"
+graph_data <- mock_observed_counts[Target %in% unexpected_primers]
 graph_data <- melt(graph_data, id.vars = colnames(graph_data)[1:3], variable.name = 'Sample')
 graph_data <- graph_data[, sum(value), by = c('Sample', classification)]
 set(graph_data, j = 'Sample', value = factor(graph_data[['Sample']], levels = mock_samples))
 
 graph_data[[classification]] <- factor(graph_data[[classification]], 
-                                       levels = c('spike', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='spike')]))))
+                                       levels = c('Ref', rev(unique(graph_data[[classification]][!(graph_data[[classification]]=='Ref')]))))
 set(graph_data, which(graph_data[['V1']] < 1), j='V1', value=NA)
 
 unexpected_graph <- ggplot(graph_data, aes_string("Sample", classification, fill = "V1")) + 

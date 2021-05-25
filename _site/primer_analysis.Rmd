@@ -27,7 +27,7 @@ if (length(BLAST_file_path) == 1 && dir.exists(BLAST_file_path)) {
 BLAST_file <- sort(normalizePath(BLAST_file))
 
 primer_success <- data.table::data.table(sample = character(),
-                                         primer = character(),
+                                         target = character(),
                                          n_reads = numeric(),
                                          artifacts = numeric(),
                                          analyzed = numeric(),
@@ -48,40 +48,39 @@ for(file in BLAST_file){
                                            'rstart', 'rend', 'e', 'bit'))
   unknown <- unknown[length >= 90]
   setorder(unknown, 'query', 'perc_id')
-  unknown <- merge(classifications, unknown, by.x = "Primer", by.y = "reference")
-  unknown <- unique(unknown, by=c("query", "Primer"))
-  unknown <- unknown[unknown[, .I[length == max(length, na.rm=T)], by = c('query', 'Primer')][[3]]]
-  unknown <- unknown[unknown[, .I[perc_id == max(perc_id, na.rm=T)], by = c('query', 'Primer')][[3]]]
-  unknown <- unknown[, .(count = .N), by = Primer]
+  unknown <- merge(classifications, unknown, by.x = "Target", by.y = "reference")
+  unknown <- unique(unknown, by=c("query", "Target"))
+  unknown <- unknown[unknown[, .I[length == max(length, na.rm=T)], by = c('query', 'Target')][[3]]]
+  unknown <- unknown[unknown[, .I[perc_id == max(perc_id, na.rm=T)], by = c('query', 'Target')][[3]]]
+  unknown <- unknown[, .(count = .N), by = Target]
   
   for(primer_file in files){
     if(file.info(primer_file)$size > 0){
-      blast <- data.table::fread(primer_file, header = FALSE, sep = '\t',
-                                 col.names = c('query', 'reference', 'perc_id', 'length', 
-                                               'mismatch', 'gap', 'qstart', 'qend', 
-                                               'rstart', 'rend', 'e', 'bit'))
-      setorder(blast, 'query', 'perc_id')
-      blast <- blast[perc_id > 95]
-      blast <- merge(classifications, blast, by.x = "Primer", by.y = "reference")
-      n_reads <- length(unique(blast[['query']]))
-      blast <- blast[length >= 90]
-      analyzed <- length(unique(blast[['query']]))
+      blast <- data.table::fread(primer_file, header = FALSE, sep = '\t')
+      #'query', 'reference', 'perc_id', 'length', 'mismatch', 'gap', 
+      #'qstart', 'qend', 'rstart', 'rend', 'e', 'bit'
+      setorder(blast, 'V1', 'V3')
+      blast <- blast[V3 > 95]
+      blast <- merge(classifications, blast, by.x = "Target", by.y = "V2")
+      n_reads <- length(unique(blast[['V1']]))
+      blast <- blast[V4 >= 90]
+      analyzed <- length(unique(blast[['V1']]))
       n_artifacts <- n_reads - analyzed
       primer_target <- gsub('____.?', '', basename(sapply(strsplit(primer_file, "\\."), "[[", 1)))
-      false_neg <- unknown[Primer == primer_target][[2]]
+      false_neg <- unknown[Target == primer_target][[2]]
       successes <- 0
       if(nrow(blast) > 0){
-        blast <- blast[blast[, .I[length == max(length, na.rm=T)], by = c('query', 'Primer')][[3]]]
-        blast <- unique(blast, by=c("query", "Primer"))
-        blast <- blast[, .(count = .N), by = Primer]
-        successes <- blast[Primer == primer_target][[2]]
+        blast <- blast[blast[, .I[V4 == max(V4, na.rm=T)], by = c('V1', 'Target')][[3]]]
+        blast <- unique(blast, by=c("V1", "Target"))
+        blast <- blast[, .(count = .N), by = Target]
+        successes <- blast[Target == primer_target][[2]]
       }
       if(length(successes) < 1) successes <- 0
       if(length(false_neg) < 1) false_neg <- 0
       primer_success <- rbind(primer_success,
                               data.table::data.table(
-                                sample = sample_name,
-                                primer = primer_target,
+                               sample = sample_name,
+                               target = primer_target,
                                n_reads = n_reads,
                                artifacts = n_artifacts,
                                analyzed = analyzed,
@@ -95,16 +94,16 @@ for(file in BLAST_file){
   print(sample_name)
 }
 primer_success[,true_neg := sum(true_pos)-true_pos, by = sample]
-primer_success <- merge(classifications, primer_success, by.x = 'Primer', by.y = 'primer')
+primer_success <- merge(classifications, primer_success, by.x = 'Target', by.y = 'target')
 primer_success <- primer_success[n_reads != 'NA']
 primer_success <- primer_success[ARG_Family != '16S']
 saveRDS(primer_success, '../data/primers/primer_success.RDS')
 data.table::set(primer_success, which(primer_success[["success_rate"]] == 0), "success_rate", NA)
 primer_success[, experiment := sapply(strsplit(sample, "-"), "[[", 1)]
-read_counts <- data.table::dcast(primer_success, Primer ~ sample, value.var=c("true_pos"), fun = sum)
-read_countss <- read_countss[c(which(rowSums(read_countss[,-1]) > 0)),]
-read_countss <- merge(classifications, read_countss, by = 'Primer')
-saveRDS(read_countss, '../data/primers/read_countss_from_primers.RDS')
+read_counts <- data.table::dcast(primer_success, Target ~ sample, value.var=c("true_pos"), fun = sum)
+read_counts <- read_counts[c(which(rowSums(read_counts[,-1]) > 0)),]
+read_counts <- merge(classifications, read_counts, by = 'Target')
+saveRDS(read_counts, '../data/primers/read_counts_from_primers.RDS')
 ```
 
 ### Primers by Samples
@@ -126,7 +125,7 @@ primer_success
 ```{r primers}
 samples <- primer_success[, sum(true_pos, na.rm = T), by = sample][V1 > 1000]$sample
 primer_success <- primer_success[sample %in% samples]
-primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=Primer, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
+primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=Target, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos") ] 
 setorder(primers, -n_reads)
 ```
 
@@ -187,9 +186,9 @@ datatable(sample_success, options = list(
 ```{r sample_t_pos}
 data.table::set(primer_success, which(primer_success[["success_rate"]] == 0), "success_rate", NA)
 primer_success[, experiment := sapply(strsplit(sample, "-"), "[[", 1)]
-read_countss <- data.table::dcast(primer_success, Primer ~ sample, value.var=c("true_pos"), fun = sum)
-read_countss <- read_countss[c(which(rowSums(read_countss[,-1]) > 0)),]
-read_countss <- merge(classifications, read_countss, by = 'Primer')
+read_counts <- data.table::dcast(primer_success, Target ~ sample, value.var=c("true_pos"), fun = sum)
+read_counts <- read_counts[c(which(rowSums(read_counts[,-1]) > 0)),]
+read_counts <- merge(classifications, read_counts, by = 'Target')
 ```
 
 ```{r t_pos_counts, echo=FALSE}
@@ -239,7 +238,7 @@ Mean accuracy of each primer, weighted by abundance per sample, was found to be 
 
 ## Primer Performance Graphs {.tabset .tabset-pills}
 ```{r overall_primer}
-primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=Primer, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos", "false_neg", "true_neg") ] 
+primers <- primer_success[, lapply(.SD, sum, na.rm=TRUE), by=Target, .SDcols=c("n_reads", "artifacts", "analyzed", "true_pos", "false_pos", "false_neg", "true_neg") ] 
 primers[, percent_artifacts := artifacts/n_reads*100]
 primers[, percent_tp := true_pos/n_reads*100]
 primers[, percent_fp := false_pos/n_reads*100]
@@ -249,10 +248,10 @@ primers[, percent_fn := false_neg/n_reads*100]
 ### All
 ```{r primer_artifact_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
 setorder(primers, -percent_artifacts)
-set(primers, j = 'Primer', value = factor(primers$Primer, levels = primers$Primer))
+set(primers, j = 'Target', value = factor(primers$Target, levels = primers$Target))
 colors <- schuylR::create_palette(5)
 
-ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
+ggplot(primers, aes_string(x="Target", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(fill = "Artifact"), alpha = 0.7) + 
   geom_bar(stat="identity", position="stack", 
@@ -274,7 +273,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 
 ### Artifact
 ```{r artifact_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
-ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
+ggplot(primers, aes_string(x="Target", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(fill="Artifact")) + 
   theme_bw() + 
@@ -290,7 +289,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 
 ### True-Positive
 ```{r tp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
-ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
+ggplot(primers, aes_string(x="Target", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_tp, fill="True-Positive") ) + 
   theme_bw() + 
@@ -306,7 +305,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 
 ### False-Positive
 ```{r fp_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
-ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
+ggplot(primers, aes_string(x="Target", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_fp, fill="False-Positive") ) + 
   theme_bw() + 
@@ -322,7 +321,7 @@ ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) +
 
 ### False-Negative
 ```{r fn_graph, fig.width=12, fig.height=7, echo=FALSE, cache=TRUE}
-ggplot(primers, aes_string(x="Primer", y="percent_artifacts")) + 
+ggplot(primers, aes_string(x="Target", y="percent_artifacts")) + 
   geom_bar(stat="identity", position="stack", 
            size=0.12, width=0.95, aes(y = percent_fn, fill="False-Negative") ) + 
   theme_bw() + 
@@ -407,7 +406,7 @@ ggplot(by_true_pos, aes_string(x = "number_reads", y = "sensitivity")) +
 <br>
 
 ### Artifacts by Primer Count
-```{r by_reads, echo=FALSE}
+```{r by_reads2, echo=FALSE}
 by_true_pos <- data.frame(sensitivity = 0, number_reads = seq(0, 1000,10), type = "True-Positive Reads")
 for(i in seq_along(by_true_pos$number_reads)){
   by_true_pos[i,1] <- mean(primer_success[true_pos > by_true_pos$number_reads[i]]$sens)
@@ -415,7 +414,7 @@ for(i in seq_along(by_true_pos$number_reads)){
 ```
 <br>
 
-```{r by_read_graph, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
+```{r by_read_graph2, fig.width=6, fig.height=4, echo=FALSE, cache=TRUE}
 ggplot(rbind(by_true_pos), aes_string(x = "number_reads", y = "sensitivity", color="type")) +
  geom_line(size = 1.6, show.legend = F) + 
   scale_colour_manual(values = c("#56B4E9")) + theme_bw() + 

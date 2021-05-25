@@ -1,4 +1,4 @@
-ARG_Family	ARG	Variant	Primer
+Class	Family	Gene	Target
 16S	16S	16S	HM798937_1_1383
 16S	16S	16S	LC124582_1_1424
 16S	16S	16S	GQ927630_1_918
@@ -25,7 +25,7 @@ ARG_Family	ARG	Variant	Primer
 16S	16S	16S	FJ478940_1_1496
 16S	16S	16S	b0463
 16S	16S	16S	SL1344_RS02425
-spike	spike	spike	spike
+Ref	Ref	Ref	Ref
 aac	AAC(2')	AAC(2')-Ia	aac_2__-Ia_1_L06156
 aac	AAC(2')	AAC(2')-Ib	aac_2__-Ib_1_U41471
 aac	AAC(2')	AAC(2')-Ic	aac_2__-Ic_1_U72714

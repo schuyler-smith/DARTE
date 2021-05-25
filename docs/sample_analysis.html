@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-15" />
+<meta name="date" content="2021-05-25" />
 
 <title>Sample Analysis</title>
 
@@ -41,7 +41,7 @@
 <script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 <script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
 <link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
-<script src="site_libs/datatables-binding-0.17/datatables.js"></script>
+<script src="site_libs/datatables-binding-0.18/datatables.js"></script>
 <link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
 <link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
 <script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
@@ -319,12 +319,12 @@ div.tocify {
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row">
-<div class="col-sm-12 col-md-4 col-lg-3">
+<div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
 </div>
 
-<div class="toc-content col-sm-12 col-md-8 col-lg-9">
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -448,7 +448,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Sample Analysis</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-15</h4>
+<h4 class="date">2021-05-25</h4>
 
 </div>
 
@@ -456,49 +456,41 @@ div.tocify {
 <p><br> <br></p>
 <div id="arg-profile" class="section level2">
 <h2>ARG Profile</h2>
-<pre class="r"><code>graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Variant&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
-graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
-graph_data &lt;- merge(metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
-variant_counts &lt;- data.table(Matrix = c(&quot;Mock&quot;, &quot;Swine Manure-A&quot;, &quot;Soil-A + Manure-A&quot;, &quot;Soil-C&quot;, &quot;Soil-B&quot;, &quot;Effluent&quot;, &quot;Swine Fecal&quot;, &quot;Total&quot;),
-           Variants = c(length(unique(graph_data[Matrix == &quot;Mock&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[Matrix == &quot;Swine Manure-A&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[Matrix == &quot;Soil-A + Manure-A&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[Matrix == &quot;Soil-C&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[Matrix == &quot;Soil-B&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[Matrix == &quot;Effluent&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[Matrix == &quot;Swine Fecal&quot;][value &gt; 0]$Primer)),
-                        length(unique(graph_data[value &gt; 0]$Primer))))</code></pre>
-<div id="htmlwidget-785bb5a1d9d1de93f0e5" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-785bb5a1d9d1de93f0e5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["Mock","Swine Manure-A","Soil-A + Manure-A","Soil-C","Soil-B","Effluent","Swine Fecal","Total"],[154,202,181,182,167,139,153,230]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Matrix<\/th>\n      <th>Variants<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>graph_data &lt;- primer_success
+graph_data &lt;- graph_data[Gene != &#39;Ref&#39;]
+graph_data &lt;- graph_data[!(Gene %in% c(&#39;16S&#39;))]
+graph_data &lt;- merge(metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;sample&#39;)
+target_counts &lt;- data.table(Matrix = c(&quot;Mock&quot;, &quot;Soil-A&quot;,&quot;Soil-B&quot;,&quot;Soil-C&quot;, 
+                    &quot;Swine Manure-A&quot;,&quot;Swine Manure-B&quot;, &quot;Soil-A + Manure-A&quot;, 
+                    &quot;Bovine Manure&quot;, &quot;Effluent&quot;, &quot;Swine Fecal&quot;, &quot;Total&quot;),
+           Targets = c(length(unique(graph_data[Matrix == &quot;Mock&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Soil-A&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Soil-B&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Soil-C&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Swine Manure-A&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Swine Manure-B&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Soil-A + Manure-A&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Bovine Manure&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Effluent&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[Matrix == &quot;Swine Fecal&quot;][true_pos &gt; 0]$Target)),
+                        length(unique(graph_data[true_pos &gt; 0]$Target))))</code></pre>
+<div id="htmlwidget-cda94bc4a855e5f1988c" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cda94bc4a855e5f1988c">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11"],["Mock","Soil-A","Soil-B","Soil-C","Swine Manure-A","Swine Manure-B","Soil-A + Manure-A","Bovine Manure","Effluent","Swine Fecal","Total"],[155,0,172,182,202,0,193,0,139,170,233]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Matrix<\/th>\n      <th>Targets<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <p><br></p>
-<pre class="r"><code>classification &lt;- &#39;ARG_Family&#39;
+<pre class="r"><code>classification &lt;- &#39;Class&#39;
 treatment_name &lt;- &#39;Matrix&#39;
-SC_I &lt;- phylosmith::melt_phyloseq(soil_column_I_ARGS)
-SC_I &lt;- SC_I[Sample %in% SC_I[,sum(Abundance), by = c(&#39;Sample&#39;)]$Sample[SC_I[,sum(Abundance), by = c(&#39;Sample&#39;)]$V1 &gt; 1000]]
-SC_I &lt;- SC_I[, sum(Abundance), by = c(&#39;Sample&#39;, &#39;Gene&#39;, &#39;Treatment&#39;, &#39;Matrix&#39;, &#39;Day&#39;)]
-set(SC_I, j = &#39;Gene&#39;, value = tolower((SC_I[[&#39;Gene&#39;]])))
-SC_I[, ARG_Family := tolower(substr(SC_I[[&#39;Gene&#39;]],1,3))]
-set(SC_I, j = &#39;Matrix&#39;, value = tolower(SC_I[[&#39;Matrix&#39;]]))
-set(SC_I, which(SC_I[[&#39;Matrix&#39;]]==&#39;soil&#39; &amp; SC_I[[&#39;Day&#39;]]==0), j=&#39;Matrix&#39;, value=&#39;Soil A&#39;)
-set(SC_I, which(SC_I[[&#39;Matrix&#39;]]==&#39;soil&#39; &amp; SC_I[[&#39;Day&#39;]]!=0), j=&#39;Matrix&#39;, value=&#39;Manure-Soil A&#39;)
-SC_I$Sample &lt;- factor(SC_I$Sample, levels = unique(SC_I$Sample[order(as.numeric(SC_I$Day))]))
-setnames(SC_I, &#39;Gene&#39;, &#39;ARG&#39;)
 
-graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Variant&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
-graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
+graph_data &lt;- melt(read_counts, id.vars = c(&#39;Class&#39;, &#39;Family&#39;, &#39;Gene&#39;, &#39;Target&#39;), variable.name = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[Gene != &#39;Ref&#39;]
+graph_data &lt;- graph_data[!(Gene %in% c(&#39;16S&#39;))]
 graph_data &lt;- merge(metadata[,c(&#39;ID&#39;, &#39;Sample&#39;, &#39;Matrix&#39;)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;ARG&#39;)]
+graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample&#39;, &#39;Matrix&#39;, &#39;Class&#39;, &#39;Family&#39;)]
 
 set(graph_data, j = classification, 
     value = factor(graph_data[[classification]], 
-                   levels = c(&#39;spike&#39;, rev(unique(graph_data[[classification]][!(graph_data[[classification]]==&#39;spike&#39;)])))))
-setkey(graph_data, &quot;ARG&quot;, &quot;Sample&quot;)
+                   levels = c(&#39;Ref&#39;, rev(unique(graph_data[[classification]][!(graph_data[[classification]]==&#39;Ref&#39;)])))))
+setkey(graph_data, &quot;Class&quot;, &quot;Sample&quot;)
 
-graph_data &lt;- rbindlist(list(
-  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
-  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 set(graph_data, j = &#39;Matrix&#39;, value = as.character(graph_data$Matrix))
 
@@ -510,20 +502,20 @@ graph_data &lt;- graph_data[V1 != 0]
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 
 classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), 
-                                            by=ARG_Family, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
+                                            by=Class, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
 classification_order &lt;- classification_order[round(classification_order[[2]]*100 / 
-                                                     length(unique(graph_data[Tech == &quot;DARTE-QM&quot;]$Sample)),1) &gt;= 0.5,]
-graph_data &lt;- graph_data[ARG_Family %in% classification_order$ARG_Family]
-set(graph_data, j = &#39;ARG_Family&#39;, value = factor(graph_data$ARG_Family, levels = classification_order[[1]]))
+                                                     length(unique(graph_data$Sample)),1) &gt;= 0.5,]
+graph_data &lt;- graph_data[Class %in% classification_order$Class]
+set(graph_data, j = &#39;Class&#39;, value = factor(graph_data$Class, levels = classification_order[[1]]))
 graph_colors &lt;- schuylR::create_palette(length(levels(graph_data[[classification]])))
-graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG_Family&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
+graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;Class&quot;, &#39;Matrix&#39;), 
                          .SDcols=c(&quot;V1&quot;, &quot;relative_abundance&quot;) ] 
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 
 set(graph_data, j = &#39;Sample&#39;, value = factor(graph_data[[&#39;Sample&#39;]], levels = unique(graph_data[[&#39;Sample&#39;]])))
 set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data[[&#39;Matrix&#39;]], levels = unique(graph_data[[&#39;Matrix&#39;]])))
 
-profile &lt;- ggplot(graph_data[Tech == &#39;DARTE-QM&#39;], 
+profile &lt;- ggplot(graph_data, 
                   aes_string(x=&quot;Sample&quot;, y=&quot;relative_abundance&quot;, fill=classification)) + 
   guides(fill=guide_legend(ncol=2)) + 
   scale_fill_manual(values=graph_colors, aesthetics=c(&quot;color&quot;, &quot;fill&quot;)) + 
@@ -646,9 +638,9 @@ permanova &lt;- vegan::adonis(t(graph_data) ~ Matrix, data = metadata[`ID` %in% 
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(&gt;F)    
-## Matrix     6    4.9263 0.82104  11.448 0.70314  0.001 ***
-## Residuals 29    2.0799 0.07172         0.29686           
-## Total     35    7.0061                 1.00000           
+## Matrix     6    4.8767 0.81278   10.39 0.68252  0.001 ***
+## Residuals 29    2.2685 0.07822         0.31748           
+## Total     35    7.1452                 1.00000           
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p><br> <br></p>

@@ -11,7 +11,7 @@
 
 <meta name="author" content="Schuyler D. Smith" />
 
-<meta name="date" content="2021-04-15" />
+<meta name="date" content="2021-05-25" />
 
 <title>Comaprison of DARTE-QM to Metagenome</title>
 
@@ -39,7 +39,7 @@
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
 <link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
-<script src="site_libs/datatables-binding-0.17/datatables.js"></script>
+<script src="site_libs/datatables-binding-0.18/datatables.js"></script>
 <link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
 <link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
 <script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
@@ -317,12 +317,12 @@ div.tocify {
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row">
-<div class="col-sm-12 col-md-4 col-lg-3">
+<div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
 </div>
 
-<div class="toc-content col-sm-12 col-md-8 col-lg-9">
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -446,7 +446,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Comaprison of DARTE-QM to Metagenome</h1>
 <h4 class="author"><a href="https://schuyler-smith.github.io/" target="_blank" >Schuyler D. Smith</a></h4>
-<h4 class="date">2021-04-15</h4>
+<h4 class="date">2021-05-25</h4>
 
 </div>
 
@@ -456,7 +456,7 @@ div.tocify {
 <h2>All ARGs Found</h2>
 <div id="profiles" class="section level3">
 <h3>Profiles</h3>
-<pre class="r"><code>classification &lt;- &#39;ARG&#39;
+<pre class="r"><code>classification &lt;- &#39;Class&#39;
 treatment_name &lt;- &#39;Matrix&#39;
 
 missing &lt;- unique(sort(as.character(SC_I$ARG)))
@@ -491,19 +491,19 @@ for(i in seq_along(missing)){
 }
 set(SC_I, j = &#39;ARG&#39;, value = factor(genes, levels = unique(genes)))
 
-graph_data &lt;- melt(read_counts, id.vars = c(&#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Variant&#39;, &#39;Primer&#39;), variable.name = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[ARG != &#39;spike&#39;]
-graph_data &lt;- graph_data[!(ARG %in% c(&#39;16S&#39;))]
+graph_data &lt;- melt(read_counts, id.vars = c(&#39;Class&#39;, &#39;Family&#39;, &#39;Gene&#39;, &#39;Target&#39;), variable.name = &#39;Sample_Name&#39;)
+graph_data &lt;- graph_data[Gene != &#39;spike&#39;]
+graph_data &lt;- graph_data[!(Gene %in% c(&#39;16S&#39;))]
 graph_data &lt;- merge(metadata[,c(1,2,4)], graph_data, by.x = &#39;ID&#39;, by.y = &#39;Sample_Name&#39;)
-graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample&#39;, &#39;Matrix&#39;, &#39;ARG_Family&#39;, &#39;ARG&#39;, &#39;Primer&#39;)]
+graph_data &lt;- graph_data[, sum(value), by = c(&#39;Sample&#39;, &#39;Matrix&#39;, &#39;Class&#39;, &#39;Family&#39;, &#39;Gene&#39;, &#39;Target&#39;)]
 
 set(graph_data, j = classification, value = factor(graph_data[[classification]], levels = c(&#39;spike&#39;, rev(unique(graph_data[[classification]][!(graph_data[[classification]]==&#39;spike&#39;)])))))
-setkey(graph_data, &quot;ARG&quot;, &quot;Sample&quot;)
-set(graph_data, which(is.na(graph_data[[&#39;Day&#39;]])), j=&#39;Day&#39;, value=0)
+setkey(graph_data, &quot;Gene&quot;, &quot;Sample&quot;)
 
+setnames(SC_I, c(&quot;ARG&quot;, &quot;ARG_Family&quot;), c(&quot;Family&quot;, &quot;Class&quot;))
 graph_data &lt;- rbindlist(list(
-  cbind(graph_data[,c(&#39;Sample&#39;, &#39;ARG&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
-  cbind(SC_I[,c(&#39;Sample&#39;, &#39;ARG&#39;, &#39;ARG_Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
+  cbind(graph_data[,c(&#39;Sample&#39;, &#39;Class&#39;, &#39;Family&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;DARTE-QM&#39;), 
+  cbind(SC_I[,c(&#39;Sample&#39;, &#39;Family&#39;, &#39;Class&#39;, &#39;Matrix&#39;, &#39;V1&#39;)], Tech = &#39;Metagenome&#39;)), fill = TRUE)
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 set(graph_data, j = &#39;Matrix&#39;, value = as.character(graph_data$Matrix))
 set(graph_data, which(graph_data$Matrix == &quot;manure&quot;), &#39;Matrix&#39;, &quot;Swine Manure-A&quot;)
@@ -515,28 +515,28 @@ graph_data &lt;- graph_data[graph_data$Matrix != &#39;Effluent&#39;,]
 graph_data &lt;- graph_data[V1 != 0]
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 
-classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), by=ARG_Family, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
+classification_order &lt;- setorder(graph_data[, lapply(.SD, sum, na.rm=TRUE), by=Class, .SDcols=c(&quot;relative_abundance&quot;)], -relative_abundance)
 classification_order &lt;- classification_order[round(classification_order[[2]]*100 / length(unique(graph_data[Tech == &quot;DARTE-QM&quot;]$Sample)),1) &gt;= 0.5,]
 
-graph_data &lt;- graph_data[ARG_Family %in% classification_order$ARG_Family]
-set(graph_data, j = &#39;ARG_Family&#39;, value = factor(graph_data$ARG_Family, levels = classification_order[[1]]))
+graph_data &lt;- graph_data[Class %in% classification_order$Class]
+set(graph_data, j = &#39;Class&#39;, value = factor(graph_data$Class, levels = classification_order[[1]]))
 
-missing &lt;- unique(sort(as.character(graph_data[Tech != &quot;DARTE-QM&quot;]$ARG_Family[!(graph_data[Tech != &quot;DARTE-QM&quot;]$ARG_Family %in% graph_data[Tech == &quot;DARTE-QM&quot;]$ARG_Family)])))
-setorder(graph_data, &#39;ARG_Family&#39;)
-genes &lt;- as.character(graph_data$ARG_Family)
+missing &lt;- unique(sort(as.character(graph_data[Tech != &quot;DARTE-QM&quot;]$Class[!(graph_data[Tech != &quot;DARTE-QM&quot;]$Class %in% graph_data[Tech == &quot;DARTE-QM&quot;]$Class)])))
+setorder(graph_data, &#39;Class&#39;)
+genes &lt;- as.character(graph_data$Class)
 for(i in seq_along(missing)){
   genes[genes %in% missing[i]] &lt;- c(&quot;mex&quot;, &quot;mux&quot;, &quot;noc&quot;, &quot;oxa&quot;)[i]
 }
-set(graph_data, j = &#39;ARG_Family&#39;, value = factor(genes, levels = unique(genes)))
+set(graph_data, j = &#39;Class&#39;, value = factor(genes, levels = unique(genes)))
 setkey(graph_data, &#39;Sample&#39;)
 set(graph_data, j = &#39;Matrix&#39;, value = factor(graph_data$Matrix, levels = unique(metadata$Matrix)))
 
-graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;ARG&quot;, &quot;ARG_Family&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
+graph_data &lt;- graph_data[, lapply(.SD, sum, na.rm=TRUE), by=c(&#39;Sample&#39;, &quot;Family&quot;, &quot;Class&quot;, &#39;Matrix&#39;, &#39;Tech&#39;), 
                          .SDcols=c(&quot;V1&quot;, &quot;relative_abundance&quot;) ] 
 graph_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
-graph_colors &lt;- schuylR::create_palette(length(unique(graph_data[[&#39;ARG_Family&#39;]])))
+graph_colors &lt;- schuylR::create_palette(length(unique(graph_data[[&#39;Class&#39;]])))
 
-gene_classes &lt;- sort(unique(graph_data[[&#39;ARG_Family&#39;]]))
+gene_classes &lt;- sort(unique(graph_data[[&#39;Class&#39;]]))
 compare_data &lt;- graph_data[c(grep(&#39;Swine Manure-A&#39;, graph_data$Sample), grep(&#39;Soil-A&#39;, graph_data$Sample), grep(&#39;_L0&#39;, graph_data$Sample)), ]
 compare_data &lt;- compare_data[Matrix %in% c(&#39;Swine Manure-A&#39;, &#39;Soil-A + Manure-A&#39;)]
 
@@ -546,10 +546,10 @@ set(compare_data, j = &#39;Matrix&#39;, value = factor(compare_data[[&#39;Matrix
 profile_compare &lt;- ggplot(compare_data, 
        aes_string(x = &quot;Sample&quot;, 
                   y = &quot;relative_abundance&quot;,
-                  fill = &quot;ARG_Family&quot;)) + 
+                  fill = &quot;Class&quot;)) + 
   guides(fill = guide_legend(ncol = 2)) + 
   scale_fill_manual(
-    values = graph_colors[gene_classes[gene_classes %in% unique(compare_data[[&#39;ARG_Family&#39;]])]],
+    values = graph_colors[gene_classes[gene_classes %in% unique(compare_data[[&#39;Class&#39;]])]],
     aesthetics = c(&quot;color&quot;, &quot;fill&quot;)
   ) + 
   facet_nested(.~ Tech + Matrix, scales = &quot;free&quot;, space = &quot;free&quot;) +
@@ -578,7 +578,7 @@ profile_compare &lt;- ggplot(compare_data,
 <div id="diversity" class="section level3">
 <h3>Diversity</h3>
 <pre class="r"><code>alpha &lt;- compare_data
-alpha &lt;- dcast(alpha, ARG ~ Sample, value.var = &#39;relative_abundance&#39;, fun.aggregate = sum)
+alpha &lt;- dcast(alpha, Class ~ Sample, value.var = &#39;relative_abundance&#39;, fun.aggregate = sum)
 alpha &lt;- alpha[rowSums(alpha[,-1]) &gt; 0 ,-1]
 replace_DT_NA(alpha)
 
@@ -586,7 +586,7 @@ alpha &lt;- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
 alpha &lt;- -alpha * log(alpha)
 alpha &lt;- alpha[,lapply(.SD, sum, na.rm = TRUE)]
 
-samples &lt;- dcast(compare_data, Sample + Tech + Matrix ~ ARG, 
+samples &lt;- dcast(compare_data, Sample + Tech + Matrix ~ Class, 
                  value.var = &#39;relative_abundance&#39;, fun.aggregate = sum)
 
 alpha_data &lt;- data.table(Sample = samples$Sample, 
@@ -594,7 +594,7 @@ alpha_data &lt;- data.table(Sample = samples$Sample,
     Tech = samples$Tech,
     Alpha = unlist(alpha))  
 color_count &lt;- length(unique(paste(alpha_data$Tech, alpha_data$Matrix)))
-alpha_graph_colors &lt;- schuylR::create_palette(color_count, colors)
+alpha_graph_colors &lt;- schuylR::create_palette(color_count)
   
 div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) + 
     geom_boxplot(show.legend = FALSE, fill = alpha_graph_colors) + 
@@ -608,41 +608,39 @@ div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
     strip.text.x = element_text(size = 12, face = &quot;bold&quot;), 
     strip.background = element_rect(colour = &quot;black&quot;, size = 1.4, fill = &quot;white&quot;),
     panel.grid.major.x = element_blank()) + 
-    labs(y = paste(&quot;Alpha-Diverity (&quot;, stringr::str_to_title(index), 
-      &quot; Index)&quot;, sep = &quot;&quot;)) + 
-    facet_nested(.~ Tech, scales = &quot;free&quot;, space = &quot;free&quot;)  +
-  scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))</code></pre>
+    labs(y = paste(&quot;Alpha-Diverity (Shannon Index)&quot;, sep = &quot;&quot;)) + 
+    facet_nested(.~ Tech, scales = &quot;free&quot;, space = &quot;free&quot;)</code></pre>
 <p><img src="metagenome_comparison_files/figure-html/div_graph-1.png" width="480" /> <br> <br></p>
 </div>
 <div id="resitome-differences" class="section level3">
 <h3>Resitome Differences</h3>
 <div id="swine-manure-a" class="section level4">
 <h4>Swine Manure-A</h4>
-<p>DARTE-QM had 98 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 2.92. <br></p>
-<p>compared to metagenomes which had 56 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 3.03. <br></p>
+<p>DARTE-QM had 99 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 1.85. <br></p>
+<p>compared to metagenomes which had 56 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 1.36. <br></p>
 <p>The metagenome found 39 ARGs that were not detected with DARTE-QM.</p>
 <p>The mean BC = 0.12 for ARG Families in Swine Manure-A Samples between both technologies.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName">
 Show Table
 </button>
 <div id="BlockName" class="collapse">
-<div id="htmlwidget-f7cfdae276a159ce6406" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f7cfdae276a159ce6406">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39"],["tetT","tetA","tet","tetO","tetM","tetW","tetY","tetZ","tetB","tetG","tetS","tetQ","tetX","APH(3'')","APH(2'')","APH(6)","ANT(6)","sul1","sul2","lnuA","lnuF","lnuC","ErmG","ErmB","ErmT","Erm","ErmC","ErmF","ErmQ","ErmA","ErmX","ErmY","AAC(6')","aadA","AAC(3)","mdtO","OXA","APH(4)","mefA"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-6d22803498aff01a3860" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6d22803498aff01a3860">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39"],["tetT","tetA","tet","tetO","tetM","tetW","tetY","tetZ","tetB","tetG","tetS","tetQ","tetX","APH(3'')","APH(2'')","APH(6)","ANT(6)","sul1","sul2","lnuA","lnuF","lnuC","ErmG","ErmB","ErmT","Erm","ErmC","ErmF","ErmQ","ErmA","ErmX","ErmY","AAC(6')","aadA","AAC(3)","mdtO","OXA","APH(4)","mefA"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br></p>
 </div>
 <div id="manure-soil" class="section level4">
 <h4>Manure-Soil</h4>
-<p>DARTE-QM had 98 ARGs in Manure-Soil samples, with an alpha-diversity measured at 2.94. <br></p>
-<p>compared to metagenomes which had 92 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 3.15. <br></p>
+<p>DARTE-QM had 99 ARGs in Manure-Soil samples, with an alpha-diversity measured at 1.86. <br></p>
+<p>compared to metagenomes which had 92 ARGs in Swine Manure-A samples, with an alpha-diversity measured at 1.79. <br></p>
 <p>The metagenome found 50 ARGs that were not detected with DARTE-QM.</p>
 <p>The mean BC = 0.32 for ARG Families in Manure + Soil-A Samples between both technologies.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName2">
 Show Table
 </button>
 <div id="BlockName2" class="collapse">
-<div id="htmlwidget-48694fb39bf989f9163e" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-48694fb39bf989f9163e">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50"],["AAC(3)","AAC(6')","aadA","ACI","acrB","ANT(6)","APH(2'')","APH(3'')","APH(4)","APH(6)","cfr(C)","CfxA","Erm","ErmA","ErmB","ErmC","ErmF","ErmG","ErmQ","ErmT","ErmX","lnuA","lnuC","lnuD","lnuF","mdsB","mdtA","mdtB","mdtC","mdtO","mefA","mefB","OXA","sul1","sul2","tet","tetA","tetB","tetC","tetG","tetL","tetM","tetO","tetQ","tetS","tetT","tetW","tetX","tetY","tetZ"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0f282639de22f3d70c5f" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0f282639de22f3d70c5f">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50"],["AAC(3)","AAC(6')","aadA","ACI","acrB","ANT(6)","APH(2'')","APH(3'')","APH(4)","APH(6)","cfr(C)","CfxA","Erm","ErmA","ErmB","ErmC","ErmF","ErmG","ErmQ","ErmT","ErmX","lnuA","lnuC","lnuD","lnuF","mdsB","mdtA","mdtB","mdtC","mdtO","mefA","mefB","OXA","sul1","sul2","tet","tetA","tetB","tetC","tetG","tetL","tetM","tetO","tetQ","tetS","tetT","tetW","tetX","tetY","tetZ"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br> <br></p>
 </div>
@@ -650,27 +648,27 @@ Show Table
 </div>
 <div id="source-differentiation" class="section level2">
 <h2>Source Differentiation</h2>
-<pre class="r"><code>darte_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
-darte_soil_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
+<pre class="r"><code>darte_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
+darte_soil_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
 
-meta_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
-meta_soil_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)</code></pre>
-<p>For ARGs characterized by DARTE-QM, the mean distance between manure and soil-manure samples was BC = 0.35. <br> For ARGs characterized by metagenomes, the mean distance between manure and soil-manure samples was BC = 0.46. <br> <br></p>
+meta_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
+meta_soil_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)</code></pre>
+<p>For ARGs characterized by DARTE-QM, the mean distance between manure and soil-manure samples was BC = 0.37. <br> For ARGs characterized by metagenomes, the mean distance between manure and soil-manure samples was BC = 0.46. <br> <br></p>
 </div>
 <div id="darte-qm-target-args" class="section level2 tabset tabset-pills">
 <h2>DARTE-QM Target ARGs</h2>
 <div id="profiles-1" class="section level3">
 <h3>Profiles</h3>
-<pre class="r"><code>compare_data &lt;- compare_data[ARG %in% classifications$ARG]
+<pre class="r"><code>compare_data &lt;- compare_data[Family %in% classifications$Family]
 compare_data[, relative_abundance := round(V1/sum(V1), 4), by = c(&#39;Sample&#39;)]
 
 profile_compare &lt;- ggplot(compare_data, 
        aes_string(x = &quot;Sample&quot;, 
                   y = &quot;relative_abundance&quot;,
-                  fill = &quot;ARG_Family&quot;)) + 
+                  fill = &quot;Class&quot;)) + 
   guides(fill = guide_legend(ncol = 2)) + 
   scale_fill_manual(
-    values = graph_colors[gene_classes[gene_classes %in% unique(compare_data[[&#39;ARG_Family&#39;]])]],
+    values = graph_colors[gene_classes[gene_classes %in% unique(compare_data[[&#39;Class&#39;]])]],
     aesthetics = c(&quot;color&quot;, &quot;fill&quot;)
   ) + 
   facet_nested(.~ Tech + Matrix, scales = &quot;free&quot;, space = &quot;free&quot;) +
@@ -699,7 +697,7 @@ profile_compare &lt;- ggplot(compare_data,
 <div id="diversity-1" class="section level3">
 <h3>Diversity</h3>
 <pre class="r"><code>alpha &lt;- compare_data
-alpha &lt;- dcast(alpha, ARG ~ Sample, value.var = &#39;relative_abundance&#39;, fun.aggregate = sum)
+alpha &lt;- dcast(alpha, Family ~ Sample, value.var = &#39;relative_abundance&#39;, fun.aggregate = sum)
 alpha &lt;- alpha[,-1]
 replace_DT_NA(alpha)
 
@@ -707,14 +705,14 @@ alpha &lt;- alpha[,lapply(.SD,function(sample) sample/sum(sample))]
 alpha &lt;- -alpha * log(alpha)
 alpha &lt;- alpha[,lapply(.SD, sum, na.rm = TRUE)]
 
-samples &lt;- dcast(compare_data, Sample + Tech + Matrix ~ ARG, value.var = &#39;relative_abundance&#39;)
+samples &lt;- dcast(compare_data, Sample + Tech + Matrix ~ Family, value.var = &#39;relative_abundance&#39;)
 
 alpha_data &lt;- data.table(Sample = samples$Sample, 
     Matrix = samples$Matrix,
     Tech = samples$Tech,
     Alpha = unlist(alpha))
   color_count &lt;- length(unique(paste(alpha_data$Tech, alpha_data$Matrix)))
-  graph_colors &lt;- create_palette(color_count, colors)
+  graph_colors &lt;- create_palette(color_count)
   
 div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) + 
     geom_boxplot(show.legend = FALSE, fill = graph_colors) + 
@@ -728,8 +726,7 @@ div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
     strip.text.x = element_text(size = 12, face = &quot;bold&quot;), 
     strip.background = element_rect(colour = &quot;black&quot;, size = 1.4, fill = &quot;white&quot;),
     panel.grid.major.x = element_blank()) + 
-    labs(y = paste(&quot;Alpha-Diverity (&quot;, stringr::str_to_title(index), 
-      &quot; Index)&quot;, sep = &quot;&quot;)) + 
+    labs(y = paste(&quot;Alpha-Diverity (Shannom Index)&quot;, sep = &quot;&quot;)) + 
     facet_nested(.~ Tech, scales = &quot;free&quot;, space = &quot;free&quot;)  +
   scale_y_continuous(breaks = seq(2, 4, 0.2), limits = c(2,4))</code></pre>
 <p><img src="metagenome_comparison_files/figure-html/div_graph2-1.png" width="480" /> <br> <br></p>
@@ -738,25 +735,25 @@ div_graph &lt;- ggplot(alpha_data, aes(Matrix, Alpha)) +
 <h3>Resitome Differences</h3>
 <div id="swine-manure-a-1" class="section level4">
 <h4>Swine Manure-A</h4>
-<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 49 of the 98 that DARTE-QM found, with an alpha diversity of 2.92. The metagenome technology was able to find 9 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
+<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 49 of the 99 that DARTE-QM found, with an alpha diversity of 2.92. The metagenome technology was able to find 9 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName3">
 Show Table
 </button>
 <div id="BlockName3" class="collapse">
-<div id="htmlwidget-35c75b215a52197dd226" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-35c75b215a52197dd226">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9"],["tetV","tetJ","tetD","lnuB","ANT(4')","lsaC","MOX","mphG","mphB"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-956e773e6cb7d676372a" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-956e773e6cb7d676372a">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9"],["tetV","tetJ","tetD","lnuB","ANT(4')","lsaC","MOX","mphG","mphB"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br></p>
 </div>
 <div id="manunre-soil" class="section level4">
 <h4>Manunre-Soil</h4>
-<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 65 of the 98, with an alpha diversity of 2.89. The metagenome technology was able to find 15 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
+<p>With the ARGs filtered to only include those targeted by DARTE-QM, metagenomes found 65 of the 99, with an alpha diversity of 2.89. The metagenome technology was able to find 15 ARGs targeted by DARTE-QM that the DARTE-QM primers were unable to successfully capture.</p>
 <button class="btn btn-primary" data-toggle="collapse" data-target="#BlockName4">
 Show Table
 </button>
 <div id="BlockName4" class="collapse">
-<div id="htmlwidget-1f19dabbfa20b6c24b2f" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1f19dabbfa20b6c24b2f">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],["tetD","tetV","tetJ","lnuB","ErmY","ANT(4')","acrA","lsaC","mphB","mphD","otrC","lsaB","MOX","otrB","AAC(2')"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-eb43dcf039028dc37d89" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-eb43dcf039028dc37d89">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],["tetD","tetV","tetJ","lnuB","ErmY","ANT(4')","acrA","lsaC","mphB","mphD","otrC","lsaB","MOX","otrB","AAC(2')"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ARG<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 </div>
 <p><br> <br></p>
 </div>
@@ -764,12 +761,12 @@ Show Table
 </div>
 <div id="source-differentiation-for-darte-qm-targets" class="section level2">
 <h2>Source Differentiation for DARTE-QM Targets</h2>
-<pre class="r"><code>darte_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
-darte_soil_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
+<pre class="r"><code>darte_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
+darte_soil_manure &lt;- dcast(compare_data[Tech == &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
 
-meta_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
-meta_soil_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ ARG_Family, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)</code></pre>
-<p>For ARGs characterized by DARTE-QM, the mean distance between manure and soil-manure samples was BC = 0.35. <br> For ARGs characterized by metagenomes, the mean distance between manure and soil-manure samples was BC = 0.37.</p>
+meta_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix == &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)
+meta_soil_manure &lt;- dcast(compare_data[Tech != &quot;DARTE-QM&quot;][Matrix != &quot;Swine Manure-A&quot;], Tech ~ Class, value.var = &#39;relative_abundance&#39;, fun.aggregate = mean)</code></pre>
+<p>For ARGs characterized by DARTE-QM, the mean distance between manure and soil-manure samples was BC = 0.37. <br> For ARGs characterized by metagenomes, the mean distance between manure and soil-manure samples was BC = 0.37.</p>
 </div>
 
 <p><br>
